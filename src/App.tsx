@@ -10,8 +10,9 @@ import SidebarControls from './components/SidebarControls';
 import FenceCanvas from './components/FenceCanvas';
 import EstimateSummary from './components/EstimateSummary';
 import FenceLogo from './components/FenceLogo';
-import { 
-  ShieldCheck, 
+import { CLIENT_CONFIG } from './clientConfig';
+import {
+  ShieldCheck,
   HelpCircle, 
   PhoneCall, 
   MapPin, 
@@ -69,7 +70,7 @@ export default function App() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const configPassword = (import.meta as any).env?.VITE_APP_PASSWORD || 'Uassistant';
+    const configPassword = (import.meta as any).env?.VITE_APP_PASSWORD || CLIENT_CONFIG.appPassword;
     if (passwordInput.trim() === configPassword.trim()) {
       setIsAuthenticated(true);
       setPasswordError('');
@@ -79,7 +80,7 @@ export default function App() {
         sessionStorage.setItem('fencing_authenticated', 'true');
       }
     } else {
-      setPasswordError('Invalid credentials. Please verify your Fencing Pro authorized passkey.');
+      setPasswordError(`Invalid credentials. Please verify your ${CLIENT_CONFIG.companyName} authorized passkey.`);
     }
   };
 
@@ -187,22 +188,22 @@ export default function App() {
         
         {/* Ambient background accent */}
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-rose-950/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-[#f20c32]/5 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor + '0d' }} />
         
         {/* Main login container */}
         <div className="w-full max-w-[440px] bg-[#141517] border border-[#2f3136] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
           
           {/* Header block with red fence badge */}
           <div className="bg-[#0b0c0d] border-b border-[#2f3136] p-8 flex flex-col items-center">
-            <div className="w-[76px] h-[76px] bg-[#f20c32] flex items-center justify-center rounded-lg shadow-lg mb-4">
+            <div className="w-[76px] h-[76px] flex items-center justify-center rounded-lg shadow-lg mb-4" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor }}>
               <FenceLogo className="w-11 h-11 text-white animate-pulse" />
             </div>
             
             <div className="flex flex-col items-center select-none mt-2">
-              <span className="text-[26px] font-black text-[#f20c32] tracking-[0.05em] uppercase leading-none font-sans" style={{ letterSpacing: '0.04em' }}>
+              <span className="text-[26px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
                 FENCING
               </span>
-              <div className="bg-[#f20c32] h-[16px] mt-1 flex items-center justify-end px-1.5 min-w-[130px] rounded-[1px]">
+              <div className="h-[16px] mt-1 flex items-center justify-end px-1.5 min-w-[130px] rounded-[1px]" style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}>
                 <span className="text-[9px] font-black text-black tracking-[0.15em] uppercase leading-none">
                   PRO
                 </span>
@@ -272,7 +273,8 @@ export default function App() {
             {/* Submit button */}
             <button
               type="submit"
-              className="w-full h-11 bg-[#f20c32] hover:bg-[#d60a2b] active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full h-11 hover:opacity-90 active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
+              style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
             >
               <span>Authenticate Portal</span>
             </button>
@@ -280,14 +282,14 @@ export default function App() {
 
           {/* Verification check lines */}
           <div className="bg-[#0b0c0d] border-t border-[#2f3136] py-3.5 px-6 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
-            <span>AS-2423 SECURE VAULT</span>
-            <span>SYSTEM v4.1</span>
+            <span>{CLIENT_CONFIG.footerSecurityText}</span>
+            <span>{CLIENT_CONFIG.footerSystemText}</span>
           </div>
         </div>
 
         {/* Legal copyright footer */}
         <div className="text-[11px] font-mono text-zinc-500 text-center mt-6 tracking-wide select-none z-10 max-w-sm leading-relaxed">
-          Fencing Pro Pty Ltd &copy; 2026. This secure visualizer environment has been custom-hardened for certified team consultants.
+          {CLIENT_CONFIG.loginFooterText}
         </div>
       </div>
     );
@@ -303,16 +305,16 @@ export default function App() {
           {/* Leftmost brand signature logo blocks based on input_file_1.png */}
           <div className="flex items-center h-full select-none shrink-0">
             {/* Accent red square block with white stylized Fence logo inside */}
-            <div className="w-[76px] h-[76px] bg-[#f20c32] flex items-center justify-center shrink-0 border-r border-[#222]">
+            <div className="w-[76px] h-[76px] flex items-center justify-center shrink-0 border-r border-[#222]" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor }}>
               <FenceLogo className="w-11.5 h-11.5 text-white animate-pulse" />
             </div>
 
             <div className="flex flex-col justify-center pl-6 pr-6 h-full border-r border-[#2f3136]">
               <div className="flex flex-col select-none">
-                <span className="text-[25px] font-black text-[#f20c32] tracking-[0.05em] uppercase leading-none font-sans" style={{ letterSpacing: '0.04em' }}>
+                <span className="text-[25px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
                   FENCING
                 </span>
-                <div className="bg-[#f20c32] h-[15px] mt-1 flex items-center justify-end px-1.5 w-full">
+                <div className="h-[15px] mt-1 flex items-center justify-end px-1.5 w-full" style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}>
                   <span className="text-[9px] font-black text-black tracking-[0.15em] uppercase leading-none">
                     PRO
                   </span>
@@ -324,12 +326,12 @@ export default function App() {
           {/* Corporate License & Identity details in the middle */}
           <div className="hidden xl:flex flex-col items-start gap-0.5 text-zinc-400 font-sans px-4 shrink">
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">
-              <span>Corporate Boundary Designer</span>
+              <span>{CLIENT_CONFIG.companyTagline.split(' · ')[0]}</span>
               <span className="text-zinc-700">&#8226;</span>
-              <span className="text-teal-400 font-bold">Interactive Suite</span>
+              <span className="text-teal-400 font-bold">{CLIENT_CONFIG.companyTagline.split(' · ')[1]}</span>
             </div>
             <span className="text-[11px] font-mono text-zinc-300 tracking-wider">
-              2026 Fencing Pro Pty Ltd
+              {CLIENT_CONFIG.companyLegal}
             </span>
           </div>
 
@@ -339,7 +341,7 @@ export default function App() {
               <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[9px] text-zinc-500 font-bold uppercase leading-none">Market Level</span>
-                <span className="text-white text-[11px] font-semibold mt-0.5">NSW Metropolitan</span>
+                <span className="text-white text-[11px] font-semibold mt-0.5">{CLIENT_CONFIG.marketRegion}</span>
               </div>
             </div>
 
@@ -347,7 +349,7 @@ export default function App() {
               <Clock className="w-4 h-4 text-rose-500 shrink-0" />
               <div className="flex flex-col">
                 <span className="text-[9px] text-zinc-500 font-bold uppercase leading-none">Fencing Standards</span>
-                <span className="text-white text-[11px] font-semibold mt-0.5">AS-2423 Approved</span>
+                <span className="text-white text-[11px] font-semibold mt-0.5">{CLIENT_CONFIG.fencingStandard}</span>
               </div>
             </div>
           </div>
@@ -394,7 +396,8 @@ export default function App() {
             {/* Lock Portal button */}
             <button
               onClick={handleLogout}
-              className="p-2 bg-[#f20c32] hover:bg-[#d60a2b] text-white rounded-lg transition-colors cursor-pointer border border-[#f20c32]/30 flex items-center justify-center gap-1.5 text-xs font-bold"
+              className="p-2 text-white rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold hover:opacity-90"
+              style={{ backgroundColor: CLIENT_CONFIG.primaryColor, borderColor: CLIENT_CONFIG.primaryColor + '4d', border: '1px solid' }}
               title="Lock Portal (Log Out)"
             >
               <LogOut className="w-4 h-4" />
