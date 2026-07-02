@@ -7,21 +7,24 @@ import React, { useState, useEffect } from 'react';
 import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, QuoteInquiry, DynamicPricing } from '../types';
 import { estimateFencingCosts, FENCE_PRICES } from '../utils';
 import { CLIENT_CONFIG } from '../clientConfig';
-import { 
-  Building2, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  FileCheck, 
-  Calculator, 
-  Sparkles, 
+import { buildQuotePdf, QuotePdfData } from '../pdfQuote';
+import {
+  Building2,
+  MapPin,
+  Phone,
+  Mail,
+  FileCheck,
+  Calculator,
+  Sparkles,
   Info,
   CheckCircle,
   Truck,
   Wrench,
   X,
   History,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Download,
+  Share2
 } from 'lucide-react';
 
 interface EstimateSummaryProps {
@@ -91,6 +94,106 @@ export default function EstimateSummary({
     includeInstall,
     customPricing
   );
+
+  // Branded PDF quote generation state
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [pdfStatus, setPdfStatus] = useState('');
+
+  // Assemble the exact same line items already displayed in the estimate panel.
+  // These mirror the on-screen rows one-for-one — nothing is recalculated here.
+  const buildPdfLineItems = (): { label: string; amount: number }[] => {
+    const items: { label: string; amount: number }[] = [
+      { label: `Boundary Panels (${estimate.totalMeters}m)`, amount: estimate.materialCost },
+      { label: 'Structural Post Upgrades', amount: estimate.postsCost }
+    ];
+    if (estimate.gatesCost > 0) {
+      items.push({ label: 'Premium Swing Gates', amount: estimate.gatesCost });
+    }
+    items.push({ label: `Fast-Set Concrete (${estimate.concreteBagsCount} bags)`, amount: estimate.concreteCost });
+    if (includeInstall) {
+      items.push({ label: 'Certified Installation Crew', amount: estimate.laborCost });
+    }
+    return items;
+  };
+
+  const buildPdfData = (): QuotePdfData => {
+    const now = new Date();
+    const expiry = new Date(now.getTime() + CLIENT_CONFIG.quoteValidityDays * 24 * 60 * 60 * 1000);
+    const fmt = (d: Date) =>
+      d.toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return {
+      quoteNumber: `${CLIENT_CONFIG.proposalIdPrefix}-${Date.now().toString().slice(-5)}`,
+      dateStr: fmt(now),
+      expiryStr: fmt(expiry),
+      customer: { name: fullName, email, phone, address },
+      spec: {
+        material: FENCE_PRICES[material].label,
+        height,
+        color: color.name,
+        totalMeters: estimate.totalMeters,
+        gatesCount: gatesList.length
+      },
+      lineItems: buildPdfLineItems(),
+      total: estimate.totalPrice
+    };
+  };
+
+  const pdfFileName = () => {
+    const safeName = (fullName || 'Fence').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'Fence';
+    const dateFile = new Date().toLocaleDateString('en-AU').replace(/\//g, '-');
+    return `Quote-${safeName}-${dateFile}.pdf`;
+  };
+
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    setPdfStatus('');
+    try {
+      const doc = await buildQuotePdf(buildPdfData());
+      doc.save(pdfFileName());
+      setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
+    } catch (err) {
+      console.error('PDF generation failed', err);
+      setPdfStatus('Could not generate the PDF. Please try again.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleSharePdf = async () => {
+    setIsGeneratingPdf(true);
+    setPdfStatus('');
+    try {
+      const doc = await buildQuotePdf(buildPdfData());
+      const fileName = pdfFileName();
+      const blob = doc.output('blob');
+      const file = new File([blob], fileName, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            files: [file],
+            title: `${CLIENT_CONFIG.companyName} Quote`,
+            text: `Fence quote from ${CLIENT_CONFIG.companyName}`
+          });
+        } catch (shareErr: any) {
+          // User dismissing the native share sheet is not an error we surface.
+          if (shareErr && shareErr.name !== 'AbortError') {
+            doc.save(fileName);
+            setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
+          }
+        }
+      } else {
+        // Web Share (with files) unsupported — fall back to a plain download.
+        doc.save(fileName);
+        setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
+      }
+    } catch (err) {
+      console.error('PDF share failed', err);
+      setPdfStatus('Could not generate the PDF. Please try again.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   // Submit quote to CRM handler
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -269,6 +372,36 @@ export default function EstimateSummary({
       >
         Compile & Request Proposal
       </button>
+
+      {/* Branded PDF quote: download + native share */}
+      <div className="flex flex-col gap-2 mt-2">
+        <div className="flex gap-2">
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isGeneratingPdf}
+            className="flex-1 py-2.5 bg-[#18191c] hover:bg-zinc-800 border border-[#2f3136] text-zinc-100 font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isGeneratingPdf ? (
+              <div className="w-3.5 h-3.5 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+            <span>Generate PDF Quote</span>
+          </button>
+          <button
+            onClick={handleSharePdf}
+            disabled={isGeneratingPdf}
+            className="px-4 py-2.5 bg-[#18191c] hover:bg-zinc-800 border border-[#2f3136] text-zinc-100 font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+            title="Share the PDF via WhatsApp, email, etc."
+          >
+            <Share2 className="w-3.5 h-3.5" />
+            <span>Share</span>
+          </button>
+        </div>
+        {pdfStatus && (
+          <p className="text-[10px] text-zinc-400 leading-relaxed text-center px-1">{pdfStatus}</p>
+        )}
+      </div>
 
       {/* Extra CRM Historic inquiries drawer button */}
       <div className="mt-auto border-t border-zinc-800 pt-3 flex flex-col gap-2.5 relative z-30 pointer-events-auto">
