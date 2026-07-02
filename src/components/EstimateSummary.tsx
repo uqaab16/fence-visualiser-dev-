@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, QuoteInquiry, DynamicPricing } from '../types';
 import { estimateFencingCosts, FENCE_PRICES } from '../utils';
+import { CLIENT_CONFIG } from '../clientConfig';
 import { 
   Building2, 
   MapPin, 
@@ -160,7 +161,7 @@ export default function EstimateSummary({
         </h4>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] bg-rose-950/40 text-rose-400 font-bold border border-rose-900/30 px-2 py-0.5 rounded font-mono uppercase">
-            Fencing Pro Rate Card
+            {CLIENT_CONFIG.companyName} Rate Card
           </span>
           {setIsRightPanelOpen && (
             <button
@@ -207,7 +208,8 @@ export default function EstimateSummary({
           type="checkbox"
           checked={includeInstall}
           onChange={(e) => setIncludeInstall(e.target.checked)}
-          className="w-4 h-4 accent-[#f20c32] bg-[#1a1b1f] border-zinc-700 rounded cursor-pointer"
+          className="w-4 h-4 bg-[#1a1b1f] border-zinc-700 rounded cursor-pointer"
+          style={{ accentColor: CLIENT_CONFIG.primaryColor }}
         />
       </div>
 
@@ -262,7 +264,8 @@ export default function EstimateSummary({
           setIsSubmitted(false);
           setShowQuoteModal(true);
         }}
-        className="w-full py-3 bg-[#f20c32] hover:bg-[#d60a2b] text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-colors mt-2"
+        className="w-full py-3 hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-colors mt-2"
+        style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
       >
         Compile & Request Proposal
       </button>
@@ -275,7 +278,7 @@ export default function EstimateSummary({
         >
           <span className="flex items-center gap-1.5">
             <History className="w-4 h-4 text-rose-500" />
-            <span className="font-bold">Fencing Pro Proposal Log</span>
+            <span className="font-bold">{CLIENT_CONFIG.companyName} Proposal Log</span>
           </span>
           <span className="font-mono text-[10px] bg-zinc-800 text-zinc-400 px-2.5 py-0.5 rounded-full">
             {sentInquiries.length} Inquiries
@@ -376,7 +379,7 @@ export default function EstimateSummary({
                 </div>
 
                 <div className="bg-[#18191c] p-3 rounded-lg border border-zinc-800 text-xs">
-                  <span className="text-[10px] text-zinc-500 font-medium block">NSW Site Address</span>
+                  <span className="text-[10px] text-zinc-500 font-medium block">{CLIENT_CONFIG.regionState + " Site Address"}</span>
                   <span className="text-white">{selectedPastInquiry.address}</span>
                 </div>
 
@@ -417,7 +420,7 @@ export default function EstimateSummary({
             <div className="px-6 py-4 border-b border-[#2f3136] bg-[#141517] flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-rose-500 animate-bounce" />
-                <h3 className="text-sm font-extrabold font-sans text-white uppercase tracking-wider">Fencing Pro Proposal Engine</h3>
+                <h3 className="text-sm font-extrabold font-sans text-white uppercase tracking-wider">{CLIENT_CONFIG.companyName} Proposal Engine</h3>
               </div>
               <button 
                 onClick={() => setShowQuoteModal(false)}
@@ -443,7 +446,7 @@ export default function EstimateSummary({
                       <li>Labor: <b className="text-white">{includeInstall ? 'Supply & Install' : 'Raw Materials (DIY)'}</b></li>
                     </ul>
                     <div className="border-t border-zinc-800/60 pt-2.5 mt-1.5 flex justify-between items-center text-xs font-bold text-white">
-                      <span>Fencing Pro Level Bid Proposal:</span>
+                      <span>{CLIENT_CONFIG.companyName} Level Bid Proposal:</span>
                       <span className="text-rose-400 font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
@@ -496,7 +499,7 @@ export default function EstimateSummary({
 
                     {/* Site Boundary address */}
                     <div className="flex flex-col gap-1">
-                      <label htmlFor="site_location" className="text-[10px] text-zinc-400 font-medium">NSW Site Address*</label>
+                      <label htmlFor="site_location" className="text-[10px] text-zinc-400 font-medium">{CLIENT_CONFIG.regionState + " Site Address*"}</label>
                       <input
                         id="site_location"
                         type="text"
@@ -561,11 +564,11 @@ export default function EstimateSummary({
                   </div>
 
                   <div className="bg-[#18191c] p-4 rounded-xl border border-zinc-800 w-full text-left mt-3">
-                    <span className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-widest block mb-1">Fencing Pro Proposal Receipt</span>
-                    <span className="text-[9.5px] text-zinc-500 font-extrabold uppercase block mb-3 font-mono">Fencing Pro Pty Ltd</span>
+                    <span className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-widest block mb-1">{CLIENT_CONFIG.companyName} Proposal Receipt</span>
+                    <span className="text-[9.5px] text-zinc-500 font-extrabold uppercase block mb-3 font-mono">{CLIENT_CONFIG.companyLegalShort}</span>
                     <div className="grid grid-cols-2 gap-y-1.5 text-[11px] text-zinc-300">
                       <span>Proposal ID:</span>
-                      <span className="font-mono text-rose-450 text-right font-bold">#FPRO-{Date.now().toString().slice(-5)}</span>
+                      <span className="font-mono text-rose-450 text-right font-bold">#{CLIENT_CONFIG.proposalIdPrefix}-{Date.now().toString().slice(-5)}</span>
 
                       <span>Project Estimate:</span>
                       <span className="font-mono text-rose-450 text-right font-bold font-sans">${estimate.totalPrice.toLocaleString()}</span>

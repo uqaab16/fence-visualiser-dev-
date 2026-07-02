@@ -10,4 +10,8 @@ export const CLIENT_CONFIG = {
   footerSecurityText: "AS-2423 SECURE VAULT",
   footerSystemText: "SYSTEM v4.1",
   loginFooterText: "Fencing Pro Pty Ltd © 2026. This secure visualizer environment has been custom-hardened for certified team consultants.",
+  companyLegalShort: "Fencing Pro Pty Ltd",
+  regionState: "NSW",
+  regionCity: "Sydney",
+  proposalIdPrefix: "FPRO",
 };

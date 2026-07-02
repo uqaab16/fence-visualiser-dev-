@@ -6,6 +6,7 @@
 import React from 'react';
 import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, DynamicPricing } from '../types';
 import { COLORS_PALETTE, FENCE_PRICES } from '../utils';
+import { CLIENT_CONFIG } from '../clientConfig';
 import { 
   Fence, 
   Palette, 
@@ -109,8 +110,8 @@ export default function SidebarControls({
           {/* Logo element representing Fencing Pro */}
           <div className="flex flex-col items-center gap-1.5 px-1 pb-4 border-b border-[#222] w-full text-center">
             <Fence className="w-6.5 h-6.5 text-teal-400" />
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 font-sans leading-none">FENCING</span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-400 font-sans leading-none font-mono">PRO</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 font-sans leading-none">{CLIENT_CONFIG.companyName.split(' ')[0]}</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-400 font-sans leading-none font-mono">{CLIENT_CONFIG.companyName.split(' ')[1]}</span>
           </div>
 
           {/* Sidebar Tab buttons */}
@@ -201,7 +202,7 @@ export default function SidebarControls({
             </button>
           )}
           <div className="text-zinc-600 text-center text-[9px] font-mono leading-tight px-1 pb-2">
-            v1.4 PRO<br />Sydney
+            v1.4 <span className="uppercase">{CLIENT_CONFIG.companyName.split(' ')[1]}</span><br />{CLIENT_CONFIG.regionCity}
           </div>
         </div>
       </div>
@@ -295,7 +296,7 @@ export default function SidebarControls({
               </div>
               <p className="text-[10px] text-zinc-500 leading-normal gap-1 flex items-start">
                 <Info className="w-3 h-3 text-zinc-400 shrink-0 mt-0.5" />
-                Sydney building codes state residential boundary fences typically peak at 1800mm. Heights over 1800mm may require DA approvals.
+                Typical Australian residential boundary fences peak at 1800mm — check your local council requirements. Heights over 1800mm may require DA approvals.
               </p>
             </div>
 
