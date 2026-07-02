@@ -201,8 +201,9 @@ export default function EstimateSummary({
 
   // ---- PDF generation for an already-saved proposal record (Proposal Log) ----
   // These read the EXACT values stored in the proposal when it was created —
-  // no cost or spec is recalculated. Only the final quoted total was persisted,
-  // so the breakdown is shown as a single "as quoted" line.
+  // no cost or spec is recalculated. Newer records persist a full itemised
+  // breakdown (rendered as-is); older records only stored the final total, so
+  // they fall back to a single "as quoted" line.
   const [isGeneratingRecordPdf, setIsGeneratingRecordPdf] = useState(false);
   const [recordPdfStatus, setRecordPdfStatus] = useState('');
 
@@ -228,7 +229,13 @@ export default function EstimateSummary({
         totalMeters: inq.fenceLength,
         gatesCount: inq.planSummary?.gatesCount || 0
       },
-      lineItems: [{ label: 'Fence supply & installation (as quoted)', amount: inq.totalCost }],
+      // New proposals persist a full itemised breakdown — render it exactly as
+      // stored. Old proposals (saved before this field existed) fall back to the
+      // single "as quoted" line so they still generate a valid PDF.
+      lineItems:
+        inq.costBreakdown && inq.costBreakdown.length > 0
+          ? inq.costBreakdown.map((item) => ({ label: item.description, amount: item.amount }))
+          : [{ label: 'Fence supply & installation (as quoted)', amount: inq.totalCost }],
       total: inq.totalCost
     };
   };
@@ -311,6 +318,13 @@ export default function EstimateSummary({
       address,
       fenceLength: estimate.totalMeters,
       totalCost: estimate.totalPrice,
+      // Persist the same itemised rows currently displayed in the estimate
+      // panel so future PDFs of this record show a full cost table. This only
+      // captures already-computed values — nothing is recalculated here.
+      costBreakdown: buildPdfLineItems().map(({ label, amount }) => ({
+        description: label,
+        amount
+      })),
       message: remarks,
       status: 'pending',
       createdAt: new Date().toLocaleDateString('en-AU', {

@@ -72,6 +72,10 @@ export interface QuoteInquiry {
   address: string;
   fenceLength: number; // in meters, calculated from nodes
   totalCost: number;
+  // Optional itemised cost breakdown captured at save time, mirroring the
+  // on-screen estimate rows. Optional for backward compatibility: proposals
+  // saved before this field existed will simply not have it.
+  costBreakdown?: { description: string; amount: number }[];
   message: string;
   status: 'pending' | 'reviewed' | 'accepted';
   createdAt: string;
