@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, QuoteInquiry, DynamicPricing } from '../types';
 import { estimateFencingCosts, FENCE_PRICES } from '../utils';
 import { CLIENT_CONFIG } from '../clientConfig';
-import { buildQuotePdf, QuotePdfData } from '../pdfQuote';
+import type { QuotePdfData } from '../pdfQuote';
 import {
   Building2,
   MapPin,
@@ -148,6 +148,8 @@ export default function EstimateSummary({
     setIsGeneratingPdf(true);
     setPdfStatus('');
     try {
+      // Lazy-load jsPDF + the builder only when actually generating a PDF.
+      const { buildQuotePdf } = await import('../pdfQuote');
       const doc = await buildQuotePdf(buildPdfData());
       doc.save(pdfFileName());
       setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
@@ -163,6 +165,8 @@ export default function EstimateSummary({
     setIsGeneratingPdf(true);
     setPdfStatus('');
     try {
+      // Lazy-load jsPDF + the builder only when actually generating a PDF.
+      const { buildQuotePdf } = await import('../pdfQuote');
       const doc = await buildQuotePdf(buildPdfData());
       const fileName = pdfFileName();
       const blob = doc.output('blob');
