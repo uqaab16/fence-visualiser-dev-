@@ -14,4 +14,12 @@ export const CLIENT_CONFIG = {
   regionState: "NSW",
   regionCity: "Sydney",
   proposalIdPrefix: "FPRO",
+  companyPhone: "0400 000 000",
+  companyEmail: "info@example.com.au",
+  companyWebsite: "www.example.com.au",
+  companyAddress: "123 Example St, City, State 0000",
+  companyABN: "00 000 000 000",
+  logoFileName: "logo.png",
+  quoteValidityDays: 30,
+  quoteTerms: "This quote is valid for 30 days from the date of issue. All prices include GST. A 10% deposit is required to confirm booking. Final measurements will be confirmed on-site prior to installation.",
 };
