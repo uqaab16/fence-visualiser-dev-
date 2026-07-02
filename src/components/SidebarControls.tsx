@@ -202,7 +202,7 @@ export default function SidebarControls({
             </button>
           )}
           <div className="text-zinc-600 text-center text-[9px] font-mono leading-tight px-1 pb-2">
-            v1.4 {CLIENT_CONFIG.companyName.split(' ')[1]}<br />{CLIENT_CONFIG.regionCity}
+            v1.4 <span className="uppercase">{CLIENT_CONFIG.companyName.split(' ')[1]}</span><br />{CLIENT_CONFIG.regionCity}
           </div>
         </div>
       </div>

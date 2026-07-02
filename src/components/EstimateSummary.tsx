@@ -565,7 +565,7 @@ export default function EstimateSummary({
 
                   <div className="bg-[#18191c] p-4 rounded-xl border border-zinc-800 w-full text-left mt-3">
                     <span className="text-[9px] text-zinc-500 font-extrabold uppercase tracking-widest block mb-1">{CLIENT_CONFIG.companyName} Proposal Receipt</span>
-                    <span className="text-[9.5px] text-zinc-500 font-extrabold uppercase block mb-3 font-mono">{CLIENT_CONFIG.companyLegal}</span>
+                    <span className="text-[9.5px] text-zinc-500 font-extrabold uppercase block mb-3 font-mono">{CLIENT_CONFIG.companyLegalShort}</span>
                     <div className="grid grid-cols-2 gap-y-1.5 text-[11px] text-zinc-300">
                       <span>Proposal ID:</span>
                       <span className="font-mono text-rose-450 text-right font-bold">#{CLIENT_CONFIG.proposalIdPrefix}-{Date.now().toString().slice(-5)}</span>
