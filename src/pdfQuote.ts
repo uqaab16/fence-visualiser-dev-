@@ -32,6 +32,26 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
 }
 
+// Choose black or white text depending on how light the background colour is,
+// so text on the brand colour stays readable for any client palette.
+function getContrastTextColor(hexColor: string): string {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5 ? '#000000' : '#ffffff';
+}
+
+// Blend a colour toward white to produce a soft tint (t = 0 → white, 1 → colour).
+function tint(rgb: [number, number, number], t: number): [number, number, number] {
+  return [
+    Math.round(255 - (255 - rgb[0]) * t),
+    Math.round(255 - (255 - rgb[1]) * t),
+    Math.round(255 - (255 - rgb[2]) * t)
+  ];
+}
+
 function money(n: number): string {
   return '$' + n.toLocaleString();
 }
@@ -75,200 +95,250 @@ export async function buildQuotePdf(data: QuotePdfData): Promise<jsPDF> {
   const doc = new jsPDF({ unit: 'px', format: 'a4', orientation: 'portrait' });
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
-  const margin = 40;
-  const contentW = pageW - margin * 2;
 
-  const [pr, pg, pb] = hexToRgb(CLIENT_CONFIG.primaryColor);
-  const gray: [number, number, number] = [90, 90, 90];
+  // ---- Palette ----
+  const primary = hexToRgb(CLIENT_CONFIG.primaryColor);
+  const onPrimary = hexToRgb(getContrastTextColor(CLIENT_CONFIG.primaryColor)); // #000 or #fff
+  const infoBg = tint(primary, 0.15); // 15% brand tint on white
+  const pillBg: [number, number, number] = [242, 242, 244];
   const dark: [number, number, number] = [30, 30, 30];
+  const muted: [number, number, number] = [120, 120, 120];
+  const hairline: [number, number, number] = [228, 228, 232];
 
-  const drawSectionHeader = (text: string, x: number, yy: number, width: number) => {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(pr, pg, pb);
-    doc.text(text.toUpperCase(), x, yy);
-    doc.setDrawColor(220, 220, 220);
-    doc.setLineWidth(0.5);
-    doc.line(x, yy + 5, x + width, yy + 5);
-  };
+  const setFill = (c: [number, number, number]) => doc.setFillColor(c[0], c[1], c[2]);
+  const setText = (c: [number, number, number]) => doc.setTextColor(c[0], c[1], c[2]);
+  const setDraw = (c: [number, number, number]) => doc.setDrawColor(c[0], c[1], c[2]);
 
-  let y = margin;
-  const rightX = pageW - margin;
+  const padX = 20;
+  const contentX = padX;
+  const contentW = pageW - padX * 2;
 
-  // ---- Header: logo (left) + company details (right) ----
+  let y = 0;
+
+  // =====================================================================
+  // HEADER BLOCK — full-width primaryColor band
+  // =====================================================================
+  const headerH = 78; // ~15px top/bottom padding around the content
+  setFill(primary);
+  doc.rect(0, 0, pageW, headerH, 'F');
+
+  const headerPadTop = 15;
+  const headerCenterY = headerH / 2;
+
+  // Left: logo (optional) then company name + ABN
+  let leftCursor = padX;
   const logo = await loadLogo(CLIENT_CONFIG.logoFileName);
-  let headerBottom = y;
-
   if (logo) {
-    const maxW = 180;
-    const maxH = 80;
+    const maxH = 40;
+    const maxW = 80;
     const scale = Math.min(maxW / logo.w, maxH / logo.h);
     const w = logo.w * scale;
     const h = logo.h * scale;
     try {
-      doc.addImage(logo.dataUrl, logo.format, margin, y, w, h);
-      headerBottom = Math.max(headerBottom, y + h);
+      doc.addImage(logo.dataUrl, logo.format, leftCursor, headerCenterY - h / 2, w, h);
+      leftCursor += w + 12;
     } catch {
-      // If jsPDF cannot render the format, skip the logo silently.
+      // Unrenderable format → fall through; the company name takes the space.
     }
   }
 
-  let cy = y;
+  setText(onPrimary);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(pr, pg, pb);
-  doc.text(CLIENT_CONFIG.companyName, rightX, cy + 14, { align: 'right' });
-  cy += 24;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(gray[0], gray[1], gray[2]);
-  const companyLines = [
-    CLIENT_CONFIG.companyPhone,
-    CLIENT_CONFIG.companyEmail,
-    CLIENT_CONFIG.companyWebsite,
-    CLIENT_CONFIG.companyAddress,
-    `ABN ${CLIENT_CONFIG.companyABN}`,
-  ];
-  companyLines.forEach((line) => {
-    doc.text(line, rightX, cy + 8, { align: 'right' });
-    cy += 13;
-  });
-  headerBottom = Math.max(headerBottom, cy);
-
-  y = headerBottom + 14;
-  doc.setDrawColor(pr, pg, pb);
-  doc.setLineWidth(2);
-  doc.line(margin, y, pageW - margin, y);
-  y += 26;
-
-  // ---- Title + quote meta ----
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.text('QUOTE', margin, y);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  let my = y - 12;
-  const metaRows: [string, string][] = [
-    ['Quote No:', data.quoteNumber],
-    ['Date:', data.dateStr],
-    ['Valid Until:', data.expiryStr],
-  ];
-  metaRows.forEach(([label, val]) => {
-    doc.setTextColor(gray[0], gray[1], gray[2]);
-    doc.text(label, rightX - 120, my);
-    doc.setTextColor(dark[0], dark[1], dark[2]);
-    doc.text(val, rightX, my, { align: 'right' });
-    my += 15;
-  });
-  y = Math.max(y, my) + 22;
-
-  // ---- Two columns: Prepared For + Fence Specification ----
-  const colGap = 20;
-  const colW = (contentW - colGap) / 2;
-  const leftX = margin;
-  const rcolX = margin + colW + colGap;
-  const sectionTop = y;
-
-  drawSectionHeader('Prepared For', leftX, sectionTop, colW);
-  drawSectionHeader('Fence Specification', rcolX, sectionTop, colW);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  const blankLine = '____________________';
-
-  let ly = sectionTop + 20;
-  const custRows: [string, string][] = [
-    ['Name', data.customer.name],
-    ['Phone', data.customer.phone],
-    ['Email', data.customer.email],
-    ['Site', data.customer.address],
-  ];
-  custRows.forEach(([label, val]) => {
-    doc.setTextColor(gray[0], gray[1], gray[2]);
-    doc.text(`${label}:`, leftX, ly);
-    doc.setTextColor(dark[0], dark[1], dark[2]);
-    const text = val && val.trim() ? val : blankLine;
-    const wrapped = doc.splitTextToSize(text, colW - 42) as string[];
-    doc.text(wrapped, leftX + 42, ly);
-    ly += 15 * wrapped.length;
-  });
-
-  let ry = sectionTop + 20;
-  const specRows: [string, string][] = [
-    ['Material', data.spec.material],
-    ['Height', `${data.spec.height}mm`],
-    ['Colour', data.spec.color],
-    ['Total Length', `${data.spec.totalMeters}m`],
-    ['Gates', `${data.spec.gatesCount}`],
-  ];
-  specRows.forEach(([label, val]) => {
-    doc.setTextColor(gray[0], gray[1], gray[2]);
-    doc.text(`${label}:`, rcolX, ry);
-    doc.setTextColor(dark[0], dark[1], dark[2]);
-    const wrapped = doc.splitTextToSize(val, colW - 72) as string[];
-    doc.text(wrapped, rcolX + 72, ry);
-    ry += 15 * wrapped.length;
-  });
-
-  y = Math.max(ly, ry) + 20;
-
-  // ---- Itemised cost breakdown + total ----
-  drawSectionHeader('Cost Breakdown', margin, y, contentW);
-  y += 22;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(gray[0], gray[1], gray[2]);
-  doc.text('Description', margin, y);
-  doc.text('Amount', pageW - margin, y, { align: 'right' });
-  y += 6;
-  doc.setDrawColor(220, 220, 220);
-  doc.setLineWidth(0.5);
-  doc.line(margin, y, pageW - margin, y);
-  y += 16;
-
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  data.lineItems.forEach((item) => {
-    doc.text(item.label, margin, y);
-    doc.text(money(item.amount), pageW - margin, y, { align: 'right' });
-    y += 16;
-  });
-
-  y += 4;
-  doc.setDrawColor(pr, pg, pb);
-  doc.setLineWidth(1);
-  doc.line(margin, y, pageW - margin, y);
-  y += 20;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.text('Total (inc. GST)', margin, y);
-  doc.setTextColor(pr, pg, pb);
-  doc.text(money(data.total), pageW - margin, y, { align: 'right' });
-
-  // ---- Footer: terms + legal name pinned near the bottom ----
-  const legalY = pageH - margin;
+  doc.setFontSize(20);
+  doc.text(CLIENT_CONFIG.companyName, leftCursor, headerCenterY + 1);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.setTextColor(gray[0], gray[1], gray[2]);
-  const termsLines = doc.splitTextToSize(CLIENT_CONFIG.quoteTerms, contentW) as string[];
-  const termsHeight = termsLines.length * 11;
-  const termsY = Math.max(y + 30, legalY - 22 - termsHeight);
+  doc.text(`ABN ${CLIENT_CONFIG.companyABN}`, leftCursor, headerCenterY + 13);
 
-  doc.setDrawColor(220, 220, 220);
-  doc.setLineWidth(0.5);
-  doc.line(margin, termsY - 12, pageW - margin, termsY - 12);
-  doc.text(termsLines, margin, termsY);
+  // Right: "QUOTE" + quote number
+  const rightX = pageW - padX;
+  setText(onPrimary);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(26);
+  doc.text('QUOTE', rightX, headerPadTop + 20, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text(data.quoteNumber, rightX, headerPadTop + 34, { align: 'right' });
+
+  y = headerH;
+
+  // =====================================================================
+  // INFO BAR — light brand tint, two columns
+  // =====================================================================
+  const infoPadTop = 10;
+  const infoLineH = 12;
+  const infoRows = 4;
+  const infoH = infoPadTop * 2 + 16 + infoRows * infoLineH;
+  setFill(infoBg);
+  doc.rect(0, y, pageW, infoH, 'F');
+
+  const colGap = 20;
+  const colW = (contentW - colGap) / 2;
+  const leftColX = contentX;
+  const rightColX = contentX + colW + colGap;
+  const infoY = y + infoPadTop + 8;
+
+  const drawInfoCol = (x: number, label: string, rows: string[]) => {
+    let cy = infoY;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    setText(primary);
+    doc.text(label, x, cy);
+    cy += 14;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    setText(dark);
+    rows.forEach((r) => {
+      if (r) {
+        const line = (doc.splitTextToSize(r, colW) as string[])[0] || r;
+        doc.text(line, x, cy);
+      }
+      cy += infoLineH;
+    });
+  };
+
+  drawInfoCol(leftColX, 'PREPARED FOR', [
+    data.customer.name,
+    data.customer.phone,
+    data.customer.email,
+    data.customer.address
+  ]);
+  drawInfoCol(rightColX, 'QUOTE DETAILS', [
+    `Date: ${data.dateStr}`,
+    `Valid Until: ${data.expiryStr}`,
+    `Ref: ${data.quoteNumber}`,
+    ''
+  ]);
+
+  y += infoH;
+
+  // Section label in the brand colour
+  const sectionLabel = (text: string, yy: number) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    setText(primary);
+    doc.text(text, contentX, yy);
+  };
+
+  // =====================================================================
+  // FENCE SPECIFICATION — grey pill row
+  // =====================================================================
+  y += 24;
+  sectionLabel('FENCE SPECIFICATION', y);
+  y += 12;
+
+  const pills: [string, string][] = [
+    ['MATERIAL', data.spec.material],
+    ['HEIGHT', `${data.spec.height}mm`],
+    ['COLOUR', data.spec.color],
+    ['LENGTH', `${data.spec.totalMeters}m`],
+    ['GATES', `${data.spec.gatesCount}`]
+  ];
+  const pillGap = 8;
+  const pillW = (contentW - pillGap * (pills.length - 1)) / pills.length;
+  const pillH = 34;
+  pills.forEach(([label, value], i) => {
+    const px = contentX + i * (pillW + pillGap);
+    setFill(pillBg);
+    doc.roundedRect(px, y, pillW, pillH, 3, 3, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    setText(muted);
+    doc.text(label, px + 6, y + 12);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    setText(dark);
+    const val = (doc.splitTextToSize(value, pillW - 12) as string[])[0] || '';
+    doc.text(val, px + 6, y + 25);
+  });
+
+  y += pillH;
+
+  // =====================================================================
+  // COST BREAKDOWN — clean minimal table with bullet squares
+  // =====================================================================
+  y += 26;
+  sectionLabel('COST BREAKDOWN', y);
+  y += 10;
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.setTextColor(dark[0], dark[1], dark[2]);
-  doc.text(CLIENT_CONFIG.companyLegalShort, pageW / 2, legalY, { align: 'center' });
+  doc.setFontSize(7.5);
+  setText(muted);
+  doc.text('DESCRIPTION', contentX, y);
+  doc.text('AMOUNT', pageW - padX, y, { align: 'right' });
+  y += 6;
+  setDraw(hairline);
+  doc.setLineWidth(0.5);
+  doc.line(contentX, y, pageW - padX, y);
+  y += 15;
+
+  const rowH = 18;
+  const bullet = 5;
+  data.lineItems.forEach((item) => {
+    setFill(primary);
+    doc.rect(contentX, y - bullet, bullet, bullet, 'F'); // brand-colour bullet square
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    setText(dark);
+    doc.text(item.label, contentX + bullet + 6, y);
+    doc.text(money(item.amount), pageW - padX, y, { align: 'right' });
+    setDraw(hairline);
+    doc.setLineWidth(0.5);
+    doc.line(contentX, y + 6, pageW - padX, y + 6); // thin separator
+    y += rowH;
+  });
+
+  // =====================================================================
+  // TOTAL BAR — full-width brand band
+  // =====================================================================
+  y += 8;
+  const totalH = 40;
+  setFill(primary);
+  doc.rect(0, y, pageW, totalH, 'F');
+  setText(onPrimary);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Total (inc. GST)', contentX, y + totalH / 2 + 4);
+  doc.setFontSize(18);
+  doc.text(money(data.total), pageW - padX, y + totalH / 2 + 5, { align: 'right' });
+  y += totalH;
+
+  // =====================================================================
+  // FOOTER — pinned near the bottom, muted grey
+  // =====================================================================
+  const footerBottom = pageH - 18;
+  const termsColor: [number, number, number] = [90, 90, 90]; // darker than `muted` so the terms stay legible
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  setText(termsColor);
+  const termsLines = doc.splitTextToSize(CLIENT_CONFIG.quoteTerms, contentW) as string[];
+  const contactLine = [
+    CLIENT_CONFIG.companyPhone,
+    CLIENT_CONFIG.companyEmail,
+    CLIENT_CONFIG.companyWebsite
+  ]
+    .filter(Boolean)
+    .join('  ·  ');
+
+  const legalGap = 12;
+  const contactGap = 12;
+  const termsBlockH = termsLines.length * 11;
+  const footerTop = footerBottom - (termsBlockH + legalGap + contactGap);
+  const startFooterY = Math.max(y + 24, footerTop);
+
+  setDraw(hairline);
+  doc.setLineWidth(0.5);
+  doc.line(contentX, startFooterY - 10, pageW - padX, startFooterY - 10);
+
+  let fy = startFooterY;
+  doc.text(termsLines, contentX, fy);
+  fy += termsBlockH + legalGap;
+
+  setText(muted);
+  doc.setFontSize(7);
+  doc.text(CLIENT_CONFIG.companyLegalShort, contentX, fy);
+
+  doc.text(contactLine, pageW / 2, footerBottom, { align: 'center' });
 
   return doc;
 }
