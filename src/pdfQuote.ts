@@ -189,8 +189,10 @@ export async function buildQuotePdf(data: QuotePdfData): Promise<jsPDF> {
     doc.setFontSize(9);
     setText(dark);
     rows.forEach((r) => {
-      const line = (doc.splitTextToSize(r || '—', colW) as string[])[0] || '—';
-      doc.text(line, x, cy);
+      if (r) {
+        const line = (doc.splitTextToSize(r, colW) as string[])[0] || r;
+        doc.text(line, x, cy);
+      }
       cy += infoLineH;
     });
   };
