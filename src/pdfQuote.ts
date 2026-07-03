@@ -305,9 +305,10 @@ export async function buildQuotePdf(data: QuotePdfData): Promise<jsPDF> {
   // FOOTER — pinned near the bottom, muted grey
   // =====================================================================
   const footerBottom = pageH - 18;
+  const termsColor: [number, number, number] = [90, 90, 90]; // darker than `muted` so the terms stay legible
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  setText(muted);
+  doc.setFontSize(8.5);
+  setText(termsColor);
   const termsLines = doc.splitTextToSize(CLIENT_CONFIG.quoteTerms, contentW) as string[];
   const contactLine = [
     CLIENT_CONFIG.companyPhone,
@@ -319,7 +320,7 @@ export async function buildQuotePdf(data: QuotePdfData): Promise<jsPDF> {
 
   const legalGap = 12;
   const contactGap = 12;
-  const termsBlockH = termsLines.length * 10;
+  const termsBlockH = termsLines.length * 11;
   const footerTop = footerBottom - (termsBlockH + legalGap + contactGap);
   const startFooterY = Math.max(y + 24, footerTop);
 
@@ -331,6 +332,7 @@ export async function buildQuotePdf(data: QuotePdfData): Promise<jsPDF> {
   doc.text(termsLines, contentX, fy);
   fy += termsBlockH + legalGap;
 
+  setText(muted);
   doc.setFontSize(7);
   doc.text(CLIENT_CONFIG.companyLegalShort, contentX, fy);
 
