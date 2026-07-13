@@ -6,7 +6,6 @@ export const CLIENT_CONFIG = {
   logoAccentColor: "#f20c32",
   marketRegion: "NSW Metropolitan",
   fencingStandard: "AS-2423 Approved",
-  appPassword: "Uassistant",
   footerSecurityText: "AS-2423 SECURE VAULT",
   footerSystemText: "SYSTEM v4.1",
   loginFooterText: "Fencing Pro Pty Ltd © 2026. This secure visualizer environment has been custom-hardened for certified team consultants.",

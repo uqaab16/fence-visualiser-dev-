@@ -11,24 +11,22 @@ import FenceCanvas from './components/FenceCanvas';
 import EstimateSummary from './components/EstimateSummary';
 import FenceLogo from './components/FenceLogo';
 import { CLIENT_CONFIG } from './clientConfig';
+import { useAuth } from './hooks/useAuth';
 import {
   ShieldCheck,
-  HelpCircle, 
-  PhoneCall, 
-  MapPin, 
-  Clock, 
-  Compass, 
-  Scissors, 
+  HelpCircle,
+  PhoneCall,
+  MapPin,
+  Clock,
+  Compass,
+  Scissors,
   CheckCircle2,
   XCircle,
   FileSpreadsheet,
   ChevronLeft,
   ChevronRight,
   Sliders,
-  Lock,
-  ShieldAlert,
-  Eye,
-  EyeOff,
+  Mail,
   LogOut
 } from 'lucide-react';
 
@@ -58,38 +56,21 @@ const DEFAULT_SEGMENTS: Segment[] = [
 ];
 
 export default function App() {
-  // Password validation state
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('fencing_authenticated') === 'true' || 
-           localStorage.getItem('fencing_authenticated_persist') === 'true';
-  });
-  const [passwordInput, setPasswordInput] = useState<string>('');
-  const [passwordError, setPasswordError] = useState<string>('');
-  const [rememberMe, setRememberMe] = useState<boolean>(true);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  // Supabase auth
+  const { session, loading: authLoading, signIn, signOut } = useAuth();
+  const [emailInput, setEmailInput] = useState<string>('');
+  const [authError, setAuthError] = useState<string>('');
+  const [magicLinkSent, setMagicLinkSent] = useState<boolean>(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
-    const configPassword = (import.meta as any).env?.VITE_APP_PASSWORD || CLIENT_CONFIG.appPassword;
-    if (passwordInput.trim() === configPassword.trim()) {
-      setIsAuthenticated(true);
-      setPasswordError('');
-      if (rememberMe) {
-        localStorage.setItem('fencing_authenticated_persist', 'true');
-      } else {
-        sessionStorage.setItem('fencing_authenticated', 'true');
-      }
+    setAuthError('');
+    const { error } = await signIn(emailInput.trim());
+    if (error) {
+      setAuthError(error.message);
     } else {
-      setPasswordError(`Invalid credentials. Please verify your ${CLIENT_CONFIG.companyName} authorized passkey.`);
+      setMagicLinkSent(true);
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('fencing_authenticated_persist');
-    sessionStorage.removeItem('fencing_authenticated');
-    setIsAuthenticated(false);
-    setPasswordInput('');
-    setPasswordError('');
   };
 
   // Navigation State
@@ -182,23 +163,28 @@ export default function App() {
     }
   }, [segments, posts, selectedPostId]);
 
-  if (!isAuthenticated) {
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#000000]">
+        <div className="text-zinc-400 text-sm font-mono animate-pulse">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!session) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-full bg-[#000000] text-zinc-100 font-sans p-4 relative overflow-hidden select-none">
-        
-        {/* Ambient background accent */}
+
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-rose-950/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor + '0d' }} />
-        
-        {/* Main login container */}
+
         <div className="w-full max-w-[440px] bg-[#141517] border border-[#2f3136] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
-          
-          {/* Header block with red fence badge */}
+
           <div className="bg-[#0b0c0d] border-b border-[#2f3136] p-8 flex flex-col items-center">
             <div className="w-[76px] h-[76px] flex items-center justify-center rounded-lg shadow-lg mb-4" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor }}>
               <FenceLogo className="w-11 h-11 text-white animate-pulse" />
             </div>
-            
+
             <div className="flex flex-col items-center select-none mt-2">
               <span className="text-[26px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
                 FENCING
@@ -209,7 +195,7 @@ export default function App() {
                 </span>
               </div>
             </div>
-            
+
             <div className="border border-[#2f3136] bg-[#141517] px-3 py-1 mt-4 rounded-full">
               <span className="text-[9px] font-bold text-zinc-400 tracking-[0.18em] uppercase">
                 PORTAL ACCESS
@@ -217,77 +203,63 @@ export default function App() {
             </div>
           </div>
 
-          {/* Form section */}
-          <form onSubmit={handleLogin} className="p-8 flex flex-col gap-5">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
-                Enterprise Password
-              </label>
-              <div className="relative mt-1">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Enter access code"
-                  className="w-full h-11 bg-[#1a1b1f] border border-[#2f3136] focus:border-[#f20c32]/50 focus:ring-1 focus:ring-[#f20c32]/40 rounded-lg pl-10 pr-12 text-xs tracking-widest text-white placeholder-zinc-600 transition outline-none"
-                  autoFocus
-                  required
-                />
-                <Lock className="w-3.5 h-3.5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 h-7 w-7 bg-[#212327] hover:bg-[#2e3137] border border-zinc-700/50 hover:border-zinc-500 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white transition-all shadow-sm focus:outline-none"
-                  title={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-3.5 h-3.5 text-rose-500" />
-                  ) : (
-                    <Eye className="w-3.5 h-3.5 text-zinc-400" />
-                  )}
-                </button>
-              </div>
+          {magicLinkSent ? (
+            <div className="p-8 flex flex-col items-center gap-4 text-center">
+              <Mail className="w-10 h-10 text-zinc-400" />
+              <p className="text-sm text-zinc-300 font-semibold">Check your inbox</p>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                We sent a magic link to <span className="text-white font-medium">{emailInput}</span>. Click the link in your email to sign in.
+              </p>
+              <button
+                onClick={() => { setMagicLinkSent(false); setEmailInput(''); }}
+                className="text-[11px] text-zinc-500 hover:text-zinc-300 underline underline-offset-2 cursor-pointer mt-2"
+              >
+                Use a different email
+              </button>
             </div>
-
-            {/* Error Message */}
-            {passwordError && (
-              <div className="bg-rose-950/20 border border-rose-900/40 rounded-lg p-3 flex items-start gap-2 text-rose-400">
-                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-                <span className="text-[11px] leading-normal font-medium">{passwordError}</span>
+          ) : (
+            <form onSubmit={handleMagicLink} className="p-8 flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                  Email Address
+                </label>
+                <div className="relative mt-1">
+                  <input
+                    type="email"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    placeholder="you@company.com"
+                    className="w-full h-11 bg-[#1a1b1f] border border-[#2f3136] focus:border-[#f20c32]/50 focus:ring-1 focus:ring-[#f20c32]/40 rounded-lg pl-10 pr-4 text-xs tracking-wider text-white placeholder-zinc-600 transition outline-none"
+                    autoFocus
+                    required
+                  />
+                  <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
               </div>
-            )}
 
-            {/* Hold session logic */}
-            <div className="flex items-center justify-between py-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-3.5 h-3.5 accent-[#f20c32] bg-[#1a1b1f] border-zinc-700 rounded cursor-pointer"
-                />
-                <span className="text-[11px] text-zinc-400 font-sans">Remember login on this device</span>
-              </label>
-            </div>
+              {authError && (
+                <div className="bg-rose-950/20 border border-rose-900/40 rounded-lg p-3 flex items-start gap-2 text-rose-400">
+                  <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span className="text-[11px] leading-normal font-medium">{authError}</span>
+                </div>
+              )}
 
-            {/* Submit button */}
-            <button
-              type="submit"
-              className="w-full h-11 hover:opacity-90 active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
-              style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
-            >
-              <span>Authenticate Portal</span>
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="w-full h-11 hover:opacity-90 active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
+                style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
+              >
+                <span>Send Magic Link</span>
+              </button>
+            </form>
+          )}
 
-          {/* Verification check lines */}
           <div className="bg-[#0b0c0d] border-t border-[#2f3136] py-3.5 px-6 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
             <span>{CLIENT_CONFIG.footerSecurityText}</span>
             <span>{CLIENT_CONFIG.footerSystemText}</span>
           </div>
         </div>
 
-        {/* Legal copyright footer */}
         <div className="text-[11px] font-mono text-zinc-500 text-center mt-6 tracking-wide select-none z-10 max-w-sm leading-relaxed">
           {CLIENT_CONFIG.loginFooterText}
         </div>
@@ -395,7 +367,7 @@ export default function App() {
 
             {/* Lock Portal button */}
             <button
-              onClick={handleLogout}
+              onClick={signOut}
               className="p-2 text-white rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-xs font-bold hover:opacity-90"
               style={{ backgroundColor: CLIENT_CONFIG.primaryColor, borderColor: CLIENT_CONFIG.primaryColor + '4d', border: '1px solid' }}
               title="Lock Portal (Log Out)"
