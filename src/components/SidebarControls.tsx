@@ -110,8 +110,7 @@ export default function SidebarControls({
           {/* Logo element representing Fencely */}
           <div className="flex flex-col items-center gap-1.5 px-1 pb-4 border-b border-[#222] w-full text-center">
             <Fence className="w-6.5 h-6.5 text-teal-400" />
-            <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 font-sans leading-none">{CLIENT_CONFIG.companyName.split(' ')[0]}</span>
-            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-400 font-sans leading-none font-mono">{CLIENT_CONFIG.companyName.split(' ')[1]}</span>
+            <span className="text-[10px] uppercase font-bold tracking-widest text-teal-400 font-sans leading-none font-mono">{CLIENT_CONFIG.companyName}</span>
           </div>
 
           {/* Sidebar Tab buttons */}
