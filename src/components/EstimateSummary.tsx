@@ -369,22 +369,22 @@ export default function EstimateSummary({
   };
 
   return (
-    <div className="flex flex-col w-80 sm:w-92 shrink-0 p-5.5 h-full overflow-y-auto gap-4 relative z-20 bg-white text-slate-900 border-l border-slate-200">
+    <div className="flex flex-col w-80 sm:w-92 shrink-0 p-5.5 h-full overflow-y-auto gap-4 relative z-20 bg-white text-[#1a1c1e] border-l border-[#d9d3c5]">
       
       {/* Title block */}
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-orange-600 flex items-center gap-2">
-          <Calculator className="w-4 h-4 text-slate-500" />
+        <h4 className="text-xs font-bold uppercase tracking-wider text-[#ff6a1f] flex items-center gap-2">
+          <Calculator className="w-4 h-4 text-[#5f6266]" />
           Live Cost Breakdown
         </h4>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] bg-orange-50/40 text-orange-600 font-bold border border-orange-200/30 px-2 py-0.5 rounded font-mono uppercase">
+          <span className="text-[10px] bg-[#fff1e9]/40 text-[#ff6a1f] font-bold border border-[#ffd4bd]/30 px-2 py-0.5 rounded font-mono uppercase">
             {CLIENT_CONFIG.companyName} Rate Card
           </span>
           {setIsRightPanelOpen && (
             <button
               onClick={() => setIsRightPanelOpen(false)}
-              className="p-1 hover:bg-slate-100 text-slate-500 hover:text-slate-700 rounded transition cursor-pointer"
+              className="p-1 hover:bg-[#ece7db] text-[#5f6266] hover:text-[#3c4045] rounded transition cursor-pointer"
               title="Collapse estimate panel"
             >
               <X className="w-3.5 h-3.5" />
@@ -394,39 +394,39 @@ export default function EstimateSummary({
       </div>
 
       {/* Basic configurations line summary */}
-      <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-col gap-2">
-        <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+      <div className="bg-[#f3efe6] p-3.5 rounded-xl border border-[#d9d3c5] flex flex-col gap-2">
+        <div className="flex justify-between items-center border-b border-[#d9d3c5] pb-2">
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-900 tracking-tight">{FENCE_PRICES[material].label}</span>
-            <span className="text-[10px] text-slate-500 font-semibold">{height}mm height &bull; {color.name} finish</span>
+            <span className="text-xs font-bold text-[#1a1c1e] tracking-tight">{FENCE_PRICES[material].label}</span>
+            <span className="text-[10px] text-[#5f6266] font-semibold">{height}mm height &bull; {color.name} finish</span>
           </div>
-          <span className="text-xs font-bold text-orange-600 font-mono text-right">{estimate.totalMeters}m</span>
+          <span className="text-xs font-bold text-[#ff6a1f] font-mono text-right">{estimate.totalMeters}m</span>
         </div>
 
-        <div className="flex justify-between text-[11px] text-slate-500">
+        <div className="flex justify-between text-[11px] text-[#5f6266]">
           <span>Boundary Posts:</span>
-          <span className="font-mono text-slate-700 font-semibold">{estimate.postCount} pillars</span>
+          <span className="font-mono text-[#3c4045] font-semibold">{estimate.postCount} pillars</span>
         </div>
 
-        <div className="flex justify-between text-[11px] text-slate-500">
+        <div className="flex justify-between text-[11px] text-[#5f6266]">
           <span>Gates integrated:</span>
-          <span className="font-mono text-slate-700 font-semibold">{gatesList.length} swing gates</span>
+          <span className="font-mono text-[#3c4045] font-semibold">{gatesList.length} swing gates</span>
         </div>
       </div>
 
       {/* Core installation toggle */}
-      <div className="flex items-center justify-between bg-slate-50/40 border border-slate-200 rounded-xl p-3">
+      <div className="flex items-center justify-between bg-[#f3efe6]/40 border border-[#d9d3c5] rounded-xl p-3">
         <div className="flex gap-2">
-          <Wrench className="w-4.5 h-4.5 text-orange-600 mt-0.5 shrink-0" />
+          <Wrench className="w-4.5 h-4.5 text-[#ff6a1f] mt-0.5 shrink-0" />
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-slate-900">Include Assembly & Labour</span>
+            <span className="text-xs font-bold text-[#1a1c1e]">Include Assembly & Labour</span>
           </div>
         </div>
         <input
           type="checkbox"
           checked={includeInstall}
           onChange={(e) => setIncludeInstall(e.target.checked)}
-          className="w-4 h-4 bg-white border-slate-300 rounded cursor-pointer"
+          className="w-4 h-4 bg-white border-[#cfc8b8] rounded cursor-pointer"
           style={{ accentColor: CLIENT_CONFIG.primaryColor }}
         />
       </div>
@@ -434,44 +434,44 @@ export default function EstimateSummary({
       {/* Detailed line item estimations bill */}
       <div className="flex flex-col gap-2.5 mt-1">
         {/* Item 1: Panels */}
-        <div className="flex justify-between text-xs text-slate-500">
-          <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-slate-500" /> Boundary Panels ({estimate.totalMeters}m)</span>
-          <span className="font-mono text-slate-900">${estimate.materialCost.toLocaleString()}</span>
+        <div className="flex justify-between text-xs text-[#5f6266]">
+          <span className="flex items-center gap-1.5"><Truck className="w-3.5 h-3.5 text-[#5f6266]" /> Boundary Panels ({estimate.totalMeters}m)</span>
+          <span className="font-mono text-[#1a1c1e]">${estimate.materialCost.toLocaleString()}</span>
         </div>
         
         {/* Item 2: Upgrades */}
-        <div className="flex justify-between text-xs text-slate-500">
-          <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-slate-500" /> Structural Post Upgrades</span>
-          <span className="font-mono text-slate-900">${estimate.postsCost.toLocaleString()}</span>
+        <div className="flex justify-between text-xs text-[#5f6266]">
+          <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-[#5f6266]" /> Structural Post Upgrades</span>
+          <span className="font-mono text-[#1a1c1e]">${estimate.postsCost.toLocaleString()}</span>
         </div>
 
         {/* Item 3: Gates */}
         {estimate.gatesCost > 0 && (
-          <div className="flex justify-between text-xs text-slate-500">
-            <span className="flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-slate-500" /> Premium Swing Gates</span>
-            <span className="font-mono text-slate-900">${estimate.gatesCost.toLocaleString()}</span>
+          <div className="flex justify-between text-xs text-[#5f6266]">
+            <span className="flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-[#5f6266]" /> Premium Swing Gates</span>
+            <span className="font-mono text-[#1a1c1e]">${estimate.gatesCost.toLocaleString()}</span>
           </div>
         )}
 
         {/* Item 4: Ancillaries (Concrete / Fasteners) */}
-        <div className="flex justify-between text-xs text-slate-500">
-          <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-slate-500" /> Fast-Set Concrete ({estimate.concreteBagsCount} bags)</span>
-          <span className="font-mono text-slate-900">${estimate.concreteCost.toLocaleString()}</span>
+        <div className="flex justify-between text-xs text-[#5f6266]">
+          <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5 text-[#5f6266]" /> Fast-Set Concrete ({estimate.concreteBagsCount} bags)</span>
+          <span className="font-mono text-[#1a1c1e]">${estimate.concreteCost.toLocaleString()}</span>
         </div>
 
         {/* Item 5: Installer labour */}
         {includeInstall && (
-          <div className="flex justify-between text-xs text-slate-500">
-            <span className="flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5 text-slate-500" /> Certified Installation Crew</span>
-            <span className="font-mono text-slate-900">${estimate.laborCost.toLocaleString()}</span>
+          <div className="flex justify-between text-xs text-[#5f6266]">
+            <span className="flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5 text-[#5f6266]" /> Certified Installation Crew</span>
+            <span className="font-mono text-[#1a1c1e]">${estimate.laborCost.toLocaleString()}</span>
           </div>
         )}
 
         {/* Grand Total visual strip */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 w-full text-left mt-3 relative overflow-hidden">
-          <div className="flex justify-between items-center text-xs font-bold text-slate-900">
+        <div className="bg-white p-4 rounded-xl border border-[#d9d3c5] w-full text-left mt-3 relative overflow-hidden">
+          <div className="flex justify-between items-center text-xs font-bold text-[#1a1c1e]">
             <span>Calculated Bid Proposal:</span>
-            <span className="text-orange-600 font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
+            <span className="text-[#ff6a1f] font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -482,7 +482,7 @@ export default function EstimateSummary({
           setIsSubmitted(false);
           setShowQuoteModal(true);
         }}
-        className="w-full py-3 hover:opacity-90 text-slate-900 font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-colors mt-2"
+        className="w-full py-3 hover:opacity-90 text-white font-bold rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-colors mt-2"
         style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
       >
         Compile & Request Proposal
@@ -494,10 +494,10 @@ export default function EstimateSummary({
           <button
             onClick={handleDownloadPdf}
             disabled={isGeneratingPdf}
-            className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-900 font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex-1 py-2.5 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] text-[#1a1c1e] font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isGeneratingPdf ? (
-              <div className="w-3.5 h-3.5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin" />
+              <div className="w-3.5 h-3.5 border-2 border-[#cfc8b8] border-t-transparent rounded-full animate-spin" />
             ) : (
               <Download className="w-3.5 h-3.5" />
             )}
@@ -506,7 +506,7 @@ export default function EstimateSummary({
           <button
             onClick={handleSharePdf}
             disabled={isGeneratingPdf}
-            className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-900 font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-4 py-2.5 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] text-[#1a1c1e] font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
             title="Share the PDF via WhatsApp, email, etc."
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -514,53 +514,53 @@ export default function EstimateSummary({
           </button>
         </div>
         {pdfStatus && (
-          <p className="text-[10px] text-slate-500 leading-relaxed text-center px-1">{pdfStatus}</p>
+          <p className="text-[10px] text-[#5f6266] leading-relaxed text-center px-1">{pdfStatus}</p>
         )}
       </div>
 
       {/* Extra CRM Historic inquiries drawer button */}
-      <div className="mt-auto border-t border-slate-200 pt-3 flex flex-col gap-2.5 relative z-30 pointer-events-auto">
+      <div className="mt-auto border-t border-[#d9d3c5] pt-3 flex flex-col gap-2.5 relative z-30 pointer-events-auto">
         <button
           onClick={() => setShowCRMInbox(!showCRMInbox)}
-          className="flex w-full items-center justify-between text-xs text-slate-500 hover:text-slate-900 transition cursor-pointer py-1 relative z-30 pointer-events-auto"
+          className="flex w-full items-center justify-between text-xs text-[#5f6266] hover:text-[#1a1c1e] transition cursor-pointer py-1 relative z-30 pointer-events-auto"
         >
           <span className="flex items-center gap-1.5">
-            <History className="w-4 h-4 text-orange-600" />
+            <History className="w-4 h-4 text-[#ff6a1f]" />
             <span className="font-bold">{CLIENT_CONFIG.companyName} Proposal Log</span>
           </span>
-          <span className="font-mono text-[10px] bg-slate-100 text-slate-500 px-2.5 py-0.5 rounded-full">
+          <span className="font-mono text-[10px] bg-[#ece7db] text-[#5f6266] px-2.5 py-0.5 rounded-full">
             {sentInquiries.length} Inquiries
           </span>
         </button>
 
         {showCRMInbox && (
-          <div className="flex flex-col gap-2 p-3 rounded-xl border max-h-52 overflow-y-auto bg-slate-50 border-slate-200 relative z-30 pointer-events-auto">
-            <div className="flex justify-between items-center text-[10px] border-b pb-1.5 mb-1.5 border-slate-200">
-              <span className="font-semibold uppercase text-slate-500">Interactive Ledger</span>
+          <div className="flex flex-col gap-2 p-3 rounded-xl border max-h-52 overflow-y-auto bg-[#f3efe6] border-[#d9d3c5] relative z-30 pointer-events-auto">
+            <div className="flex justify-between items-center text-[10px] border-b pb-1.5 mb-1.5 border-[#d9d3c5]">
+              <span className="font-semibold uppercase text-[#5f6266]">Interactive Ledger</span>
               <button onClick={clearCRMInboxes} className="text-red-500 hover:text-red-400 text-[10px] font-sans font-medium cursor-pointer">
                 Clear All
               </button>
             </div>
 
             {sentInquiries.length === 0 ? (
-              <span className="text-[10px] text-slate-500 text-center py-4 italic">No submitted designs yet. Submit custom requests to log them here.</span>
+              <span className="text-[10px] text-[#5f6266] text-center py-4 italic">No submitted designs yet. Submit custom requests to log them here.</span>
             ) : (
               sentInquiries.map((inq) => (
                 <div 
                   key={inq.id}
                   onClick={() => { setSelectedPastInquiry(inq); setRecordPdfStatus(''); }}
                   title="Click to view full inquiry details"
-                  className="text-[10px] border-b pb-2 flex flex-col gap-1 px-2 py-2 rounded transition-all text-slate-500 border-slate-200 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+                  className="text-[10px] border-b pb-2 flex flex-col gap-1 px-2 py-2 rounded transition-all text-[#5f6266] border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e] cursor-pointer"
                 >
-                  <div className="flex justify-between font-bold leading-tight text-slate-900 mb-0.5">
-                    <span className="underline decoration-dotted text-orange-600">{inq.fullName}</span>
-                    <span className="text-emerald-400 font-mono">${inq.totalCost.toLocaleString()}</span>
+                  <div className="flex justify-between font-bold leading-tight text-[#1a1c1e] mb-0.5">
+                    <span className="underline decoration-dotted text-[#ff6a1f]">{inq.fullName}</span>
+                    <span className="text-[#ff6a1f] font-mono">${inq.totalCost.toLocaleString()}</span>
                   </div>
-                  <div className="text-[9px] text-slate-500 flex items-center justify-between mt-0.5 font-sans">
+                  <div className="text-[9px] text-[#5f6266] flex items-center justify-between mt-0.5 font-sans">
                     <span>{inq.planSummary?.material || "Fence Block"} ({inq.fenceLength}m)</span>
-                    <span className="text-slate-500 font-mono">{inq.createdAt}</span>
+                    <span className="text-[#5f6266] font-mono">{inq.createdAt}</span>
                   </div>
-                  <p className="text-[9.5px] leading-relaxed mt-1 italic font-light p-1.5 rounded border text-slate-700 bg-white border-slate-200/80 line-clamp-1">
+                  <p className="text-[9.5px] leading-relaxed mt-1 italic font-light p-1.5 rounded border text-[#3c4045] bg-white border-[#d9d3c5]/80 line-clamp-1">
                     Address: {inq.address}
                   </p>
                 </div>
@@ -573,17 +573,17 @@ export default function EstimateSummary({
       {/* MODAL WINDOW: PAST PROPOSAL DETAIL VIEWERS */}
       {selectedPastInquiry && (
         <div className="fixed inset-0 bg-white/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-300 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="bg-white border border-[#cfc8b8] w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200 bg-white flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-[#d9d3c5] bg-white flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-orange-600 animate-pulse" />
-                <h3 className="text-sm font-extrabold font-sans text-slate-900 uppercase tracking-wider">Proposal Record Details</h3>
+                <FileCheck className="w-5 h-5 text-[#ff6a1f] animate-pulse" />
+                <h3 className="text-sm font-extrabold font-display text-[#1a1c1e] uppercase tracking-wider">Proposal Record Details</h3>
               </div>
               <button 
                 onClick={() => setSelectedPastInquiry(null)}
-                className="text-slate-500 hover:text-slate-900 transition p-1 cursor-pointer"
+                className="text-[#5f6266] hover:text-[#1a1c1e] transition p-1 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -591,70 +591,70 @@ export default function EstimateSummary({
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto flex-1 flex flex-col gap-5">
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col gap-2">
-                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Layout Specifications</span>
-                <ul className="text-xs text-slate-700 grid grid-cols-2 gap-y-1.5 gap-x-3.5 list-disc pl-4">
-                  <li>Material: <b className="text-slate-900">{selectedPastInquiry.planSummary?.material || "Slat Fencing"}</b></li>
-                  <li>Height: <b className="text-slate-900">{selectedPastInquiry.planSummary?.height || 1200}mm</b></li>
-                  <li>Color: <b className="text-slate-900">{selectedPastInquiry.planSummary?.colorName || "Monument"}</b></li>
-                  <li>Total Distance: <b className="text-slate-900 font-mono">{selectedPastInquiry.fenceLength}m</b></li>
-                  <li>Segments: <b className="text-slate-900 font-mono">{selectedPastInquiry.planSummary?.segmentsCount || 0}</b></li>
-                  <li>Gates: <b className="text-slate-900 font-mono">{selectedPastInquiry.planSummary?.gatesCount || 0}</b></li>
+              <div className="bg-[#f3efe6] p-4 rounded-xl border border-[#d9d3c5] flex flex-col gap-2">
+                <span className="text-[10px] text-[#5f6266] font-bold uppercase tracking-wider">Layout Specifications</span>
+                <ul className="text-xs text-[#3c4045] grid grid-cols-2 gap-y-1.5 gap-x-3.5 list-disc pl-4">
+                  <li>Material: <b className="text-[#1a1c1e]">{selectedPastInquiry.planSummary?.material || "Slat Fencing"}</b></li>
+                  <li>Height: <b className="text-[#1a1c1e]">{selectedPastInquiry.planSummary?.height || 1200}mm</b></li>
+                  <li>Color: <b className="text-[#1a1c1e]">{selectedPastInquiry.planSummary?.colorName || "Monument"}</b></li>
+                  <li>Total Distance: <b className="text-[#1a1c1e] font-mono">{selectedPastInquiry.fenceLength}m</b></li>
+                  <li>Segments: <b className="text-[#1a1c1e] font-mono">{selectedPastInquiry.planSummary?.segmentsCount || 0}</b></li>
+                  <li>Gates: <b className="text-[#1a1c1e] font-mono">{selectedPastInquiry.planSummary?.gatesCount || 0}</b></li>
                 </ul>
-                <div className="border-t border-slate-200/60 pt-2.5 mt-1.5 flex justify-between items-center text-xs font-bold text-slate-900">
+                <div className="border-t border-[#d9d3c5]/60 pt-2.5 mt-1.5 flex justify-between items-center text-xs font-bold text-[#1a1c1e]">
                   <span>Calculated Bid Proposal:</span>
-                  <span className="text-orange-600 font-mono text-sm">${selectedPastInquiry.totalCost.toLocaleString()}</span>
+                  <span className="text-[#ff6a1f] font-mono text-sm">${selectedPastInquiry.totalCost.toLocaleString()}</span>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3.5">
-                <span className="text-xs font-bold text-orange-600 uppercase tracking-widest leading-none">Client & Site Information</span>
+                <span className="text-xs font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">Client & Site Information</span>
                 
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 font-medium block">Full Name</span>
-                    <span className="text-slate-900 font-semibold">{selectedPastInquiry.fullName}</span>
+                  <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5]">
+                    <span className="text-[10px] text-[#5f6266] font-medium block">Full Name</span>
+                    <span className="text-[#1a1c1e] font-semibold">{selectedPastInquiry.fullName}</span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 font-medium block">Phone</span>
-                    <span className="text-slate-900 font-mono">{selectedPastInquiry.phone}</span>
+                  <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5]">
+                    <span className="text-[10px] text-[#5f6266] font-medium block">Phone</span>
+                    <span className="text-[#1a1c1e] font-mono">{selectedPastInquiry.phone}</span>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-                  <span className="text-[10px] text-slate-500 font-medium block">Email Address</span>
-                  <span className="text-slate-900 font-mono">{selectedPastInquiry.email}</span>
+                <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5] text-xs">
+                  <span className="text-[10px] text-[#5f6266] font-medium block">Email Address</span>
+                  <span className="text-[#1a1c1e] font-mono">{selectedPastInquiry.email}</span>
                 </div>
 
-                <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-                  <span className="text-[10px] text-slate-500 font-medium block">{CLIENT_CONFIG.regionState + " Site Address"}</span>
-                  <span className="text-slate-900">{selectedPastInquiry.address}</span>
+                <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5] text-xs">
+                  <span className="text-[10px] text-[#5f6266] font-medium block">{CLIENT_CONFIG.regionState + " Site Address"}</span>
+                  <span className="text-[#1a1c1e]">{selectedPastInquiry.address}</span>
                 </div>
 
                 {selectedPastInquiry.message && (
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs">
-                    <span className="text-[10px] text-slate-500 font-medium block">Site Remarks / Notes</span>
-                    <p className="text-slate-700 italic mt-1 font-light leading-relaxed">
+                  <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5] text-xs">
+                    <span className="text-[10px] text-[#5f6266] font-medium block">Site Remarks / Notes</span>
+                    <p className="text-[#3c4045] italic mt-1 font-light leading-relaxed">
                       "{selectedPastInquiry.message}"
                     </p>
                   </div>
                 )}
                
-                <div className="text-[10px] text-slate-500 font-mono text-right mt-1">
+                <div className="text-[10px] text-[#5f6266] font-mono text-right mt-1">
                   Submitted On: {selectedPastInquiry.createdAt}
                 </div>
               </div>
 
               {/* Branded PDF for this saved proposal: download + native share */}
-              <div className="flex flex-col gap-2 border-t border-slate-200 pt-4">
+              <div className="flex flex-col gap-2 border-t border-[#d9d3c5] pt-4">
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleDownloadRecordPdf(selectedPastInquiry)}
                     disabled={isGeneratingRecordPdf}
-                    className="flex-1 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-900 font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="flex-1 py-2.5 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] text-[#1a1c1e] font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isGeneratingRecordPdf ? (
-                      <div className="w-3.5 h-3.5 border-2 border-slate-300 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3.5 h-3.5 border-2 border-[#cfc8b8] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <Download className="w-3.5 h-3.5" />
                     )}
@@ -663,7 +663,7 @@ export default function EstimateSummary({
                   <button
                     onClick={() => handleShareRecordPdf(selectedPastInquiry)}
                     disabled={isGeneratingRecordPdf}
-                    className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-900 font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="px-4 py-2.5 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] text-[#1a1c1e] font-bold rounded-xl text-[11px] uppercase tracking-wider cursor-pointer transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
                     title="Share the PDF via WhatsApp, email, etc."
                   >
                     <Share2 className="w-3.5 h-3.5" />
@@ -671,16 +671,16 @@ export default function EstimateSummary({
                   </button>
                 </div>
                 {recordPdfStatus && (
-                  <p className="text-[10px] text-slate-500 leading-relaxed text-center px-1">{recordPdfStatus}</p>
+                  <p className="text-[10px] text-[#5f6266] leading-relaxed text-center px-1">{recordPdfStatus}</p>
                 )}
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 bg-white flex justify-end">
+            <div className="px-6 py-4 border-t border-[#d9d3c5] bg-white flex justify-end">
               <button 
                 onClick={() => setSelectedPastInquiry(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold py-2.5 px-5 rounded-lg text-xs uppercase cursor-pointer"
+                className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] font-bold py-2.5 px-5 rounded-lg text-xs uppercase cursor-pointer"
               >
                 Close Record
               </button>
@@ -692,17 +692,17 @@ export default function EstimateSummary({
       {/* MODAL WINDOW: QUOTATION REQUEST CAPTURE MODULE */}
       {showQuoteModal && (
         <div className="fixed inset-0 bg-white/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-300 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+          <div className="bg-white border border-[#cfc8b8] w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-200 bg-white flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-[#d9d3c5] bg-white flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileCheck className="w-5 h-5 text-orange-600 animate-bounce" />
-                <h3 className="text-sm font-extrabold font-sans text-slate-900 uppercase tracking-wider">{CLIENT_CONFIG.companyName} Proposal Engine</h3>
+                <FileCheck className="w-5 h-5 text-[#ff6a1f] animate-bounce" />
+                <h3 className="text-sm font-extrabold font-display text-[#1a1c1e] uppercase tracking-wider">{CLIENT_CONFIG.companyName} Proposal Engine</h3>
               </div>
               <button 
                 onClick={() => setShowQuoteModal(false)}
-                className="text-slate-500 hover:text-slate-900 transition p-1 cursor-pointer"
+                className="text-[#5f6266] hover:text-[#1a1c1e] transition p-1 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -713,28 +713,28 @@ export default function EstimateSummary({
               
               {!isSubmitted ? (
                 <form onSubmit={handleFormSubmit} className="flex flex-col gap-4">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col gap-2">
-                    <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Configured Layout Specifications</span>
-                    <ul className="text-xs text-slate-700 grid grid-cols-2 gap-y-1.5 gap-x-3.5 list-disc pl-4">
-                      <li>Material: <b className="text-slate-900">{FENCE_PRICES[material].label}</b></li>
-                      <li>Height: <b className="text-slate-900">{height}mm</b></li>
-                      <li>Color: <b className="text-slate-900">{color.name}</b></li>
-                      <li>Calculated Frontage: <b className="text-slate-900 font-mono">{estimate.totalMeters}m</b></li>
-                      <li>Post Pillars: <b className="text-slate-900 font-mono">{estimate.postCount}</b></li>
-                      <li>Labor: <b className="text-slate-900">{includeInstall ? 'Supply & Install' : 'Raw Materials (DIY)'}</b></li>
+                  <div className="bg-[#f3efe6] p-4 rounded-xl border border-[#d9d3c5] flex flex-col gap-2">
+                    <span className="text-[10px] text-[#5f6266] font-bold uppercase tracking-wider">Configured Layout Specifications</span>
+                    <ul className="text-xs text-[#3c4045] grid grid-cols-2 gap-y-1.5 gap-x-3.5 list-disc pl-4">
+                      <li>Material: <b className="text-[#1a1c1e]">{FENCE_PRICES[material].label}</b></li>
+                      <li>Height: <b className="text-[#1a1c1e]">{height}mm</b></li>
+                      <li>Color: <b className="text-[#1a1c1e]">{color.name}</b></li>
+                      <li>Calculated Frontage: <b className="text-[#1a1c1e] font-mono">{estimate.totalMeters}m</b></li>
+                      <li>Post Pillars: <b className="text-[#1a1c1e] font-mono">{estimate.postCount}</b></li>
+                      <li>Labor: <b className="text-[#1a1c1e]">{includeInstall ? 'Supply & Install' : 'Raw Materials (DIY)'}</b></li>
                     </ul>
-                    <div className="border-t border-slate-200/60 pt-2.5 mt-1.5 flex justify-between items-center text-xs font-bold text-slate-900">
+                    <div className="border-t border-[#d9d3c5]/60 pt-2.5 mt-1.5 flex justify-between items-center text-xs font-bold text-[#1a1c1e]">
                       <span>{CLIENT_CONFIG.companyName} Level Bid Proposal:</span>
-                      <span className="text-orange-600 font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
+                      <span className="text-[#ff6a1f] font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-3.5">
-                    <span className="text-xs font-bold text-orange-600 uppercase tracking-widest leading-none pt-1">Client & Site Information</span>
+                    <span className="text-xs font-bold text-[#ff6a1f] uppercase tracking-widest leading-none pt-1">Client & Site Information</span>
                     
                     {/* Full Name field */}
                     <div className="flex flex-col gap-1">
-                      <label htmlFor="customer_full_name" className="text-[10px] text-slate-500 font-medium">Customer Full Name*</label>
+                      <label htmlFor="customer_full_name" className="text-[10px] text-[#5f6266] font-medium">Customer Full Name*</label>
                       <input
                         id="customer_full_name"
                         type="text"
@@ -742,14 +742,14 @@ export default function EstimateSummary({
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="Jack Taylor"
-                        className="w-full text-xs bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-orange-500 transition"
+                        className="w-full text-xs bg-[#f3efe6] border border-[#d9d3c5] text-[#1a1c1e] px-3 py-2.5 rounded-lg focus:outline-none focus:border-[#ff6a1f] transition"
                       />
                     </div>
 
                     {/* Contact grid */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1">
-                        <label htmlFor="customer_email" className="text-[10px] text-slate-500 font-medium">Email Address*</label>
+                        <label htmlFor="customer_email" className="text-[10px] text-[#5f6266] font-medium">Email Address*</label>
                         <input
                           id="customer_email"
                           type="email"
@@ -757,12 +757,12 @@ export default function EstimateSummary({
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="client@gmail.com"
-                          className="w-full text-xs bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-orange-500 transition"
+                          className="w-full text-xs bg-[#f3efe6] border border-[#d9d3c5] text-[#1a1c1e] px-3 py-2.5 rounded-lg focus:outline-none focus:border-[#ff6a1f] transition"
                         />
                       </div>
                       
                       <div className="flex flex-col gap-1">
-                        <label htmlFor="customer_phone" className="text-[10px] text-slate-500 font-medium">Australian Mobile*</label>
+                        <label htmlFor="customer_phone" className="text-[10px] text-[#5f6266] font-medium">Australian Mobile*</label>
                         <input
                           id="customer_phone"
                           type="text"
@@ -770,14 +770,14 @@ export default function EstimateSummary({
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="+61 400 000 000"
-                          className="w-full text-xs bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-orange-500 transition"
+                          className="w-full text-xs bg-[#f3efe6] border border-[#d9d3c5] text-[#1a1c1e] px-3 py-2.5 rounded-lg focus:outline-none focus:border-[#ff6a1f] transition"
                         />
                       </div>
                     </div>
 
                     {/* Site Boundary address */}
                     <div className="flex flex-col gap-1">
-                      <label htmlFor="site_location" className="text-[10px] text-slate-500 font-medium">{CLIENT_CONFIG.regionState + " Site Address*"}</label>
+                      <label htmlFor="site_location" className="text-[10px] text-[#5f6266] font-medium">{CLIENT_CONFIG.regionState + " Site Address*"}</label>
                       <input
                         id="site_location"
                         type="text"
@@ -785,37 +785,37 @@ export default function EstimateSummary({
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="29 Belmore Road, Randwick NSW 2031"
-                        className="w-full text-xs bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-orange-500 transition"
+                        className="w-full text-xs bg-[#f3efe6] border border-[#d9d3c5] text-[#1a1c1e] px-3 py-2.5 rounded-lg focus:outline-none focus:border-[#ff6a1f] transition"
                       />
                     </div>
 
                     {/* Direct instructions memo */}
                     <div className="flex flex-col gap-1">
-                      <label htmlFor="quote_enquiry_message" className="text-[10px] text-slate-500 font-medium">Additional Site Notes</label>
+                      <label htmlFor="quote_enquiry_message" className="text-[10px] text-[#5f6266] font-medium">Additional Site Notes</label>
                       <textarea
                         id="quote_enquiry_message"
                         rows={2.5}
                         value={remarks}
                         onChange={(e) => setRemarks(e.target.value)}
                         placeholder="Driveway slope, sand ground conditions, or gate remote electrical requirements etc."
-                        className="w-full text-xs bg-slate-50 border border-slate-200 text-slate-900 px-3 py-2.5 rounded-lg focus:outline-none focus:border-orange-500 transition resize-none"
+                        className="w-full text-xs bg-[#f3efe6] border border-[#d9d3c5] text-[#1a1c1e] px-3 py-2.5 rounded-lg focus:outline-none focus:border-[#ff6a1f] transition resize-none"
                       />
                     </div>
                   </div>
 
                   {/* Buttons */}
-                  <div className="flex justify-end gap-2.5 pt-3.5 border-t border-slate-200">
+                  <div className="flex justify-end gap-2.5 pt-3.5 border-t border-[#d9d3c5]">
                     <button
                       type="button"
                       onClick={() => setShowQuoteModal(false)}
-                      className="px-4 py-2.5 rounded-lg bg-slate-100 text-slate-700 text-xs hover:bg-slate-200 transition cursor-pointer font-bold uppercase select-none"
+                      className="px-4 py-2.5 rounded-lg bg-[#ece7db] text-[#3c4045] text-xs hover:bg-[#e2ddd0] transition cursor-pointer font-bold uppercase select-none"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-5 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer uppercase select-none"
+                      className="px-5 py-2.5 rounded-lg bg-[#e85a12] hover:bg-[#ff6a1f] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer uppercase select-none"
                     >
                       {isSubmitting ? (
                         <>
@@ -831,31 +831,31 @@ export default function EstimateSummary({
               ) : (
                 /* Success screen */
                 <div className="flex flex-col items-center text-center py-7 px-4 gap-4">
-                  <div className="w-14 h-14 bg-emerald-950/40 text-emerald-400 border-2 border-emerald-500/30 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="w-14 h-14 bg-[#fff1e9]/40 text-[#ff6a1f] border-2 border-[#ffd4bd]/30 rounded-full flex items-center justify-center shadow-lg">
                     <CheckCircle className="w-8 h-8" />
                   </div>
                   <div>
-                    <h4 className="text-base font-extrabold text-slate-900 font-sans uppercase">Proposal Generated!</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed mt-2.5 max-w-[340px] mx-auto">
+                    <h4 className="text-base font-extrabold text-[#1a1c1e] font-display uppercase">Proposal Generated!</h4>
+                    <p className="text-xs text-[#5f6266] leading-relaxed mt-2.5 max-w-[340px] mx-auto">
                       Thank you! Clear-cut costings have been saved inside the interactive fencer log ledger below. Your business bid is formatted for printing.
                     </p>
                   </div>
 
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 w-full text-left mt-3">
-                    <span className="text-[9px] text-slate-500 font-extrabold uppercase tracking-widest block mb-1">{CLIENT_CONFIG.companyName} Proposal Receipt</span>
-                    <span className="text-[9.5px] text-slate-500 font-extrabold uppercase block mb-3 font-mono">{CLIENT_CONFIG.companyLegalShort}</span>
-                    <div className="grid grid-cols-2 gap-y-1.5 text-[11px] text-slate-700">
+                  <div className="bg-[#f3efe6] p-4 rounded-xl border border-[#d9d3c5] w-full text-left mt-3">
+                    <span className="text-[9px] text-[#5f6266] font-extrabold uppercase tracking-widest block mb-1">{CLIENT_CONFIG.companyName} Proposal Receipt</span>
+                    <span className="text-[9.5px] text-[#5f6266] font-extrabold uppercase block mb-3 font-mono">{CLIENT_CONFIG.companyLegalShort}</span>
+                    <div className="grid grid-cols-2 gap-y-1.5 text-[11px] text-[#3c4045]">
                       <span>Proposal ID:</span>
-                      <span className="font-mono text-orange-500 text-right font-bold">#{CLIENT_CONFIG.proposalIdPrefix}-{Date.now().toString().slice(-5)}</span>
+                      <span className="font-mono text-[#ff6a1f] text-right font-bold">#{CLIENT_CONFIG.proposalIdPrefix}-{Date.now().toString().slice(-5)}</span>
 
                       <span>Project Estimate:</span>
-                      <span className="font-mono text-orange-500 text-right font-bold font-sans">${estimate.totalPrice.toLocaleString()}</span>
+                      <span className="font-mono text-[#ff6a1f] text-right font-bold font-sans">${estimate.totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
 
                   <button
                     onClick={() => setShowQuoteModal(false)}
-                    className="mt-4 bg-orange-600 text-white hover:bg-orange-500 font-bold px-6 py-2.5 rounded-lg text-xs uppercase cursor-pointer"
+                    className="mt-4 bg-[#e85a12] text-white hover:bg-[#ff6a1f] font-bold px-6 py-2.5 rounded-lg text-xs uppercase cursor-pointer"
                   >
                     Return to Designer Studio
                   </button>
