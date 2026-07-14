@@ -9,7 +9,6 @@ import { COLORS_PALETTE, estimateFencingCosts } from './utils';
 import SidebarControls from './components/SidebarControls';
 import FenceCanvas from './components/FenceCanvas';
 import EstimateSummary from './components/EstimateSummary';
-import FenceLogo from './components/FenceLogo';
 import { CLIENT_CONFIG } from './clientConfig';
 import { useAuth } from './hooks/useAuth';
 import {
@@ -181,22 +180,13 @@ export default function App() {
         <div className="w-full max-w-[440px] bg-[#141517] border border-[#2f3136] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
 
           <div className="bg-[#0b0c0d] border-b border-[#2f3136] p-8 flex flex-col items-center">
-            <div className="w-[76px] h-[76px] flex items-center justify-center rounded-lg shadow-lg mb-4" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor }}>
-              <FenceLogo className="w-11 h-11 text-white animate-pulse" />
-            </div>
+            <img
+              src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
+              alt={CLIENT_CONFIG.companyName}
+              className="w-40 h-40 object-contain select-none"
+            />
 
-            <div className="flex flex-col items-center select-none mt-2">
-              <span className="text-[26px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
-                {CLIENT_CONFIG.companyName}
-              </span>
-              <div className="h-[16px] mt-1 flex items-center justify-end px-1.5 min-w-[130px] rounded-[1px]" style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}>
-                <span className="text-[9px] font-black text-black tracking-[0.15em] uppercase leading-none">
-                  PRO
-                </span>
-              </div>
-            </div>
-
-            <div className="border border-[#2f3136] bg-[#141517] px-3 py-1 mt-4 rounded-full">
+            <div className="border border-[#2f3136] bg-[#141517] px-3 py-1 mt-2 rounded-full">
               <span className="text-[9px] font-bold text-zinc-400 tracking-[0.18em] uppercase">
                 SIGN IN
               </span>
@@ -274,24 +264,14 @@ export default function App() {
       {!isFullScreen ? (
         <header className="h-[76px] border-b border-[#2f3136] bg-[#000000] flex items-center justify-between px-0 shrink-0 z-40 shadow-xl">
           
-          {/* Leftmost brand signature logo blocks based on input_file_1.png */}
+          {/* Leftmost brand signature logo lockup */}
           <div className="flex items-center h-full select-none shrink-0">
-            {/* Accent red square block with white stylized Fence logo inside */}
-            <div className="w-[76px] h-[76px] flex items-center justify-center shrink-0 border-r border-[#222]" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor }}>
-              <FenceLogo className="w-11.5 h-11.5 text-white animate-pulse" />
-            </div>
-
-            <div className="flex flex-col justify-center pl-6 pr-6 h-full border-r border-[#2f3136]">
-              <div className="flex flex-col select-none">
-                <span className="text-[25px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
-                  {CLIENT_CONFIG.companyName}
-                </span>
-                <div className="h-[15px] mt-1 flex items-center justify-end px-1.5 w-full" style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}>
-                  <span className="text-[9px] font-black text-black tracking-[0.15em] uppercase leading-none">
-                    PRO
-                  </span>
-                </div>
-              </div>
+            <div className="flex items-center h-full pl-5 pr-6 border-r border-[#2f3136]">
+              <img
+                src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
+                alt={CLIENT_CONFIG.companyName}
+                className="h-[62px] w-auto object-contain"
+              />
             </div>
           </div>
 
