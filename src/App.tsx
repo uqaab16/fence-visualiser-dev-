@@ -180,13 +180,15 @@ export default function App() {
         <div className="w-full max-w-[440px] bg-white border border-slate-200 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
 
           <div className="bg-white border-b border-slate-200 p-8 flex flex-col items-center">
-            <img
-              src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
-              alt={CLIENT_CONFIG.companyName}
-              className="w-40 h-40 object-contain select-none"
-            />
+            <div className="bg-[#0a1628] rounded-2xl p-5 shadow-md">
+              <img
+                src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
+                alt={CLIENT_CONFIG.companyName}
+                className="w-32 h-32 object-contain select-none"
+              />
+            </div>
 
-            <div className="border border-slate-200 bg-white px-3 py-1 mt-2 rounded-full">
+            <div className="border border-slate-200 bg-white px-3 py-1 mt-4 rounded-full">
               <span className="text-[9px] font-bold text-slate-500 tracking-[0.18em] uppercase">
                 SIGN IN
               </span>
@@ -267,11 +269,13 @@ export default function App() {
           {/* Leftmost brand signature logo lockup */}
           <div className="flex items-center h-full select-none shrink-0">
             <div className="flex items-center h-full pl-5 pr-6 border-r border-slate-200">
-              <img
-                src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
-                alt={CLIENT_CONFIG.companyName}
-                className="h-[62px] w-auto object-contain"
-              />
+              <div className="bg-[#0a1628] rounded-xl p-2 flex items-center shadow-sm">
+                <img
+                  src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
+                  alt={CLIENT_CONFIG.companyName}
+                  className="h-[52px] w-auto object-contain"
+                />
+              </div>
             </div>
           </div>
 
