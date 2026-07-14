@@ -1197,8 +1197,8 @@ export default function FenceCanvas({
           <button
             onClick={() => setPanMode(!panMode)}
             title={panMode ? "Switch to Draw and Drag state" : "Enable camera swipe and pan"}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-              panMode ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f]/30' : 'bg-white border border-[#d9d3c5] text-[#5f6266] hover:text-[#1a1c1e]'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border ${
+              panMode ? 'bg-[#ff6a1f] text-white border-[#ff6a1f]' : 'bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]'
             }`}
           >
             <Hand className="w-3.5 h-3.5" />
@@ -1210,8 +1210,8 @@ export default function FenceCanvas({
             <button
               onClick={() => setIsFullScreen(!isFullScreen)}
               title={isFullScreen ? "Exit Full Screen" : "Fill screen with yard template"}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-                isFullScreen ? 'bg-[#ff6a1f] text-white font-bold' : 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:bg-[#e2ddd0]'
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border ${
+                isFullScreen ? 'bg-[#ff6a1f] text-white border-[#ff6a1f]' : 'bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]'
               }`}
             >
               {isFullScreen ? <Minimize2 className="w-3.5 h-3.5 animate-pulse" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -1223,8 +1223,8 @@ export default function FenceCanvas({
           <button
             onClick={() => setShowHelperGrid(!showHelperGrid)}
             title="Toggle assistance alignment points"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-              showHelperGrid ? 'bg-white border border-[#d9d3c5] text-[#ff6a1f] border border-[#ff6a1f]/20' : 'bg-white border border-[#d9d3c5] text-[#5f6266]'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border ${
+              showHelperGrid ? 'bg-[#ff6a1f] text-white border-[#ff6a1f]' : 'bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -1235,7 +1235,7 @@ export default function FenceCanvas({
           <button
             onClick={() => setShowSatelliteModal(true)}
             title="Measure real-world lot boundary using satellite photography"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition border border-[#ffd4bd]/30 hover:border-[#ffd4bd] text-[#ff6a1f] hover:text-[#ff6a1f] bg-[#fff1e9]/10 hover:bg-[#fff1e9]/20 font-sans shadow"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border bg-[#f3efe6] hover:bg-[#ece7db] border-[#d9d3c5] text-[#1a1c1e]"
           >
             <span>🛰️ Map Measure</span>
           </button>
@@ -1250,10 +1250,10 @@ export default function FenceCanvas({
               setPanMode(false); // turn off pan mode if active
             }}
             title="Paint over foreground elements (like mailboxes, trees, or pillars) in the photo to bring them in front of the fence."
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 ${
-              isBrushMode 
-                ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f] shadow-md' 
-                : 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:text-[#1a1c1e] hover:bg-[#e2ddd0]'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border ${
+              isBrushMode
+                ? 'bg-[#ff6a1f] text-white border-[#ff6a1f]'
+                : 'bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]'
             }`}
           >
             <Paintbrush className="w-3.5 h-3.5" />
@@ -1265,10 +1265,10 @@ export default function FenceCanvas({
             onClick={handleUndo}
             disabled={history.length === 0}
             title={history.length === 0 ? "No actions to undo" : `Undo last change (Step ${history.length})`}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer select-none ${
-              history.length > 0 
-                ? 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:text-[#1a1c1e] border border-[#ff6a1f]/20' 
-                : 'bg-[#f3efe6] text-[#5f6266] cursor-not-allowed border border-transparent'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition cursor-pointer select-none border ${
+              history.length > 0
+                ? 'bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]'
+                : 'bg-[#f3efe6] border-[#d9d3c5] text-[#5f6266] cursor-not-allowed opacity-50'
             }`}
           >
             <Undo className="w-3.5 h-3.5" />
@@ -1276,25 +1276,22 @@ export default function FenceCanvas({
           </button>
 
           {/* Directional Add Post Actions */}
-          <div className="flex items-center bg-white border border-[#d9d3c5] rounded-lg p-0.5 border border-[#cfc8b8]/40">
-            <button
-              onClick={() => addPostDirect('left')}
-              title="Add post extending straight on the LEFT side of the fence"
-              className="flex items-center gap-1 hover:bg-white border border-[#d9d3c5] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#ff6a1f] font-bold" />
-              <span>Add Left</span>
-            </button>
-            <div className="w-[1px] h-4 bg-[#e2ddd0]" />
-            <button
-              onClick={() => addPostDirect('right')}
-              title="Add post extending straight on the RIGHT side of the fence"
-              className="flex items-center gap-1 hover:bg-white border border-[#d9d3c5] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#ff6a1f] font-bold" />
-              <span>Add Right</span>
-            </button>
-          </div>
+          <button
+            onClick={() => addPostDirect('left')}
+            title="Add post extending straight on the LEFT side of the fence"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Left</span>
+          </button>
+          <button
+            onClick={() => addPostDirect('right')}
+            title="Add post extending straight on the RIGHT side of the fence"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider cursor-pointer transition border bg-[#f3efe6] border-[#d9d3c5] text-[#1a1c1e] hover:bg-[#ece7db]"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Right</span>
+          </button>
 
           {/* Download/Export Design Button */}
           <button
@@ -1423,17 +1420,17 @@ export default function FenceCanvas({
                     >
                       Upload Photo
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={loadDefaultImage}
-                      className="flex-1 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition border cursor-pointer bg-[#f3efe6] hover:bg-[#ece7db] text-[#3c4045] border-[#cfc8b8]"
+                      className="flex-1 font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider transition border cursor-pointer bg-[#f3efe6] hover:bg-[#ece7db] text-[#1a1c1e] border-[#d9d3c5]"
                     >
                       Use Demo Yard
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setShowSatelliteModal(true)}
-                      className="flex-1 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition border cursor-pointer bg-[#fff1e9]/40 hover:bg-[#fff1e9]/40 text-[#ff6a1f] hover:text-[#ff6a1f] border-[#ffd4bd]/40 flex items-center justify-center gap-1.5 shadow"
+                      className="flex-1 font-bold py-2.5 px-3 rounded-xl text-[11px] uppercase tracking-wider transition border cursor-pointer bg-[#f3efe6] hover:bg-[#ece7db] text-[#1a1c1e] border-[#d9d3c5] flex items-center justify-center gap-1.5"
                     >
                       <span>🛰️ Map Measure</span>
                     </button>
