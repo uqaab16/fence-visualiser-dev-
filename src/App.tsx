@@ -164,30 +164,30 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#000000]">
-        <div className="text-zinc-400 text-sm font-mono animate-pulse">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="text-slate-500 text-sm font-mono animate-pulse">Loading...</div>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-full bg-[#000000] text-zinc-100 font-sans p-4 relative overflow-hidden select-none">
+      <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-full bg-white text-slate-900 font-sans p-4 relative overflow-hidden select-none">
 
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-rose-950/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-orange-50/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor + '0d' }} />
 
-        <div className="w-full max-w-[440px] bg-[#141517] border border-[#2f3136] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
+        <div className="w-full max-w-[440px] bg-white border border-slate-200 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
 
-          <div className="bg-[#0b0c0d] border-b border-[#2f3136] p-8 flex flex-col items-center">
+          <div className="bg-white border-b border-slate-200 p-8 flex flex-col items-center">
             <img
               src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
               alt={CLIENT_CONFIG.companyName}
               className="w-40 h-40 object-contain select-none"
             />
 
-            <div className="border border-[#2f3136] bg-[#141517] px-3 py-1 mt-2 rounded-full">
-              <span className="text-[9px] font-bold text-zinc-400 tracking-[0.18em] uppercase">
+            <div className="border border-slate-200 bg-white px-3 py-1 mt-2 rounded-full">
+              <span className="text-[9px] font-bold text-slate-500 tracking-[0.18em] uppercase">
                 SIGN IN
               </span>
             </div>
@@ -195,14 +195,14 @@ export default function App() {
 
           {magicLinkSent ? (
             <div className="p-8 flex flex-col items-center gap-4 text-center">
-              <Mail className="w-10 h-10 text-zinc-400" />
-              <p className="text-sm text-zinc-300 font-semibold">Check your inbox</p>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                We sent a magic link to <span className="text-white font-medium">{emailInput}</span>. Click the link in your email to sign in.
+              <Mail className="w-10 h-10 text-slate-500" />
+              <p className="text-sm text-slate-700 font-semibold">Check your inbox</p>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                We sent a magic link to <span className="text-slate-900 font-medium">{emailInput}</span>. Click the link in your email to sign in.
               </p>
               <button
                 onClick={() => { setMagicLinkSent(false); setEmailInput(''); }}
-                className="text-[11px] text-zinc-500 hover:text-zinc-300 underline underline-offset-2 cursor-pointer mt-2"
+                className="text-[11px] text-slate-500 hover:text-slate-700 underline underline-offset-2 cursor-pointer mt-2"
               >
                 Use a different email
               </button>
@@ -210,7 +210,7 @@ export default function App() {
           ) : (
             <form onSubmit={handleMagicLink} className="p-8 flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">
                   Email Address
                 </label>
                 <div className="relative mt-1">
@@ -219,16 +219,16 @@ export default function App() {
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     placeholder="you@company.com"
-                    className="w-full h-11 bg-[#1a1b1f] border border-[#2f3136] focus:border-[#f20c32]/50 focus:ring-1 focus:ring-[#f20c32]/40 rounded-lg pl-10 pr-4 text-xs tracking-wider text-white placeholder-zinc-600 transition outline-none"
+                    className="w-full h-11 bg-white border border-slate-200 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/40 rounded-lg pl-10 pr-4 text-xs tracking-wider text-slate-900 placeholder-slate-400 transition outline-none"
                     autoFocus
                     required
                   />
-                  <Mail className="w-3.5 h-3.5 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-3.5 h-3.5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
               {authError && (
-                <div className="bg-rose-950/20 border border-rose-900/40 rounded-lg p-3 flex items-start gap-2 text-rose-400">
+                <div className="bg-orange-50/20 border border-orange-200/40 rounded-lg p-3 flex items-start gap-2 text-orange-600">
                   <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span className="text-[11px] leading-normal font-medium">{authError}</span>
                 </div>
@@ -244,13 +244,13 @@ export default function App() {
             </form>
           )}
 
-          <div className="bg-[#0b0c0d] border-t border-[#2f3136] py-3.5 px-6 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
+          <div className="bg-white border-t border-slate-200 py-3.5 px-6 flex items-center justify-between text-[10px] text-slate-500 font-mono">
             <span>{CLIENT_CONFIG.footerSecurityText}</span>
             <span>{CLIENT_CONFIG.footerSystemText}</span>
           </div>
         </div>
 
-        <div className="text-[11px] font-mono text-zinc-500 text-center mt-6 tracking-wide select-none z-10 max-w-sm leading-relaxed">
+        <div className="text-[11px] font-mono text-slate-500 text-center mt-6 tracking-wide select-none z-10 max-w-sm leading-relaxed">
           {CLIENT_CONFIG.loginFooterText}
         </div>
       </div>
@@ -258,15 +258,15 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full max-w-full bg-[#141517] text-zinc-100 overflow-hidden font-sans select-none">
+    <div className="flex flex-col h-screen w-full max-w-full bg-white text-slate-900 overflow-hidden font-sans select-none">
       
       {/* Primary header brand bar exactly matching the Fencing Pro visual guidelines */}
       {!isFullScreen ? (
-        <header className="h-[76px] border-b border-[#2f3136] bg-[#000000] flex items-center justify-between px-0 shrink-0 z-40 shadow-xl">
+        <header className="h-[76px] border-b border-slate-200 bg-white flex items-center justify-between px-0 shrink-0 z-40 shadow-xl">
           
           {/* Leftmost brand signature logo lockup */}
           <div className="flex items-center h-full select-none shrink-0">
-            <div className="flex items-center h-full pl-5 pr-6 border-r border-[#2f3136]">
+            <div className="flex items-center h-full pl-5 pr-6 border-r border-slate-200">
               <img
                 src={`${import.meta.env.BASE_URL}${CLIENT_CONFIG.logoFileName}`}
                 alt={CLIENT_CONFIG.companyName}
@@ -276,32 +276,32 @@ export default function App() {
           </div>
 
           {/* Corporate License & Identity details in the middle */}
-          <div className="hidden xl:flex flex-col items-start gap-0.5 text-zinc-400 font-sans px-4 shrink">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">
+          <div className="hidden xl:flex flex-col items-start gap-0.5 text-slate-500 font-sans px-4 shrink">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">
               <span>{CLIENT_CONFIG.companyTagline.split(' · ')[0]}</span>
-              <span className="text-zinc-700">&#8226;</span>
-              <span className="text-teal-400 font-bold">{CLIENT_CONFIG.companyTagline.split(' · ')[1]}</span>
+              <span className="text-slate-700">&#8226;</span>
+              <span className="text-orange-600 font-bold">{CLIENT_CONFIG.companyTagline.split(' · ')[1]}</span>
             </div>
-            <span className="text-[11px] font-mono text-zinc-300 tracking-wider">
+            <span className="text-[11px] font-mono text-slate-700 tracking-wider">
               {CLIENT_CONFIG.companyLegal}
             </span>
           </div>
 
           {/* Multi-info indicators */}
-          <div className="hidden 2xl:flex items-center gap-6 text-xs text-zinc-400 pl-4 border-l border-zinc-800 shrink">
+          <div className="hidden 2xl:flex items-center gap-6 text-xs text-slate-500 pl-4 border-l border-slate-200 shrink">
             <div className="flex items-center gap-1.5 pr-4 py-1">
-              <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
+              <MapPin className="w-4 h-4 text-orange-600 shrink-0" />
               <div className="flex flex-col">
-                <span className="text-[9px] text-zinc-500 font-bold uppercase leading-none">Market Level</span>
-                <span className="text-white text-[11px] font-semibold mt-0.5">{CLIENT_CONFIG.marketRegion}</span>
+                <span className="text-[9px] text-slate-500 font-bold uppercase leading-none">Market Level</span>
+                <span className="text-slate-900 text-[11px] font-semibold mt-0.5">{CLIENT_CONFIG.marketRegion}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 pr-4 py-1 border-l border-zinc-800 pl-4">
-              <Clock className="w-4 h-4 text-rose-500 shrink-0" />
+            <div className="flex items-center gap-1.5 pr-4 py-1 border-l border-slate-200 pl-4">
+              <Clock className="w-4 h-4 text-orange-600 shrink-0" />
               <div className="flex flex-col">
-                <span className="text-[9px] text-zinc-500 font-bold uppercase leading-none">Fencing Standards</span>
-                <span className="text-white text-[11px] font-semibold mt-0.5">{CLIENT_CONFIG.fencingStandard}</span>
+                <span className="text-[9px] text-slate-500 font-bold uppercase leading-none">Fencing Standards</span>
+                <span className="text-slate-900 text-[11px] font-semibold mt-0.5">{CLIENT_CONFIG.fencingStandard}</span>
               </div>
             </div>
           </div>
@@ -313,8 +313,8 @@ export default function App() {
               onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
               className={`p-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all cursor-pointer ${
                 isLeftPanelOpen
-                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border-zinc-700'
+                  ? 'bg-orange-500/10 text-orange-600 border-orange-500/20'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border-slate-300'
               }`}
               title="Toggle left design control sidebar"
             >
@@ -327,8 +327,8 @@ export default function App() {
               onClick={() => setIsRightPanelOpen(!isRightPanelOpen)}
               className={`p-2 rounded-lg flex items-center justify-center gap-1.5 text-xs font-semibold border transition-all cursor-pointer ${
                 isRightPanelOpen
-                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                  : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border-zinc-700'
+                  ? 'bg-orange-500/10 text-orange-600 border-orange-500/20'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-500 border-slate-300'
               }`}
               title="Toggle right pricing breakdown sidebar"
             >
@@ -339,7 +339,7 @@ export default function App() {
             {/* Tutorial button */}
             <button
               onClick={() => setShowTutorial(true)}
-              className="p-2 bg-[#2b2d31] hover:bg-[#34363c] text-rose-300 rounded-lg transition-colors cursor-pointer border border-rose-500/15 flex items-center justify-center gap-1.5 text-xs font-semibold"
+              className="p-2 bg-slate-100 hover:bg-slate-200 text-orange-500 rounded-lg transition-colors cursor-pointer border border-orange-500/15 flex items-center justify-center gap-1.5 text-xs font-semibold"
             >
               <HelpCircle className="w-4 h-4" />
               <span className="hidden sm:inline">Guide</span>
@@ -360,7 +360,7 @@ export default function App() {
       ) : null}
 
       {/* Primary visualizer studio board split */}
-      <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-[#141517] relative">
+      <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-white relative">
         
         {/* Step-by-step customizer on LHS */}
         {!isFullScreen && (
@@ -420,13 +420,13 @@ export default function App() {
         )}
 
         {/* Interactive Visualizer Canvas in Center */}
-        <div className={`flex-1 min-w-0 p-5.5 flex flex-col min-h-0 relative z-10 transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 bg-[#141517] p-0' : ''}`}>
+        <div className={`flex-1 min-w-0 p-5.5 flex flex-col min-h-0 relative z-10 transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 bg-white p-0' : ''}`}>
           
           {/* Persistent Touch/Click-Friendly Expand Edge Handles on borders of Canvas */}
           {!isLeftPanelOpen && !isFullScreen && (
             <button
               onClick={() => setIsLeftPanelOpen(true)}
-              className="absolute left-6 top-1/2 -translate-y-1/2 bg-teal-500 hover:bg-teal-400 text-[#141517] w-8 h-20 rounded-r-xl flex flex-col items-center justify-center shadow-2xl z-40 transition-all group border-l border-teal-300/30 cursor-pointer"
+              className="absolute left-6 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-500 text-slate-900 w-8 h-20 rounded-r-xl flex flex-col items-center justify-center shadow-2xl z-40 transition-all group border-l border-orange-400/30 cursor-pointer"
               title="Expand Design Controls Panel"
             >
               <ChevronRight className="w-5 h-5 animate-bounce" />
@@ -437,7 +437,7 @@ export default function App() {
           {!isRightPanelOpen && !isFullScreen && (
             <button
               onClick={() => setIsRightPanelOpen(true)}
-              className="absolute right-6 top-1/2 -translate-y-1/2 bg-teal-500 hover:bg-teal-400 text-[#141517] w-8 h-20 rounded-l-xl flex flex-col items-center justify-center shadow-2xl z-40 transition-all group border-r border-[#2f3136] cursor-pointer"
+              className="absolute right-6 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-500 text-slate-900 w-8 h-20 rounded-l-xl flex flex-col items-center justify-center shadow-2xl z-40 transition-all group border-r border-slate-200 cursor-pointer"
               title="Expand Price Estimate Panel"
             >
               <ChevronLeft className="w-5 h-5 animate-bounce" />
@@ -479,7 +479,7 @@ export default function App() {
         {/* Detailed Itemized Estimates and Actions panel on RHS */}
         {!isFullScreen && (
           <div className={`transition-all duration-300 ease-in-out h-full overflow-hidden shrink-0 ${
-            isRightPanelOpen ? 'w-80 sm:w-92 opacity-100 border-l border-[#2f3136]' : 'w-0 opacity-0 pointer-events-none'
+            isRightPanelOpen ? 'w-80 sm:w-92 opacity-100 border-l border-slate-200' : 'w-0 opacity-0 pointer-events-none'
           }`}>
             <EstimateSummary
               material={material}
@@ -499,59 +499,59 @@ export default function App() {
 
       {/* HOW-IT-WORKS SYSTEM OVERLAY MODAL */}
       {showTutorial && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
-          <div className="bg-[#1f2125] border border-zinc-700 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 bg-white/90 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
+          <div className="bg-white border border-slate-300 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
             
-            <div className="px-6 py-4.5 bg-[#141517] border-b border-[#2f3136] flex items-center justify-between">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">Fencely Guide</span>
+            <div className="px-6 py-4.5 bg-white border-b border-slate-200 flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Fencely Guide</span>
               <button 
                 onClick={() => setShowTutorial(false)}
-                className="text-zinc-500 hover:text-white transition cursor-pointer"
+                className="text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 CLOSE [x]
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex flex-col gap-5 leading-relaxed text-zinc-300 font-sans">
-              <h3 className="text-sm font-extrabold text-rose-500 uppercase tracking-widest leading-none">Interactive Visual Boundary Controls</h3>
-              <p className="text-xs text-zinc-400">
+            <div className="p-6 overflow-y-auto flex flex-col gap-5 leading-relaxed text-slate-700 font-sans">
+              <h3 className="text-sm font-extrabold text-orange-600 uppercase tracking-widest leading-none">Interactive Visual Boundary Controls</h3>
+              <p className="text-xs text-slate-500">
                 This simulator is designed to give Fencely users and their respected clients a professional edge by overlaying highly accurate, responsive boundary design mockups onto residential properties.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                <div className="bg-[#18191c] p-4.5 rounded-xl border border-zinc-800">
-                  <span className="text-xs font-bold text-white block mb-1">📌 Drag Anchor Handles</span>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                <div className="bg-slate-50 p-4.5 rounded-xl border border-slate-200">
+                  <span className="text-xs font-bold text-slate-900 block mb-1">📌 Drag Anchor Handles</span>
+                  <p className="text-[11px] text-slate-500 leading-normal">
                     Drag the circular anchors overlaying the grass to stretch and fit the fence directly along lawn contours. It calculates matching spatial spacing and physical structural lengths.
                   </p>
                 </div>
                 
-                <div className="bg-[#18191c] p-4.5 rounded-xl border border-zinc-800">
-                  <span className="text-xs font-bold text-white block mb-1">🎨 Premium Colors Palette</span>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                <div className="bg-slate-50 p-4.5 rounded-xl border border-slate-200">
+                  <span className="text-xs font-bold text-slate-900 block mb-1">🎨 Premium Colors Palette</span>
+                  <p className="text-[11px] text-slate-500 leading-normal">
                     Select between Monument, Surfmist, Basalt, or Hardwood Woodgrains. Contrast colors by assigning separate finishes to vertical posts and horizontal slats.
                   </p>
                 </div>
 
-                <div className="bg-[#18191c] p-4.5 rounded-xl border border-zinc-800">
-                  <span className="text-xs font-bold text-white block mb-1">🗒 Interactive Post & Slat Editors</span>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                <div className="bg-slate-50 p-4.5 rounded-xl border border-slate-200">
+                  <span className="text-xs font-bold text-slate-900 block mb-1">🗒 Interactive Post & Slat Editors</span>
+                  <p className="text-[11px] text-slate-500 leading-normal">
                     Click any post directly on canvas to upgrade to standard, corner, H-post, gate support, or decorative columns. Click any fence segment to mount gates and slide their width.
                   </p>
                 </div>
 
-                <div className="bg-[#18191c] p-4.5 rounded-xl border border-zinc-800">
-                  <span className="text-xs font-bold text-white block mb-1">📸 Client Photo Overlay</span>
-                  <p className="text-[11px] text-zinc-400 leading-normal">
+                <div className="bg-slate-50 p-4.5 rounded-xl border border-slate-200">
+                  <span className="text-xs font-bold text-slate-900 block mb-1">📸 Client Photo Overlay</span>
+                  <p className="text-[11px] text-slate-500 leading-normal">
                     Snap a photo of the client's property, upload it directly with the <strong>Upload Photo</strong> button on the canvas, and trace the mockup on their real home grounds!
                   </p>
                 </div>
               </div>
 
-              <div className="border-t border-[#2f3136] pt-4 flex justify-end">
+              <div className="border-t border-slate-200 pt-4 flex justify-end">
                 <button
                   onClick={() => setShowTutorial(false)}
-                  className="bg-rose-600 hover:bg-rose-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase cursor-pointer"
+                  className="bg-orange-600 hover:bg-orange-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs uppercase cursor-pointer"
                 >
                   Embark Design
                 </button>

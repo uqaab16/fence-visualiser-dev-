@@ -1180,13 +1180,13 @@ export default function FenceCanvas({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#18191c] rounded-2xl border border-[#2f3136] overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
       
       {/* Top action bar */}
-      <div className="flex flex-wrap items-center justify-between px-5 py-3.5 bg-[#1f2125] border-b border-[#2f3136] gap-3">
+      <div className="flex flex-wrap items-center justify-between px-5 py-3.5 bg-white border-b border-slate-200 gap-3">
         <div className="flex items-center gap-2">
-          <Layers className="w-4.5 h-4.5 text-zinc-400" />
-          <h3 className="text-sm font-semibold text-white font-sans">Interactive Design Studio</h3>
+          <Layers className="w-4.5 h-4.5 text-slate-500" />
+          <h3 className="text-sm font-semibold text-slate-900 font-sans">Interactive Design Studio</h3>
           <span className="text-[11px] font-mono bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded-full">
             Full Transparency Enabled
           </span>
@@ -1198,7 +1198,7 @@ export default function FenceCanvas({
             onClick={() => setPanMode(!panMode)}
             title={panMode ? "Switch to Draw and Drag state" : "Enable camera swipe and pan"}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-              panMode ? 'bg-[#14b8a6] text-zinc-950 font-bold border border-teal-300/30' : 'bg-[#2b2d31] text-zinc-400 hover:text-white'
+              panMode ? 'bg-orange-500 text-slate-900 font-bold border border-orange-400/30' : 'bg-slate-100 text-slate-500 hover:text-slate-900'
             }`}
           >
             <Hand className="w-3.5 h-3.5" />
@@ -1211,7 +1211,7 @@ export default function FenceCanvas({
               onClick={() => setIsFullScreen(!isFullScreen)}
               title={isFullScreen ? "Exit Full Screen" : "Fill screen with yard template"}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-                isFullScreen ? 'bg-amber-500 text-zinc-950 font-bold' : 'bg-zinc-800 text-teal-400 hover:bg-zinc-700'
+                isFullScreen ? 'bg-amber-500 text-slate-900 font-bold' : 'bg-slate-100 text-orange-600 hover:bg-slate-200'
               }`}
             >
               {isFullScreen ? <Minimize2 className="w-3.5 h-3.5 animate-pulse" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -1224,7 +1224,7 @@ export default function FenceCanvas({
             onClick={() => setShowHelperGrid(!showHelperGrid)}
             title="Toggle assistance alignment points"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-              showHelperGrid ? 'bg-zinc-800 text-teal-400 border border-teal-500/20' : 'bg-[#2a2c31] text-zinc-400'
+              showHelperGrid ? 'bg-slate-100 text-orange-600 border border-orange-500/20' : 'bg-slate-100 text-slate-500'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -1235,7 +1235,7 @@ export default function FenceCanvas({
           <button
             onClick={() => setShowSatelliteModal(true)}
             title="Measure real-world lot boundary using satellite photography"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition border border-rose-900/30 hover:border-rose-800 text-rose-400 hover:text-rose-300 bg-rose-950/10 hover:bg-rose-950/20 font-sans shadow"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition border border-orange-200/30 hover:border-rose-800 text-orange-600 hover:text-orange-500 bg-orange-50/10 hover:bg-orange-50/20 font-sans shadow"
           >
             <span>🛰️ Map Measure</span>
           </button>
@@ -1252,8 +1252,8 @@ export default function FenceCanvas({
             title="Paint over foreground elements (like mailboxes, trees, or pillars) in the photo to bring them in front of the fence."
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 ${
               isBrushMode 
-                ? 'bg-teal-500 text-zinc-950 font-bold border border-teal-300 shadow-md' 
-                : 'bg-zinc-800 text-teal-400 hover:text-white hover:bg-zinc-700'
+                ? 'bg-orange-500 text-slate-900 font-bold border border-orange-400 shadow-md' 
+                : 'bg-slate-100 text-orange-600 hover:text-slate-900 hover:bg-slate-200'
             }`}
           >
             <Paintbrush className="w-3.5 h-3.5" />
@@ -1267,8 +1267,8 @@ export default function FenceCanvas({
             title={history.length === 0 ? "No actions to undo" : `Undo last change (Step ${history.length})`}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer select-none ${
               history.length > 0 
-                ? 'bg-[#2b2d31] text-teal-400 hover:text-white border border-teal-500/20' 
-                : 'bg-[#1e1f22] text-zinc-650 cursor-not-allowed border border-transparent'
+                ? 'bg-slate-100 text-orange-600 hover:text-slate-900 border border-orange-500/20' 
+                : 'bg-slate-50 text-slate-500 cursor-not-allowed border border-transparent'
             }`}
           >
             <Undo className="w-3.5 h-3.5" />
@@ -1276,20 +1276,20 @@ export default function FenceCanvas({
           </button>
 
           {/* Directional Add Post Actions */}
-          <div className="flex items-center bg-[#2b2d31] rounded-lg p-0.5 border border-zinc-700/40">
+          <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-300/40">
             <button
               onClick={() => addPostDirect('left')}
               title="Add post extending straight on the LEFT side of the fence"
-              className="flex items-center gap-1 hover:bg-zinc-800 text-white px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1 hover:bg-slate-100 text-slate-900 px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 text-emerald-500 font-bold" />
               <span>Add Left</span>
             </button>
-            <div className="w-[1px] h-4 bg-zinc-750" />
+            <div className="w-[1px] h-4 bg-slate-200" />
             <button
               onClick={() => addPostDirect('right')}
               title="Add post extending straight on the RIGHT side of the fence"
-              className="flex items-center gap-1 hover:bg-zinc-800 text-white px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1 hover:bg-slate-100 text-slate-900 px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 text-emerald-400 font-bold" />
               <span>Add Right</span>
@@ -1300,7 +1300,7 @@ export default function FenceCanvas({
           <button
             onClick={handleExportDesign}
             title="Export full visual layout design copy to image/specification sheet"
-            className="flex items-center gap-1 bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-md select-none"
+            className="flex items-center gap-1 bg-amber-600 hover:bg-amber-500 text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-md select-none"
           >
             <Download className="w-3.5 h-3.5 text-amber-100" />
             <span>Export Design</span>
@@ -1310,7 +1310,7 @@ export default function FenceCanvas({
             <button
               onClick={deleteSelectedPost}
               disabled={posts.length <= 2}
-              className="flex items-center gap-1 bg-[#251515] hover:bg-[#3d1a1a] text-red-300 border border-red-900/30 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:brightness-50 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-1 bg-orange-50 hover:bg-orange-50 text-red-300 border border-red-900/30 px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:brightness-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5 text-red-400" />
               <span>Delete Selected Post</span>
@@ -1320,7 +1320,7 @@ export default function FenceCanvas({
           {selectedSegmentId && segments.find(s => s.id === selectedSegmentId)?.isStandaloneGate && (
             <button
               onClick={deleteSelectedSegment}
-              className="flex items-center gap-1 bg-[#251515] hover:bg-[#3d1a1a] text-red-300 border border-red-900/30 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1 bg-orange-50 hover:bg-orange-50 text-red-300 border border-red-900/30 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5 text-red-400" />
               <span>Delete Selected Gate</span>
@@ -1337,7 +1337,7 @@ export default function FenceCanvas({
           />
           <button
             onClick={triggerFileUpload}
-            className="bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+            className="bg-teal-600 hover:bg-orange-500 text-white font-medium text-xs px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
             Upload Photo
           </button>
@@ -1346,7 +1346,7 @@ export default function FenceCanvas({
             <button
               onClick={handleResetDesign}
               title="Clear only drawn fences, posts, and nodes"
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs px-2.5 py-1.5 rounded-lg transition border border-zinc-700 cursor-pointer"
+              className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-2.5 py-1.5 rounded-lg transition border border-slate-300 cursor-pointer"
             >
               Reset Design
             </button>
@@ -1356,7 +1356,7 @@ export default function FenceCanvas({
             <button
               onClick={handleClearCanvas}
               title="Clear entire canvas (remove background image and fence design)"
-              className="flex items-center gap-1 bg-[#251515] hover:bg-[#3d1a1a] text-red-305 border border-red-900/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer"
+              className="flex items-center gap-1 bg-orange-50 hover:bg-orange-50 text-red-305 border border-red-900/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer"
             >
               <X className="w-3.5 h-3.5 text-red-400" />
               <span>Clear Canvas</span>
@@ -1366,7 +1366,7 @@ export default function FenceCanvas({
       </div>
 
       {/* Main visualizer container canvas */}
-      <div className="relative flex-1 bg-[#101113] overflow-hidden select-none" ref={containerRef}>
+      <div className="relative flex-1 bg-white overflow-hidden select-none" ref={containerRef}>
         
         {/* Ground image of site under visualizer */}
         <div 
@@ -1404,29 +1404,29 @@ export default function FenceCanvas({
                 className="w-full h-full object-contain transition-opacity duration-300 pointer-events-none"
               />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl m-4 select-none transition-colors duration-200 bg-zinc-950/40 border-zinc-700 text-zinc-100 shadow-2xl">
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl m-4 select-none transition-colors duration-200 bg-white/40 border-slate-300 text-slate-900 shadow-2xl">
                 <div className="max-w-md text-center flex flex-col items-center">
-                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 border transition-colors bg-rose-500/10 border-rose-500/20 text-rose-500">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 border transition-colors bg-orange-500/10 border-orange-500/20 text-orange-600">
                     <Plus className="w-6 h-6" />
                   </div>
-                  <h3 className="text-base font-black mb-2 leading-tight uppercase tracking-wider text-white">
+                  <h3 className="text-base font-black mb-2 leading-tight uppercase tracking-wider text-slate-900">
                     Initialize Property Backdrop
                   </h3>
-                  <p className="text-xs text-zinc-500 mb-6 leading-relaxed">
+                  <p className="text-xs text-slate-500 mb-6 leading-relaxed">
                     Upload a high-resolution snapshot of your property boundary to position posts and trace custom framing lines.
                   </p>
                   
                   <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-md">
                     <button 
                       onClick={triggerFileUpload}
-                      className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition cursor-pointer shadow"
+                      className="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition cursor-pointer shadow"
                     >
                       Upload Photo
                     </button>
                     <button 
                       type="button"
                       onClick={loadDefaultImage}
-                      className="flex-1 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition border cursor-pointer bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-700"
+                      className="flex-1 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition border cursor-pointer bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-300"
                     >
                       Use Demo Yard
                     </button>
@@ -1444,7 +1444,7 @@ export default function FenceCanvas({
 
           {/* Grid helper overlay */}
           {showHelperGrid && (
-            <div className="absolute inset-0 border border-teal-500/10 pointer-events-none grid grid-cols-6 grid-rows-6">
+            <div className="absolute inset-0 border border-orange-500/10 pointer-events-none grid grid-cols-6 grid-rows-6">
               {Array.from({ length: 36 }).map((_, i) => (
                 <div key={i} className="border-t border-l border-white/[0.02]" />
               ))}
@@ -2645,23 +2645,23 @@ export default function FenceCanvas({
                 <div
                   className={`rounded-full flex items-center justify-center transition shadow-md duration-200 ${
                     isSelected 
-                      ? 'bg-teal-500 border border-white ring-2 ring-teal-300 scale-110 shadow-lg' 
+                      ? 'bg-orange-500 border border-white ring-2 ring-teal-300 scale-110 shadow-lg' 
                       : activeDragId === post.id 
                         ? 'bg-emerald-400 scale-125 shadow-lg border border-white'
-                        : 'bg-zinc-800 border bg-zinc-900 border-white/60 hover:bg-zinc-700 hover:scale-115'
+                        : 'bg-slate-100 border bg-slate-50 border-white/60 hover:bg-slate-200 hover:scale-115'
                   }`}
                   style={{
                     width: `${handleSize}px`,
                     height: `${handleSize}px`
                   }}
                 >
-                  <div className="w-2 h-2 rounded-full bg-slate-950/60" />
+                  <div className="w-2 h-2 rounded-full bg-slate-100/60" />
                 </div>
                 
                 {/* Floating Tooltip Label */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-zinc-950 text-white text-[9px] px-1.5 py-0.5 rounded border border-zinc-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-sans flex items-center gap-1 shadow-md">
-                  <span className="font-semibold text-teal-300 uppercase">{post.type} post</span>
-                  <span className="text-zinc-400 font-mono">({Math.round(post.x)}%, {Math.round(post.y)}%)</span>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white text-slate-900 text-[9px] px-1.5 py-0.5 rounded border border-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-sans flex items-center gap-1 shadow-md">
+                  <span className="font-semibold text-orange-500 uppercase">{post.type} post</span>
+                  <span className="text-slate-500 font-mono">({Math.round(post.x)}%, {Math.round(post.y)}%)</span>
                 </div>
               </div>
             );
@@ -2698,20 +2698,20 @@ export default function FenceCanvas({
 
         {/* 6. Foreground Masking Brush HUD Panel */}
         {isBrushMode && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-[#1f2125]/95 border border-teal-500/20 p-4 rounded-xl shadow-2xl flex flex-col gap-3 z-40 select-none w-72 backdrop-blur-md">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
-              <Paintbrush className="w-4.5 h-4.5 text-teal-400 shrink-0" />
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/95 border border-orange-500/20 p-4 rounded-xl shadow-2xl flex flex-col gap-3 z-40 select-none w-72 backdrop-blur-md">
+            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <Paintbrush className="w-4.5 h-4.5 text-orange-600 shrink-0" />
               <div className="flex-1">
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider block">Foreground Masking</span>
-                <span className="text-[9px] text-zinc-400 block leading-tight">Paint over mailboxes, bushes, pillars to bring them forward</span>
+                <span className="text-[11px] font-bold text-slate-900 uppercase tracking-wider block">Foreground Masking</span>
+                <span className="text-[9px] text-slate-500 block leading-tight">Paint over mailboxes, bushes, pillars to bring them forward</span>
               </div>
             </div>
 
             {/* Brush Size selector slider */}
             <div className="flex flex-col gap-1">
               <div className="flex justify-between items-center text-[10px]">
-                <span className="text-zinc-400 font-medium">Brush Size</span>
-                <span className="font-mono font-bold text-teal-400">{Math.round(brushSize * 4)}px</span>
+                <span className="text-slate-500 font-medium">Brush Size</span>
+                <span className="font-mono font-bold text-orange-600">{Math.round(brushSize * 4)}px</span>
               </div>
               <input
                 type="range"
@@ -2720,7 +2720,7 @@ export default function FenceCanvas({
                 step="0.25"
                 value={brushSize}
                 onChange={(e) => setBrushSize(parseFloat(e.target.value))}
-                className="w-full h-1 bg-zinc-805 rounded appearance-none cursor-pointer accent-teal-500"
+                className="w-full h-1 bg-slate-100 rounded appearance-none cursor-pointer accent-teal-500"
               />
             </div>
 
@@ -2730,8 +2730,8 @@ export default function FenceCanvas({
                 onClick={() => setIsBrushEraser(false)}
                 className={`py-1.5 rounded text-center text-[10px] font-bold cursor-pointer transition ${
                   !isBrushEraser 
-                    ? 'bg-teal-950/80 border border-teal-500/40 text-teal-400 font-bold shadow-sm' 
-                    : 'bg-zinc-850 border border-zinc-800 text-zinc-400 hover:text-white'
+                    ? 'bg-orange-100/80 border border-orange-500/40 text-orange-600 font-bold shadow-sm' 
+                    : 'bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900'
                 }`}
               >
                 ● Brush Mask
@@ -2740,8 +2740,8 @@ export default function FenceCanvas({
                 onClick={() => setIsBrushEraser(true)}
                 className={`py-1.5 rounded text-center text-[10px] font-bold cursor-pointer transition ${
                   isBrushEraser 
-                    ? 'bg-rose-950/80 border border-rose-500/40 text-rose-400 font-bold shadow-sm' 
-                    : 'bg-zinc-850 border border-zinc-800 text-zinc-400 hover:text-white'
+                    ? 'bg-orange-50/80 border border-orange-500/40 text-orange-600 font-bold shadow-sm' 
+                    : 'bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900'
                 }`}
               >
                 ○ Erase Mask
@@ -2749,24 +2749,24 @@ export default function FenceCanvas({
             </div>
 
             {/* Mask actions row */}
-            <div className="flex items-center gap-1.5 border-t border-zinc-800 pt-2 text-[10px]">
+            <div className="flex items-center gap-1.5 border-t border-slate-200 pt-2 text-[10px]">
               <button
                 onClick={() => setMaskStrokes(prev => prev.slice(0, -1))}
                 disabled={maskStrokes.length === 0}
-                className="flex-1 bg-zinc-850 py-1 hover:bg-zinc-800 text-zinc-300 rounded border border-zinc-800 cursor-pointer text-center font-bold disabled:opacity-30 disabled:pointer-events-none transition"
+                className="flex-1 bg-slate-100 py-1 hover:bg-slate-100 text-slate-700 rounded border border-slate-200 cursor-pointer text-center font-bold disabled:opacity-30 disabled:pointer-events-none transition"
               >
                 Undo
               </button>
               <button
                 onClick={() => setMaskStrokes([])}
                 disabled={maskStrokes.length === 0}
-                className="flex-1 bg-rose-950/20 border border-rose-950/10 py-1 hover:bg-rose-950/40 text-rose-300 rounded cursor-pointer text-center font-bold disabled:opacity-30 disabled:pointer-events-none transition"
+                className="flex-1 bg-orange-50/20 border border-rose-950/10 py-1 hover:bg-orange-50/40 text-orange-500 rounded cursor-pointer text-center font-bold disabled:opacity-30 disabled:pointer-events-none transition"
               >
                 Clear All
               </button>
               <button
                 onClick={() => setIsBrushMode(false)}
-                className="flex-1 bg-teal-500 hover:bg-teal-400 py-1 text-slate-950 rounded cursor-pointer text-center font-bold tracking-wider uppercase transition text-[9px]"
+                className="flex-1 bg-orange-500 hover:bg-orange-500 py-1 text-slate-950 rounded cursor-pointer text-center font-bold tracking-wider uppercase transition text-[9px]"
               >
                 Done
               </button>
@@ -2779,7 +2779,7 @@ export default function FenceCanvas({
           onPointerDown={(e) => handlePanelDragStart(e, 'viewEngine')}
           onPointerMove={(e) => handlePanelDragMove(e, 'viewEngine')}
           onPointerUp={(e) => handlePanelDragEnd(e, 'viewEngine')}
-          className={`absolute bottom-4 right-4 bg-[#1f2125]/95 border border-[#2f3136] px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-2 z-30 select-none cursor-grab active:cursor-grabbing ${
+          className={`absolute bottom-4 right-4 bg-white/95 border border-slate-200 px-2.5 py-1.5 rounded-lg shadow-xl flex items-center gap-2 z-30 select-none cursor-grab active:cursor-grabbing ${
             dragPanel === 'viewEngine' ? 'ring-1 ring-teal-500/50' : ''
           }`}
           style={{
@@ -2788,24 +2788,24 @@ export default function FenceCanvas({
           }}
         >
           <div className="flex items-center gap-1">
-            <Compass className="w-3.5 h-3.5 text-teal-400 rotate-12" />
-            <span className="text-[10px] font-bold text-zinc-300 font-sans uppercase tracking-wider">HUD</span>
+            <Compass className="w-3.5 h-3.5 text-orange-600 rotate-12" />
+            <span className="text-[10px] font-bold text-slate-700 font-sans uppercase tracking-wider">HUD</span>
           </div>
 
-          <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2">
+          <div className="flex items-center gap-1.5 border-l border-slate-200 pl-2">
             <button
               onClick={() => setZoom(prev => Math.max(0.5, prev - 0.25))}
-              className="px-1.5 py-0.5 bg-zinc-800 text-zinc-300 hover:text-white rounded text-[10px] hover:bg-zinc-700 transition cursor-pointer font-bold"
+              className="px-1.5 py-0.5 bg-slate-100 text-slate-700 hover:text-slate-900 rounded text-[10px] hover:bg-slate-200 transition cursor-pointer font-bold"
               title="Zoom Out"
             >
               -
             </button>
-            <span className="text-[10px] font-mono font-bold text-teal-400 bg-teal-950/40 px-1.5 py-0.5 rounded border border-teal-900/25">
+            <span className="text-[10px] font-mono font-bold text-orange-600 bg-orange-100/40 px-1.5 py-0.5 rounded border border-orange-200/25">
               {Math.round(zoom * 100)}%
             </span>
             <button
               onClick={() => setZoom(prev => Math.min(3.0, prev + 0.25))}
-              className="px-1.5 py-0.5 bg-zinc-800 text-zinc-300 hover:text-white rounded text-[10px] hover:bg-zinc-700 transition cursor-pointer font-bold"
+              className="px-1.5 py-0.5 bg-slate-100 text-slate-700 hover:text-slate-900 rounded text-[10px] hover:bg-slate-200 transition cursor-pointer font-bold"
               title="Zoom In"
             >
               +
@@ -2818,7 +2818,7 @@ export default function FenceCanvas({
                 setZoom(1);
                 setViewportPan({ x: 0, y: 0 });
               }}
-              className="px-1.5 py-0.5 bg-teal-950/60 hover:bg-teal-900 text-teal-400 rounded text-[9px] transition cursor-pointer font-semibold"
+              className="px-1.5 py-0.5 bg-orange-100/60 hover:bg-teal-900 text-orange-600 rounded text-[9px] transition cursor-pointer font-semibold"
               title="Reset Zoom & Panning"
             >
               Reset
@@ -2833,7 +2833,7 @@ export default function FenceCanvas({
             onPointerMove={(e) => handlePanelDragMove(e, 'reposition')}
             onPointerUp={(e) => handlePanelDragEnd(e, 'reposition')}
             onClick={() => setIsShiftResizeMinimized(false)}
-            className={`absolute bottom-4 left-4 bg-[#1f2125]/95 hover:bg-zinc-800 border border-[#2f3136] px-2.5 py-1.5 rounded-lg shadow-xl z-30 flex items-center gap-1 text-[10px] font-bold text-teal-400 cursor-grab active:cursor-grabbing select-none`}
+            className={`absolute bottom-4 left-4 bg-white/95 hover:bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-lg shadow-xl z-30 flex items-center gap-1 text-[10px] font-bold text-orange-600 cursor-grab active:cursor-grabbing select-none`}
             style={{
               transform: `translate(${repositionOffset.x}px, ${repositionOffset.y}px)`,
               touchAction: 'none'
@@ -2848,7 +2848,7 @@ export default function FenceCanvas({
             onPointerDown={(e) => handlePanelDragStart(e, 'reposition')}
             onPointerMove={(e) => handlePanelDragMove(e, 'reposition')}
             onPointerUp={(e) => handlePanelDragEnd(e, 'reposition')}
-            className={`absolute bottom-4 left-4 bg-[#1f2125]/95 border border-[#2f3136] px-2.5 py-2 rounded-lg shadow-xl flex flex-col gap-1.5 z-30 select-none max-w-[170px] cursor-grab active:cursor-grabbing ${
+            className={`absolute bottom-4 left-4 bg-white/95 border border-slate-200 px-2.5 py-2 rounded-lg shadow-xl flex flex-col gap-1.5 z-30 select-none max-w-[170px] cursor-grab active:cursor-grabbing ${
               dragPanel === 'reposition' ? 'ring-1 ring-teal-500/50' : ''
             }`}
             style={{
@@ -2857,13 +2857,13 @@ export default function FenceCanvas({
             }}
           >
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1 text-[10px] font-bold text-zinc-300">
-                <Sliders className="w-3 h-3 text-teal-400" />
+              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-700">
+                <Sliders className="w-3 h-3 text-orange-600" />
                 <span>Move Fence</span>
               </div>
               <button
                 onClick={() => setIsShiftResizeMinimized(true)}
-                className="text-[9px] text-zinc-500 hover:text-teal-400 transition cursor-pointer font-bold shrink-0 uppercase"
+                className="text-[9px] text-slate-500 hover:text-orange-600 transition cursor-pointer font-bold shrink-0 uppercase"
                 title="Collapse Panel"
               >
                 Hide
@@ -2876,7 +2876,7 @@ export default function FenceCanvas({
               <button
                 onClick={() => nudgeFenceFile(0, -1)}
                 title="Shift Fence Up"
-                className="w-5.5 h-5.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded flex items-center justify-center transition border border-zinc-750 cursor-pointer"
+                className="w-5.5 h-5.5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded flex items-center justify-center transition border border-slate-200 cursor-pointer"
               >
                 <ChevronUp className="w-3 h-3" />
               </button>
@@ -2885,21 +2885,21 @@ export default function FenceCanvas({
               <button
                 onClick={() => nudgeFenceFile(-1, 0)}
                 title="Shift Fence Left"
-                className="w-5.5 h-5.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded flex items-center justify-center transition border border-zinc-750 cursor-pointer"
+                className="w-5.5 h-5.5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded flex items-center justify-center transition border border-slate-200 cursor-pointer"
               >
                 <ChevronLeft className="w-3 h-3" />
               </button>
               <button
                 onClick={() => setGlobalOffset({ x: 0, y: 0 })}
                 title="Recenter Fence"
-                className="w-5.5 h-5.5 bg-zinc-900 hover:bg-zinc-800 text-teal-400 rounded flex items-center justify-center transition font-mono text-[8px] border border-zinc-800 cursor-pointer uppercase font-bold"
+                className="w-5.5 h-5.5 bg-slate-50 hover:bg-slate-100 text-orange-600 rounded flex items-center justify-center transition font-mono text-[8px] border border-slate-200 cursor-pointer uppercase font-bold"
               >
                 RST
               </button>
               <button
                 onClick={() => nudgeFenceFile(1, 0)}
                 title="Shift Fence Right"
-                className="w-5.5 h-5.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded flex items-center justify-center transition border border-zinc-750 cursor-pointer"
+                className="w-5.5 h-5.5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded flex items-center justify-center transition border border-slate-200 cursor-pointer"
               >
                 <ChevronRight className="w-3 h-3" />
               </button>
@@ -2908,7 +2908,7 @@ export default function FenceCanvas({
               <button
                 onClick={() => nudgeFenceFile(0, 1)}
                 title="Shift Fence Down"
-                className="w-5.5 h-5.5 bg-zinc-805 hover:bg-zinc-700 text-white rounded flex items-center justify-center transition border border-zinc-750 cursor-pointer"
+                className="w-5.5 h-5.5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded flex items-center justify-center transition border border-slate-200 cursor-pointer"
               >
                 <ChevronDown className="w-3 h-3" />
               </button>
@@ -2927,22 +2927,22 @@ export default function FenceCanvas({
               onPointerMove={(e) => handlePanelDragMove(e, 'post')}
               onPointerUp={(e) => handlePanelDragEnd(e, 'post')}
               onClick={() => setIsPostCustomizerMinimized(false)}
-              className={`absolute top-4 right-4 bg-[#1f2125]/95 border border-teal-500/20 px-2.5 py-1.5 rounded-lg shadow-xl z-30 flex items-center justify-between w-44 text-[10px] text-white cursor-grab active:cursor-grabbing select-none`}
+              className={`absolute top-4 right-4 bg-white/95 border border-orange-500/20 px-2.5 py-1.5 rounded-lg shadow-xl z-30 flex items-center justify-between w-44 text-[10px] text-slate-900 cursor-grab active:cursor-grabbing select-none`}
               style={{
                 transform: `translate(${postCustomizerOffset.x}px, ${postCustomizerOffset.y}px)`,
                 touchAction: 'none'
               }}
               title="Expand selected post customizer"
             >
-              <span className="font-bold text-teal-400">Post Upgrade</span>
-              <span className="text-[9px] text-zinc-500 uppercase font-semibold">[+]</span>
+              <span className="font-bold text-orange-600">Post Upgrade</span>
+              <span className="text-[9px] text-slate-500 uppercase font-semibold">[+]</span>
             </button>
           ) : (
             <div
               onPointerDown={(e) => handlePanelDragStart(e, 'post')}
               onPointerMove={(e) => handlePanelDragMove(e, 'post')}
               onPointerUp={(e) => handlePanelDragEnd(e, 'post')}
-              className={`absolute top-4 right-4 bg-[#1f2125]/95 border border-teal-500/20 px-2.5 py-2 rounded-lg shadow-xl z-30 w-48 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing select-none hover:bg-[#1f2125] transition-all duration-150 ${
+              className={`absolute top-4 right-4 bg-white/95 border border-orange-500/20 px-2.5 py-2 rounded-lg shadow-xl z-30 w-48 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing select-none hover:bg-white transition-all duration-150 ${
                 dragPanel === 'post' ? 'ring-1 ring-teal-500/50' : ''
               }`}
               style={{
@@ -2951,24 +2951,24 @@ export default function FenceCanvas({
               }}
             >
               <div className="flex items-center justify-between font-sans">
-                <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider">Post Upgrade</span>
+                <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Post Upgrade</span>
                 <button
                   onClick={() => setIsPostCustomizerMinimized(true)}
-                  className="text-[9px] text-zinc-500 hover:text-teal-400 transition cursor-pointer font-bold uppercase shrink-0"
+                  className="text-[9px] text-slate-500 hover:text-orange-600 transition cursor-pointer font-bold uppercase shrink-0"
                   title="Minimize"
                 >
                   Hide
                 </button>
               </div>
               <div className="flex flex-col gap-0.5">
-                <label className="text-[9px] text-zinc-400 uppercase tracking-widest leading-none mb-0.5">Style:</label>
+                <label className="text-[9px] text-slate-500 uppercase tracking-widest leading-none mb-0.5">Style:</label>
                 <select
                   value={posts.find(p => p.id === selectedPostId)?.type || 'standard'}
                   onChange={(e) => {
                     const val = e.target.value as any;
                     setPosts(prev => prev.map(p => p.id === selectedPostId ? { ...p, type: val } : p));
                   }}
-                  className="w-full text-[10px] font-medium bg-zinc-800 text-white rounded px-1.5 py-0.5 border border-zinc-700 focus:outline-none focus:border-teal-500"
+                  className="w-full text-[10px] font-medium bg-slate-100 text-slate-900 rounded px-1.5 py-0.5 border border-slate-300 focus:outline-none focus:border-orange-500"
                 >
                   <option value="standard">Standard (50mm)</option>
                   <option value="corner">Heavy Corner (100mm)</option>
@@ -2979,27 +2979,27 @@ export default function FenceCanvas({
               </div>
 
               {/* Micro Nudges inside popup */}
-              <div className="flex flex-col gap-1 mt-0.5 border-t border-zinc-800 pt-1">
-                <span className="text-[8px] text-zinc-555 text-center uppercase tracking-wider font-bold">Nudge Node</span>
+              <div className="flex flex-col gap-1 mt-0.5 border-t border-slate-200 pt-1">
+                <span className="text-[8px] text-slate-500 text-center uppercase tracking-wider font-bold">Nudge Node</span>
                 <div className="grid grid-cols-2 gap-1">
-                  <button onClick={() => nudgePost(0, -0.25)} className="px-1 py-0.5 bg-zinc-800 text-white rounded text-[9px] hover:bg-zinc-750 cursor-pointer uppercase">▲ Up</button>
-                  <button onClick={() => nudgePost(0, 0.25)} className="px-1 py-0.5 bg-zinc-800 text-white rounded text-[9px] hover:bg-zinc-750 cursor-pointer uppercase">▼ Down</button>
-                  <button onClick={() => nudgePost(-0.25, 0)} className="px-1 py-0.5 bg-zinc-800 text-white rounded text-[9px] hover:bg-zinc-750 cursor-pointer uppercase">◀ L</button>
-                  <button onClick={() => nudgePost(0.25, 0)} className="px-1 py-0.5 bg-zinc-800 text-white rounded text-[9px] hover:bg-zinc-750 cursor-pointer uppercase">▶ R</button>
+                  <button onClick={() => nudgePost(0, -0.25)} className="px-1 py-0.5 bg-slate-100 text-slate-900 rounded text-[9px] hover:bg-slate-200 cursor-pointer uppercase">▲ Up</button>
+                  <button onClick={() => nudgePost(0, 0.25)} className="px-1 py-0.5 bg-slate-100 text-slate-900 rounded text-[9px] hover:bg-slate-200 cursor-pointer uppercase">▼ Down</button>
+                  <button onClick={() => nudgePost(-0.25, 0)} className="px-1 py-0.5 bg-slate-100 text-slate-900 rounded text-[9px] hover:bg-slate-200 cursor-pointer uppercase">◀ L</button>
+                  <button onClick={() => nudgePost(0.25, 0)} className="px-1 py-0.5 bg-slate-100 text-slate-900 rounded text-[9px] hover:bg-slate-200 cursor-pointer uppercase">▶ R</button>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-zinc-800 pt-1.5">
+              <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-slate-200 pt-1.5">
                 <button
                   onClick={() => setSelectedPostId(null)}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-white rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-zinc-700"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-900 rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-slate-300"
                 >
                   Deselect
                 </button>
                 <button
                   onClick={() => deleteSelectedPost()}
                   disabled={posts.length <= 2}
-                  className="bg-rose-950/60 hover:bg-rose-900 border border-rose-900/35 text-rose-300 disabled:opacity-40 disabled:cursor-not-allowed rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
+                  className="bg-orange-50/60 hover:bg-orange-100 border border-orange-200/35 text-orange-500 disabled:opacity-40 disabled:cursor-not-allowed rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
                   title="Remove selected post"
                 >
                   <Trash2 className="w-3 h-3 shrink-0" />
@@ -3018,22 +3018,22 @@ export default function FenceCanvas({
               onPointerMove={(e) => handlePanelDragMove(e, 'segment')}
               onPointerUp={(e) => handlePanelDragEnd(e, 'segment')}
               onClick={() => setIsSegmentCustomizerMinimized(false)}
-              className={`absolute top-4 right-4 bg-[#1f2125]/95 border border-teal-500/20 px-2.5 py-1.5 rounded-lg shadow-xl z-30 transition flex items-center justify-between w-48 text-[10px] text-white cursor-grab active:cursor-grabbing select-none`}
+              className={`absolute top-4 right-4 bg-white/95 border border-orange-500/20 px-2.5 py-1.5 rounded-lg shadow-xl z-30 transition flex items-center justify-between w-48 text-[10px] text-slate-900 cursor-grab active:cursor-grabbing select-none`}
               style={{
                 transform: `translate(${segmentCustomizerOffset.x}px, ${segmentCustomizerOffset.y}px)`,
                 touchAction: 'none'
               }}
               title="Expand segment customizer"
             >
-              <span className="font-bold text-teal-400">Segment Settings</span>
-              <span className="text-[9px] text-zinc-500 uppercase font-semibold">[+]</span>
+              <span className="font-bold text-orange-600">Segment Settings</span>
+              <span className="text-[9px] text-slate-500 uppercase font-semibold">[+]</span>
             </button>
           ) : (
             <div
               onPointerDown={(e) => handlePanelDragStart(e, 'segment')}
               onPointerMove={(e) => handlePanelDragMove(e, 'segment')}
               onPointerUp={(e) => handlePanelDragEnd(e, 'segment')}
-              className={`absolute top-4 right-4 bg-[#1f2125]/95 border border-teal-500/20 px-2.5 py-2 rounded-lg shadow-xl z-30 w-52 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing select-none hover:bg-[#1f2125] transition-all duration-150 ${
+              className={`absolute top-4 right-4 bg-white/95 border border-orange-500/20 px-2.5 py-2 rounded-lg shadow-xl z-30 w-52 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing select-none hover:bg-white transition-all duration-150 ${
                 dragPanel === 'segment' ? 'ring-1 ring-teal-500/50' : ''
               }`}
               style={{
@@ -3042,10 +3042,10 @@ export default function FenceCanvas({
               }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider">Segment Settings</span>
+                <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Segment Settings</span>
                 <button
                   onClick={() => setIsSegmentCustomizerMinimized(true)}
-                  className="text-[9px] text-[#8e9297] hover:text-white transition cursor-pointer font-bold uppercase shrink-0"
+                  className="text-[9px] text-slate-500 hover:text-slate-900 transition cursor-pointer font-bold uppercase shrink-0"
                   title="Minimize"
                 >
                   Hide
@@ -3054,23 +3054,23 @@ export default function FenceCanvas({
               
               {/* Split segment to add new intermediate post */}
               <div className="flex flex-col gap-0.5">
-                <span className="text-[8px] text-zinc-400 uppercase tracking-widest leading-none mb-0.5">Node:</span>
+                <span className="text-[8px] text-slate-500 uppercase tracking-widest leading-none mb-0.5">Node:</span>
                 <button
                   onClick={() => {
                     const seg = segments.find(s => s.id === selectedSegmentId);
                     if (seg) handleSegmentClick(seg, 0.5);
                   }}
-                  className="w-full text-left bg-zinc-800 hover:bg-zinc-750 text-white text-[10px] px-1.5 py-1 rounded border border-zinc-700 transition flex items-center justify-between cursor-pointer"
+                  className="w-full text-left bg-slate-100 hover:bg-slate-200 text-slate-900 text-[10px] px-1.5 py-1 rounded border border-slate-300 transition flex items-center justify-between cursor-pointer"
                 >
                   <span className="flex items-center gap-1"><Plus className="w-2.5 h-2.5 text-emerald-405" /> Split Center</span>
-                  <span className="text-[8px] font-mono text-zinc-500 uppercase leading-none">Add</span>
+                  <span className="text-[8px] font-mono text-slate-500 uppercase leading-none">Add</span>
                 </button>
               </div>
 
               {/* Toggle Gate inside this specific segment */}
-              <div className="flex flex-col gap-1 mt-0.5 border-t border-zinc-800 pt-1.5">
+              <div className="flex flex-col gap-1 mt-0.5 border-t border-slate-200 pt-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-white leading-none">Gate Overlay</span>
+                  <span className="text-[10px] font-semibold text-slate-900 leading-none">Gate Overlay</span>
                   <input
                     type="checkbox"
                     id="segment_gate_check"
@@ -3090,11 +3090,11 @@ export default function FenceCanvas({
                 </div>
 
                 {segments.find(s => s.id === selectedSegmentId)?.hasGate && (
-                  <div className="flex flex-col gap-1.5 mt-0.5 pt-1 pb-0.5 bg-[#18191c] px-1.5 rounded border border-zinc-800">
+                  <div className="flex flex-col gap-1.5 mt-0.5 pt-1 pb-0.5 bg-slate-50 px-1.5 rounded border border-slate-200">
                     {/* Gate Type Selector */}
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[8px] text-zinc-400 uppercase tracking-wider mb-0.5">Gate Type:</span>
-                      <div className="grid grid-cols-2 gap-1 bg-zinc-900 p-0.5 rounded border border-zinc-750">
+                      <span className="text-[8px] text-slate-500 uppercase tracking-wider mb-0.5">Gate Type:</span>
+                      <div className="grid grid-cols-2 gap-1 bg-slate-50 p-0.5 rounded border border-slate-200">
                         <button
                           type="button"
                           onClick={() => {
@@ -3103,7 +3103,7 @@ export default function FenceCanvas({
                           className={`py-0.5 rounded text-[8.5px] font-medium transition cursor-pointer text-center ${
                             (segments.find(s => s.id === selectedSegmentId)?.gateType !== 'double')
                               ? 'bg-emerald-600/40 text-emerald-300 border border-emerald-500/30'
-                              : 'text-zinc-400 hover:text-white border border-transparent'
+                              : 'text-slate-500 hover:text-slate-900 border border-transparent'
                           }`}
                         >
                           Single (1.2m)
@@ -3116,7 +3116,7 @@ export default function FenceCanvas({
                           className={`py-0.5 rounded text-[8.5px] font-medium transition cursor-pointer text-center ${
                             (segments.find(s => s.id === selectedSegmentId)?.gateType === 'double')
                               ? 'bg-emerald-600/40 text-emerald-300 border border-emerald-500/30'
-                              : 'text-zinc-400 hover:text-white border border-transparent'
+                              : 'text-slate-500 hover:text-slate-900 border border-transparent'
                           }`}
                         >
                           Double (4.0m)
@@ -3126,7 +3126,7 @@ export default function FenceCanvas({
 
                     {/* Gate Width Display */}
                     <div className="flex flex-col gap-0.5">
-                      <div className="flex justify-between items-center text-[8px] text-zinc-400 leading-none">
+                      <div className="flex justify-between items-center text-[8px] text-slate-500 leading-none">
                         <span>Width:</span>
                         <span className="font-mono text-emerald-400 text-[9px] font-bold">
                           {segments.find(s => s.id === selectedSegmentId)?.gateType === 'double' ? '4.0m' : '1.2m'} (Locked)
@@ -3136,9 +3136,9 @@ export default function FenceCanvas({
 
                     {/* Gate Positioning along segment line */}
                     <div className="flex flex-col gap-0.5">
-                      <div className="flex justify-between items-center text-[8px] text-zinc-400 leading-none">
+                      <div className="flex justify-between items-center text-[8px] text-slate-500 leading-none">
                         <span>Pos:</span>
-                        <span className="font-mono text-white text-[9px] font-bold">{(segments.find(s => s.id === selectedSegmentId)?.gatePositionPercent || 40)}%</span>
+                        <span className="font-mono text-slate-900 text-[9px] font-bold">{(segments.find(s => s.id === selectedSegmentId)?.gatePositionPercent || 40)}%</span>
                       </div>
                       <input
                         type="range"
@@ -3149,23 +3149,23 @@ export default function FenceCanvas({
                           const val = parseInt(e.target.value);
                           setSegments(prev => prev.map(s => s.id === selectedSegmentId ? { ...s, gatePositionPercent: val } : s));
                         }}
-                        className="w-full h-0.5 accent-teal-500 bg-zinc-700 rounded cursor-pointer"
+                        className="w-full h-0.5 accent-teal-500 bg-slate-200 rounded cursor-pointer"
                       />
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-zinc-800 pt-1.5">
+              <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-slate-200 pt-1.5">
                 <button
                   onClick={() => setSelectedSegmentId(null)}
-                  className="bg-zinc-805 hover:bg-zinc-750 text-white rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-zinc-750"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-900 rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-slate-200"
                 >
                   Deselect
                 </button>
                 <button
                   onClick={() => deleteSelectedSegment()}
-                  className="bg-rose-950/60 hover:bg-rose-900 border border-rose-900/40 text-rose-300 rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
+                  className="bg-orange-50/60 hover:bg-orange-100 border border-orange-200/40 text-orange-500 rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
                   title="Delete this fence panel"
                 >
                   <Trash2 className="w-3 h-3 shrink-0" />
@@ -3182,7 +3182,7 @@ export default function FenceCanvas({
             onPointerDown={(e) => handlePanelDragStart(e, 'segment')}
             onPointerMove={(e) => handlePanelDragMove(e, 'segment')}
             onPointerUp={(e) => handlePanelDragEnd(e, 'segment')}
-            className={`absolute top-4 right-4 bg-[#1f2125]/95 border border-teal-500/20 px-2.5 py-2.5 rounded-lg shadow-xl z-30 w-48 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing select-none hover:bg-[#1f2125] transition-all duration-150 ${
+            className={`absolute top-4 right-4 bg-white/95 border border-orange-500/20 px-2.5 py-2.5 rounded-lg shadow-xl z-30 w-48 flex flex-col gap-1.5 cursor-grab active:cursor-grabbing select-none hover:bg-white transition-all duration-150 ${
               dragPanel === 'segment' ? 'ring-1 ring-teal-500/50' : ''
             }`}
             style={{
@@ -3191,26 +3191,26 @@ export default function FenceCanvas({
             }}
           >
             <div className="flex items-center justify-between font-sans">
-              <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider">Gate Settings</span>
+              <span className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Gate Settings</span>
             </div>
-            <div className="text-[10px] text-zinc-300 flex flex-col gap-1 leading-normal">
+            <div className="text-[10px] text-slate-700 flex flex-col gap-1 leading-normal">
               <div>
-                Type: <b className="text-white">{segments.find(s => s.id === selectedSegmentId)?.gateType === 'double' ? 'Double Gate' : 'Single Gate'}</b>
+                Type: <b className="text-slate-900">{segments.find(s => s.id === selectedSegmentId)?.gateType === 'double' ? 'Double Gate' : 'Single Gate'}</b>
               </div>
               <div>
-                Width: <b className="text-white">{segments.find(s => s.id === selectedSegmentId)?.gateType === 'double' ? '4.0m' : '1.2m'}</b>
+                Width: <b className="text-slate-900">{segments.find(s => s.id === selectedSegmentId)?.gateType === 'double' ? '4.0m' : '1.2m'}</b>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-zinc-800 pt-1.5">
+            <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-slate-200 pt-1.5">
               <button
                 onClick={() => setSelectedSegmentId(null)}
-                className="bg-zinc-805 hover:bg-zinc-750 text-white rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-zinc-750"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-900 rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-slate-200"
               >
                 Deselect
               </button>
               <button
                 onClick={() => deleteSelectedSegment()}
-                className="bg-rose-950/60 hover:bg-rose-900 border border-rose-900/40 text-rose-300 rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
+                className="bg-orange-50/60 hover:bg-orange-100 border border-orange-200/40 text-orange-500 rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
                 title="Remove selected gate"
               >
                 <Trash2 className="w-3 h-3 shrink-0" />
@@ -3222,16 +3222,16 @@ export default function FenceCanvas({
 
         {/* Tip banner for first load - dismissible */}
         {showTipBanner && (
-          <div className="absolute top-4 left-4 bg-zinc-950/85 backdrop-blur-md px-3.5 py-2.5 rounded-xl text-neutral-300 text-xs border border-zinc-800 max-w-sm z-30 shadow-2xl flex gap-2.5 items-start">
-            <Info className="w-4.5 h-4.5 text-teal-400 shrink-0 mt-0.5 animate-bounce" />
+          <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3.5 py-2.5 rounded-xl text-slate-600 text-xs border border-slate-200 max-w-sm z-30 shadow-2xl flex gap-2.5 items-start">
+            <Info className="w-4.5 h-4.5 text-orange-600 shrink-0 mt-0.5 animate-bounce" />
             <div className="flex-1">
               <p className="font-sans leading-relaxed">
-                Drag the <b className="text-white">circular handles</b> to drape the fence perfectly along the garden path. Switch to <b className="text-teal-400">Pan Tool</b> to drag the camera view or zoom!
+                Drag the <b className="text-slate-900">circular handles</b> to drape the fence perfectly along the garden path. Switch to <b className="text-orange-600">Pan Tool</b> to drag the camera view or zoom!
               </p>
             </div>
             <button
               onClick={dismissTipBanner}
-              className="text-zinc-500 hover:text-white transition font-mono text-[9px] uppercase font-bold pl-1.5 cursor-pointer"
+              className="text-slate-500 hover:text-slate-900 transition font-mono text-[9px] uppercase font-bold pl-1.5 cursor-pointer"
               title="Dismiss instruction"
             >
               [X]
