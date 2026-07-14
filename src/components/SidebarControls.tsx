@@ -107,7 +107,7 @@ export default function SidebarControls({
       {/* 1. VERICAL SLIM RAIL DEPICTED IN ICON-BASED LAYOUT SCREENSHOT */}
       <div className="w-[84px] border-r border-[#2f3136] bg-[#141517] flex flex-col items-center py-5 justify-between shrink-0">
         <div className="flex flex-col items-center gap-7 w-full">
-          {/* Logo element representing Fencing Pro */}
+          {/* Logo element representing Fencely */}
           <div className="flex flex-col items-center gap-1.5 px-1 pb-4 border-b border-[#222] w-full text-center">
             <Fence className="w-6.5 h-6.5 text-teal-400" />
             <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400 font-sans leading-none">{CLIENT_CONFIG.companyName.split(' ')[0]}</span>

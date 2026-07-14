@@ -187,7 +187,7 @@ export default function App() {
 
             <div className="flex flex-col items-center select-none mt-2">
               <span className="text-[26px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
-                FENCING
+                {CLIENT_CONFIG.companyName}
               </span>
               <div className="h-[16px] mt-1 flex items-center justify-end px-1.5 min-w-[130px] rounded-[1px]" style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}>
                 <span className="text-[9px] font-black text-black tracking-[0.15em] uppercase leading-none">
@@ -198,7 +198,7 @@ export default function App() {
 
             <div className="border border-[#2f3136] bg-[#141517] px-3 py-1 mt-4 rounded-full">
               <span className="text-[9px] font-bold text-zinc-400 tracking-[0.18em] uppercase">
-                PORTAL ACCESS
+                SIGN IN
               </span>
             </div>
           </div>
@@ -284,7 +284,7 @@ export default function App() {
             <div className="flex flex-col justify-center pl-6 pr-6 h-full border-r border-[#2f3136]">
               <div className="flex flex-col select-none">
                 <span className="text-[25px] font-black tracking-[0.05em] uppercase leading-none font-sans" style={{ color: CLIENT_CONFIG.primaryColor, letterSpacing: '0.04em' }}>
-                  FENCING
+                  {CLIENT_CONFIG.companyName}
                 </span>
                 <div className="h-[15px] mt-1 flex items-center justify-end px-1.5 w-full" style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}>
                   <span className="text-[9px] font-black text-black tracking-[0.15em] uppercase leading-none">
@@ -523,7 +523,7 @@ export default function App() {
           <div className="bg-[#1f2125] border border-zinc-700 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
             
             <div className="px-6 py-4.5 bg-[#141517] border-b border-[#2f3136] flex items-center justify-between">
-              <span className="text-xs font-bold text-white uppercase tracking-wider">Fencing Pro Companion Guide</span>
+              <span className="text-xs font-bold text-white uppercase tracking-wider">Fencely Guide</span>
               <button 
                 onClick={() => setShowTutorial(false)}
                 className="text-zinc-500 hover:text-white transition cursor-pointer"
@@ -535,7 +535,7 @@ export default function App() {
             <div className="p-6 overflow-y-auto flex flex-col gap-5 leading-relaxed text-zinc-300 font-sans">
               <h3 className="text-sm font-extrabold text-rose-500 uppercase tracking-widest leading-none">Interactive Visual Boundary Controls</h3>
               <p className="text-xs text-zinc-400">
-                This simulator is designed to give Fencing Pro consultants and their respected clients a professional edge by overlaying highly accurate, responsive boundary design mockups onto residential properties.
+                This simulator is designed to give Fencely users and their respected clients a professional edge by overlaying highly accurate, responsive boundary design mockups onto residential properties.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
