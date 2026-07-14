@@ -1197,9 +1197,7 @@ export default function FenceCanvas({
           <button
             onClick={() => setPanMode(!panMode)}
             title={panMode ? "Switch to Draw and Drag state" : "Enable camera swipe and pan"}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-              panMode ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f]/30' : 'bg-white border border-[#d9d3c5] text-[#5f6266] hover:text-[#1a1c1e]'
-            }`}
+            className={`btn-tool ${panMode ? 'is-active' : ''}`}
           >
             <Hand className="w-3.5 h-3.5" />
             <span>{panMode ? "Panning Mode" : "Pan Tool"}</span>
@@ -1210,9 +1208,7 @@ export default function FenceCanvas({
             <button
               onClick={() => setIsFullScreen(!isFullScreen)}
               title={isFullScreen ? "Exit Full Screen" : "Fill screen with yard template"}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-                isFullScreen ? 'bg-[#ff6a1f] text-white font-bold' : 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:bg-[#e2ddd0]'
-              }`}
+              className={`btn-tool ${isFullScreen ? 'is-active' : ''}`}
             >
               {isFullScreen ? <Minimize2 className="w-3.5 h-3.5 animate-pulse" /> : <Maximize2 className="w-3.5 h-3.5" />}
               <span>{isFullScreen ? "Exit Fullscreen" : "Full Screen"}</span>
@@ -1223,9 +1219,7 @@ export default function FenceCanvas({
           <button
             onClick={() => setShowHelperGrid(!showHelperGrid)}
             title="Toggle assistance alignment points"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-              showHelperGrid ? 'bg-white border border-[#d9d3c5] text-[#ff6a1f] border border-[#ff6a1f]/20' : 'bg-white border border-[#d9d3c5] text-[#5f6266]'
-            }`}
+            className={`btn-tool ${showHelperGrid ? 'is-active' : ''}`}
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Alignment Points</span>
@@ -1235,7 +1229,7 @@ export default function FenceCanvas({
           <button
             onClick={() => setShowSatelliteModal(true)}
             title="Measure real-world lot boundary using satellite photography"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition border border-[#ffd4bd]/30 hover:border-[#ffd4bd] text-[#ff6a1f] hover:text-[#ff6a1f] bg-[#fff1e9]/10 hover:bg-[#fff1e9]/20 font-sans shadow"
+            className="btn-tool"
           >
             <span>🛰️ Map Measure</span>
           </button>
@@ -1250,11 +1244,7 @@ export default function FenceCanvas({
               setPanMode(false); // turn off pan mode if active
             }}
             title="Paint over foreground elements (like mailboxes, trees, or pillars) in the photo to bring them in front of the fence."
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 ${
-              isBrushMode 
-                ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f] shadow-md' 
-                : 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:text-[#1a1c1e] hover:bg-[#e2ddd0]'
-            }`}
+            className={`btn-tool ${isBrushMode ? 'is-active' : ''}`}
           >
             <Paintbrush className="w-3.5 h-3.5" />
             <span>Layering Brush</span>
@@ -1265,36 +1255,29 @@ export default function FenceCanvas({
             onClick={handleUndo}
             disabled={history.length === 0}
             title={history.length === 0 ? "No actions to undo" : `Undo last change (Step ${history.length})`}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer select-none ${
-              history.length > 0 
-                ? 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:text-[#1a1c1e] border border-[#ff6a1f]/20' 
-                : 'bg-[#f3efe6] text-[#5f6266] cursor-not-allowed border border-transparent'
-            }`}
+            className="btn-tool select-none"
           >
             <Undo className="w-3.5 h-3.5" />
             <span>Undo ({history.length})</span>
           </button>
 
           {/* Directional Add Post Actions */}
-          <div className="flex items-center bg-white border border-[#d9d3c5] rounded-lg p-0.5 border border-[#cfc8b8]/40">
-            <button
-              onClick={() => addPostDirect('left')}
-              title="Add post extending straight on the LEFT side of the fence"
-              className="flex items-center gap-1 hover:bg-white border border-[#d9d3c5] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#ff6a1f] font-bold" />
-              <span>Add Left</span>
-            </button>
-            <div className="w-[1px] h-4 bg-[#e2ddd0]" />
-            <button
-              onClick={() => addPostDirect('right')}
-              title="Add post extending straight on the RIGHT side of the fence"
-              className="flex items-center gap-1 hover:bg-white border border-[#d9d3c5] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 text-[#ff6a1f] font-bold" />
-              <span>Add Right</span>
-            </button>
-          </div>
+          <button
+            onClick={() => addPostDirect('left')}
+            title="Add post extending straight on the LEFT side of the fence"
+            className="btn-tool"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Left</span>
+          </button>
+          <button
+            onClick={() => addPostDirect('right')}
+            title="Add post extending straight on the RIGHT side of the fence"
+            className="btn-tool"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Right</span>
+          </button>
 
           {/* Download/Export Design Button */}
           <button
@@ -1423,17 +1406,17 @@ export default function FenceCanvas({
                     >
                       Upload Photo
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={loadDefaultImage}
-                      className="flex-1 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition border cursor-pointer bg-[#f3efe6] hover:bg-[#ece7db] text-[#3c4045] border-[#cfc8b8]"
+                      className="btn-tool flex-1 uppercase tracking-wider"
                     >
                       Use Demo Yard
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => setShowSatelliteModal(true)}
-                      className="flex-1 font-bold py-2.5 px-3 rounded-lg text-xs uppercase tracking-wider transition border cursor-pointer bg-[#fff1e9]/40 hover:bg-[#fff1e9]/40 text-[#ff6a1f] hover:text-[#ff6a1f] border-[#ffd4bd]/40 flex items-center justify-center gap-1.5 shadow"
+                      className="btn-tool flex-1 uppercase tracking-wider"
                     >
                       <span>🛰️ Map Measure</span>
                     </button>
@@ -2795,7 +2778,7 @@ export default function FenceCanvas({
           <div className="flex items-center gap-1.5 border-l border-[#d9d3c5] pl-2">
             <button
               onClick={() => setZoom(prev => Math.max(0.5, prev - 0.25))}
-              className="px-1.5 py-0.5 bg-[#ece7db] text-[#3c4045] hover:text-[#1a1c1e] rounded text-[10px] hover:bg-[#e2ddd0] transition cursor-pointer font-bold"
+              className="btn-tool btn-tool-sm"
               title="Zoom Out"
             >
               -
@@ -2805,7 +2788,7 @@ export default function FenceCanvas({
             </span>
             <button
               onClick={() => setZoom(prev => Math.min(3.0, prev + 0.25))}
-              className="px-1.5 py-0.5 bg-[#ece7db] text-[#3c4045] hover:text-[#1a1c1e] rounded text-[10px] hover:bg-[#e2ddd0] transition cursor-pointer font-bold"
+              className="btn-tool btn-tool-sm"
               title="Zoom In"
             >
               +
@@ -2818,7 +2801,7 @@ export default function FenceCanvas({
                 setZoom(1);
                 setViewportPan({ x: 0, y: 0 });
               }}
-              className="px-1.5 py-0.5 bg-[#ffe3d3]/60 hover:bg-[#fff1e9] text-[#ff6a1f] rounded text-[9px] transition cursor-pointer font-semibold"
+              className="btn-tool btn-tool-sm"
               title="Reset Zoom & Panning"
             >
               Reset
@@ -2876,7 +2859,7 @@ export default function FenceCanvas({
               <button
                 onClick={() => nudgeFenceFile(0, -1)}
                 title="Shift Fence Up"
-                className="w-5.5 h-5.5 bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded flex items-center justify-center transition border border-[#d9d3c5] cursor-pointer"
+                className="btn-tool btn-tool-sm w-5.5 h-5.5"
               >
                 <ChevronUp className="w-3 h-3" />
               </button>
@@ -2885,21 +2868,21 @@ export default function FenceCanvas({
               <button
                 onClick={() => nudgeFenceFile(-1, 0)}
                 title="Shift Fence Left"
-                className="w-5.5 h-5.5 bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded flex items-center justify-center transition border border-[#d9d3c5] cursor-pointer"
+                className="btn-tool btn-tool-sm w-5.5 h-5.5"
               >
                 <ChevronLeft className="w-3 h-3" />
               </button>
               <button
                 onClick={() => setGlobalOffset({ x: 0, y: 0 })}
                 title="Recenter Fence"
-                className="w-5.5 h-5.5 bg-[#f3efe6] hover:bg-[#ece7db] text-[#ff6a1f] rounded flex items-center justify-center transition font-mono text-[8px] border border-[#d9d3c5] cursor-pointer uppercase font-bold"
+                className="btn-tool btn-tool-sm w-5.5 h-5.5 font-mono text-[8px] uppercase"
               >
                 RST
               </button>
               <button
                 onClick={() => nudgeFenceFile(1, 0)}
                 title="Shift Fence Right"
-                className="w-5.5 h-5.5 bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded flex items-center justify-center transition border border-[#d9d3c5] cursor-pointer"
+                className="btn-tool btn-tool-sm w-5.5 h-5.5"
               >
                 <ChevronRight className="w-3 h-3" />
               </button>
@@ -2908,7 +2891,7 @@ export default function FenceCanvas({
               <button
                 onClick={() => nudgeFenceFile(0, 1)}
                 title="Shift Fence Down"
-                className="w-5.5 h-5.5 bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded flex items-center justify-center transition border border-[#d9d3c5] cursor-pointer"
+                className="btn-tool btn-tool-sm w-5.5 h-5.5"
               >
                 <ChevronDown className="w-3 h-3" />
               </button>
