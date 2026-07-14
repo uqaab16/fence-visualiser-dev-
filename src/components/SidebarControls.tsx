@@ -102,10 +102,10 @@ export default function SidebarControls({
   const heightOptions: FenceHeight[] = [900, 1200, 1500, 1800, 2100];
 
   return (
-    <div className="w-80 sm:w-96 bg-white border-r border-[#d9d3c5] flex flex-row shrink-0 h-full">
+    <div className="w-80 sm:w-96 bg-[#f3efe6] border-r border-[#d9d3c5] flex flex-row shrink-0 h-full">
       
       {/* 1. VERICAL SLIM RAIL DEPICTED IN ICON-BASED LAYOUT SCREENSHOT */}
-      <div className="w-[84px] border-r border-[#d9d3c5] bg-white flex flex-col items-center py-5 justify-between shrink-0">
+      <div className="w-[84px] border-r border-[#d9d3c5] bg-[#f3efe6] flex flex-col items-center py-5 justify-between shrink-0">
         <div className="flex flex-col items-center gap-7 w-full">
           {/* Logo element representing Fencely */}
           <div className="flex flex-col items-center gap-1.5 px-1 pb-4 border-b border-[#d9d3c5] w-full text-center">
@@ -507,7 +507,7 @@ export default function SidebarControls({
                 {color.isColorbond ? (
                   <span className="text-[9px] bg-sky-950/40 text-sky-400 border border-sky-900/40 px-1.5 py-0.5 rounded font-bold font-mono">COLORBOND&reg;</span>
                 ) : (
-                  <span className="text-[9px] bg-amber-950/40 text-amber-500 border border-amber-900/40 px-1.5 py-0.5 rounded font-bold font-mono">RAW WOOD</span>
+                  <span className="text-[9px] bg-[#fff1e9] text-[#ff6a1f] border border-[#ffd4bd] px-1.5 py-0.5 rounded font-bold font-mono">RAW WOOD</span>
                 )}
               </div>
               <p className="text-[10px] text-[#5f6266] leading-relaxed italic">

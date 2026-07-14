@@ -164,7 +164,7 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="flex items-center justify-center min-h-screen bg-[#f3efe6]">
         <div className="text-[#5f6266] text-sm font-mono animate-pulse">Loading...</div>
       </div>
     );
@@ -177,7 +177,7 @@ export default function App() {
         <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-[#fff1e9]/10 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ backgroundColor: CLIENT_CONFIG.logoAccentColor + '0d' }} />
 
-        <div className="w-full max-w-[440px] bg-white border border-[#d9d3c5] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
+        <div className="w-full max-w-[440px] bg-[#f3efe6] border border-[#d9d3c5] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden relative z-10 flex flex-col">
 
           <div className="bg-[#24272a] border-b border-[#3c4045] p-8 flex flex-col items-center">
             <img
@@ -244,7 +244,7 @@ export default function App() {
             </form>
           )}
 
-          <div className="bg-white border-t border-[#d9d3c5] py-3.5 px-6 flex items-center justify-between text-[10px] text-[#5f6266] font-mono">
+          <div className="bg-[#f3efe6] border-t border-[#d9d3c5] py-3.5 px-6 flex items-center justify-between text-[10px] text-[#5f6266] font-mono">
             <span>{CLIENT_CONFIG.footerSecurityText}</span>
             <span>{CLIENT_CONFIG.footerSystemText}</span>
           </div>
@@ -258,7 +258,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full max-w-full bg-white text-[#1a1c1e] overflow-hidden font-sans select-none">
+    <div className="flex flex-col h-screen w-full max-w-full bg-[#f3efe6] text-[#1a1c1e] overflow-hidden font-sans select-none">
       
       {/* Primary header brand bar exactly matching the Fencing Pro visual guidelines */}
       {!isFullScreen ? (
@@ -360,7 +360,7 @@ export default function App() {
       ) : null}
 
       {/* Primary visualizer studio board split */}
-      <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-white relative">
+      <div className="flex-1 flex flex-row overflow-hidden min-h-0 bg-[#f3efe6] relative">
         
         {/* Step-by-step customizer on LHS */}
         {!isFullScreen && (
@@ -420,7 +420,7 @@ export default function App() {
         )}
 
         {/* Interactive Visualizer Canvas in Center */}
-        <div className={`flex-1 min-w-0 p-5.5 flex flex-col min-h-0 relative z-10 transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 bg-white p-0' : ''}`}>
+        <div className={`flex-1 min-w-0 p-5.5 flex flex-col min-h-0 relative z-10 transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 bg-[#f3efe6] p-0' : ''}`}>
           
           {/* Persistent Touch/Click-Friendly Expand Edge Handles on borders of Canvas */}
           {!isLeftPanelOpen && !isFullScreen && (
@@ -499,7 +499,7 @@ export default function App() {
 
       {/* HOW-IT-WORKS SYSTEM OVERLAY MODAL */}
       {showTutorial && (
-        <div className="fixed inset-0 bg-white/90 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
+        <div className="fixed inset-0 bg-[#1a1c1e]/60 backdrop-blur-md z-50 flex items-center justify-center p-4 select-none">
           <div className="bg-white border border-[#cfc8b8] w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
             
             <div className="px-6 py-4.5 bg-white border-b border-[#d9d3c5] flex items-center justify-between">

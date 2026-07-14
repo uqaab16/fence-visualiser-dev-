@@ -369,7 +369,7 @@ export default function EstimateSummary({
   };
 
   return (
-    <div className="flex flex-col w-80 sm:w-92 shrink-0 p-5.5 h-full overflow-y-auto gap-4 relative z-20 bg-white text-[#1a1c1e] border-l border-[#d9d3c5]">
+    <div className="flex flex-col w-80 sm:w-92 shrink-0 p-5.5 h-full overflow-y-auto gap-4 relative z-20 bg-[#f3efe6] text-[#1a1c1e] border-l border-[#d9d3c5]">
       
       {/* Title block */}
       <div className="flex items-center justify-between">
@@ -572,7 +572,7 @@ export default function EstimateSummary({
 
       {/* MODAL WINDOW: PAST PROPOSAL DETAIL VIEWERS */}
       {selectedPastInquiry && (
-        <div className="fixed inset-0 bg-white/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[#1a1c1e]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#cfc8b8] w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}
@@ -691,7 +691,7 @@ export default function EstimateSummary({
 
       {/* MODAL WINDOW: QUOTATION REQUEST CAPTURE MODULE */}
       {showQuoteModal && (
-        <div className="fixed inset-0 bg-white/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[#1a1c1e]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white border border-[#cfc8b8] w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             
             {/* Modal Header */}

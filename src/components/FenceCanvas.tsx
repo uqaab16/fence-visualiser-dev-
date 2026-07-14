@@ -1183,11 +1183,11 @@ export default function FenceCanvas({
     <div className="flex flex-col h-full bg-[#f3efe6] rounded-2xl border border-[#d9d3c5] overflow-hidden">
       
       {/* Top action bar */}
-      <div className="flex flex-wrap items-center justify-between px-5 py-3.5 bg-white border-b border-[#d9d3c5] gap-3">
+      <div className="flex flex-wrap items-center justify-between px-5 py-3.5 bg-[#f3efe6] border-b border-[#d9d3c5] gap-3">
         <div className="flex items-center gap-2">
           <Layers className="w-4.5 h-4.5 text-[#5f6266]" />
           <h3 className="text-sm font-semibold text-[#1a1c1e] font-display">Interactive Design Studio</h3>
-          <span className="text-[11px] font-mono bg-[#fff1e9]/40 text-[#ff6a1f] border border-[#ffd4bd]/40 px-2 py-0.5 rounded-full">
+          <span className="text-[11px] font-mono bg-[#ece7db] text-[#5f6266] border border-[#d9d3c5] px-2 py-0.5 rounded-full">
             Full Transparency Enabled
           </span>
         </div>
@@ -1198,7 +1198,7 @@ export default function FenceCanvas({
             onClick={() => setPanMode(!panMode)}
             title={panMode ? "Switch to Draw and Drag state" : "Enable camera swipe and pan"}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-              panMode ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f]/30' : 'bg-[#ece7db] text-[#5f6266] hover:text-[#1a1c1e]'
+              panMode ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f]/30' : 'bg-white border border-[#d9d3c5] text-[#5f6266] hover:text-[#1a1c1e]'
             }`}
           >
             <Hand className="w-3.5 h-3.5" />
@@ -1211,7 +1211,7 @@ export default function FenceCanvas({
               onClick={() => setIsFullScreen(!isFullScreen)}
               title={isFullScreen ? "Exit Full Screen" : "Fill screen with yard template"}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition ${
-                isFullScreen ? 'bg-amber-500 text-[#1a1c1e] font-bold' : 'bg-[#ece7db] text-[#ff6a1f] hover:bg-[#e2ddd0]'
+                isFullScreen ? 'bg-[#ff6a1f] text-white font-bold' : 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:bg-[#e2ddd0]'
               }`}
             >
               {isFullScreen ? <Minimize2 className="w-3.5 h-3.5 animate-pulse" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -1224,7 +1224,7 @@ export default function FenceCanvas({
             onClick={() => setShowHelperGrid(!showHelperGrid)}
             title="Toggle assistance alignment points"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-              showHelperGrid ? 'bg-[#ece7db] text-[#ff6a1f] border border-[#ff6a1f]/20' : 'bg-[#ece7db] text-[#5f6266]'
+              showHelperGrid ? 'bg-white border border-[#d9d3c5] text-[#ff6a1f] border border-[#ff6a1f]/20' : 'bg-white border border-[#d9d3c5] text-[#5f6266]'
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
@@ -1253,7 +1253,7 @@ export default function FenceCanvas({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-200 ${
               isBrushMode 
                 ? 'bg-[#ff6a1f] text-white font-bold border border-[#ff8a4f] shadow-md' 
-                : 'bg-[#ece7db] text-[#ff6a1f] hover:text-[#1a1c1e] hover:bg-[#e2ddd0]'
+                : 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:text-[#1a1c1e] hover:bg-[#e2ddd0]'
             }`}
           >
             <Paintbrush className="w-3.5 h-3.5" />
@@ -1267,7 +1267,7 @@ export default function FenceCanvas({
             title={history.length === 0 ? "No actions to undo" : `Undo last change (Step ${history.length})`}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer select-none ${
               history.length > 0 
-                ? 'bg-[#ece7db] text-[#ff6a1f] hover:text-[#1a1c1e] border border-[#ff6a1f]/20' 
+                ? 'bg-white border border-[#d9d3c5] text-[#ff6a1f] hover:text-[#1a1c1e] border border-[#ff6a1f]/20' 
                 : 'bg-[#f3efe6] text-[#5f6266] cursor-not-allowed border border-transparent'
             }`}
           >
@@ -1276,11 +1276,11 @@ export default function FenceCanvas({
           </button>
 
           {/* Directional Add Post Actions */}
-          <div className="flex items-center bg-[#ece7db] rounded-lg p-0.5 border border-[#cfc8b8]/40">
+          <div className="flex items-center bg-white border border-[#d9d3c5] rounded-lg p-0.5 border border-[#cfc8b8]/40">
             <button
               onClick={() => addPostDirect('left')}
               title="Add post extending straight on the LEFT side of the fence"
-              className="flex items-center gap-1 hover:bg-[#ece7db] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1 hover:bg-white border border-[#d9d3c5] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 text-[#ff6a1f] font-bold" />
               <span>Add Left</span>
@@ -1289,7 +1289,7 @@ export default function FenceCanvas({
             <button
               onClick={() => addPostDirect('right')}
               title="Add post extending straight on the RIGHT side of the fence"
-              className="flex items-center gap-1 hover:bg-[#ece7db] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
+              className="flex items-center gap-1 hover:bg-white border border-[#d9d3c5] text-[#1a1c1e] px-2.5 py-1 rounded text-xs font-medium transition cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5 text-[#ff6a1f] font-bold" />
               <span>Add Right</span>
@@ -1300,9 +1300,9 @@ export default function FenceCanvas({
           <button
             onClick={handleExportDesign}
             title="Export full visual layout design copy to image/specification sheet"
-            className="flex items-center gap-1 bg-amber-600 hover:bg-amber-500 text-[#1a1c1e] px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-md select-none"
+            className="flex items-center gap-1 bg-[#ff6a1f] hover:bg-[#e85a12] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-md select-none"
           >
-            <Download className="w-3.5 h-3.5 text-amber-100" />
+            <Download className="w-3.5 h-3.5 text-white" />
             <span>Export Design</span>
           </button>
 
@@ -1409,7 +1409,7 @@ export default function FenceCanvas({
                   <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4 border transition-colors bg-[#ff6a1f]/10 border-[#ff6a1f]/20 text-[#ff6a1f]">
                     <Plus className="w-6 h-6" />
                   </div>
-                  <h3 className="text-base font-black mb-2 leading-tight uppercase tracking-wider text-[#1a1c1e]">
+                  <h3 className="font-display text-2xl font-extrabold mb-2 leading-none uppercase tracking-wide text-[#1a1c1e]">
                     Initialize Property Backdrop
                   </h3>
                   <p className="text-xs text-[#5f6266] mb-6 leading-relaxed">
@@ -2800,7 +2800,7 @@ export default function FenceCanvas({
             >
               -
             </button>
-            <span className="text-[10px] font-mono font-bold text-[#ff6a1f] bg-[#ffe3d3]/40 px-1.5 py-0.5 rounded border border-[#ffd4bd]/25">
+            <span className="text-[10px] font-mono font-bold text-[#3c4045] bg-[#ece7db] px-1.5 py-0.5 rounded border border-[#d9d3c5]">
               {Math.round(zoom * 100)}%
             </span>
             <button
@@ -2833,7 +2833,7 @@ export default function FenceCanvas({
             onPointerMove={(e) => handlePanelDragMove(e, 'reposition')}
             onPointerUp={(e) => handlePanelDragEnd(e, 'reposition')}
             onClick={() => setIsShiftResizeMinimized(false)}
-            className={`absolute bottom-4 left-4 bg-white/95 hover:bg-[#ece7db] border border-[#d9d3c5] px-2.5 py-1.5 rounded-lg shadow-xl z-30 flex items-center gap-1 text-[10px] font-bold text-[#ff6a1f] cursor-grab active:cursor-grabbing select-none`}
+            className={`absolute bottom-4 left-4 bg-white/95 hover:bg-[#ece7db] border border-[#d9d3c5] px-2.5 py-1.5 rounded-lg shadow-xl z-30 flex items-center gap-1 text-[10px] font-bold text-[#3c4045] cursor-grab active:cursor-grabbing select-none`}
             style={{
               transform: `translate(${repositionOffset.x}px, ${repositionOffset.y}px)`,
               touchAction: 'none'
@@ -3222,7 +3222,7 @@ export default function FenceCanvas({
 
         {/* Tip banner for first load - dismissible */}
         {showTipBanner && (
-          <div className="absolute top-4 left-4 bg-white/85 backdrop-blur-md px-3.5 py-2.5 rounded-xl text-[#5f6266] text-xs border border-[#d9d3c5] max-w-sm z-30 shadow-2xl flex gap-2.5 items-start">
+          <div className="absolute top-4 left-4 bg-[#1a1c1e]/60 backdrop-blur-md px-3.5 py-2.5 rounded-xl text-[#5f6266] text-xs border border-[#d9d3c5] max-w-sm z-30 shadow-2xl flex gap-2.5 items-start">
             <Info className="w-4.5 h-4.5 text-[#ff6a1f] shrink-0 mt-0.5 animate-bounce" />
             <div className="flex-1">
               <p className="font-sans leading-relaxed">

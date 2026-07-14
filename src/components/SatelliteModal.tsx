@@ -103,7 +103,7 @@ export default function SatelliteModal({ isOpen, onClose, onSelectDistance }: Sa
 
   // Real Google Maps logic wrapper
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-[#1a1c1e]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white border border-[#cfc8b8] w-full max-w-4xl h-[85vh] rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         
         {/* Header bar */}
@@ -175,9 +175,9 @@ export default function SatelliteModal({ isOpen, onClose, onSelectDistance }: Sa
 
               {/* API Key Warning block if offline */}
               {!hasValidKey && (
-                <div className="bg-amber-500/10 border border-amber-500/15 p-3 rounded-xl space-y-1 shadow">
-                  <div className="flex items-center gap-1.5 text-amber-400 text-[9.5px] font-extrabold uppercase tracking-widest font-mono">
-                    <Info className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <div className="bg-[#fff1e9] border border-[#ffd4bd] p-3 rounded-xl space-y-1 shadow">
+                  <div className="flex items-center gap-1.5 text-[#ff6a1f] text-[9.5px] font-extrabold uppercase tracking-widest font-mono">
+                    <Info className="w-3.5 h-3.5 text-[#ff6a1f] shrink-0" />
                     Offline Sandbox Mode
                   </div>
                   <p className="text-[10px] text-[#5f6266] leading-relaxed font-sans">
@@ -1024,7 +1024,7 @@ function MockMapContainer({
 
         {/* Dynamic Satellite Scanning Scanner Effect Loader */}
         {isSearching && (
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex flex-col items-center justify-center space-y-4">
+          <div className="absolute inset-0 bg-[#1a1c1e]/60 backdrop-blur-sm z-30 flex flex-col items-center justify-center space-y-4">
             <div className="relative">
               <div className="w-16 h-16 rounded-full border-4 border-[#ff6a1f]/20 border-t-rose-500 animate-spin" />
               <Search className="w-6 h-6 text-[#ff6a1f] absolute inset-0 m-auto animate-pulse" />
