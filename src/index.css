@@ -25,18 +25,22 @@ body {
   justify-content: center;
   gap: 0.375rem;
   padding: 0.625rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
-  background-color: #ffffff;
-  color: #3c4045;
-  border: 1px solid #cfc8b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background-color: #f3efe6;
+  color: #1a1c1e;
+  border: 1px solid #d9d3c5;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.btn-tool:hover:not(:disabled),
+.btn-tool:hover:not(:disabled) {
+  background-color: #ece7db;
+}
 .btn-tool.is-active {
   background-color: #ff6a1f;
   color: #ffffff;
