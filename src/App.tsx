@@ -11,8 +11,8 @@ import FenceCanvas from './components/FenceCanvas';
 import EstimateSummary from './components/EstimateSummary';
 import { CLIENT_CONFIG } from './clientConfig';
 import { useAuth } from './hooks/useAuth';
-import { supabase } from './lib/supabase';
 import { loadPricing, savePricing } from './lib/pricing';
+import { ensureUserOnboarded } from './lib/onboarding';
 import {
   ShieldCheck,
   HelpCircle,
@@ -108,25 +108,22 @@ export default function App() {
     }
     let cancelled = false;
     (async () => {
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('company_id')
-        .eq('id', session.user.id)
-        .maybeSingle();
+      // First-time users get a company + profile + pricing row created here;
+      // returning users just get their existing company_id back.
+      const resolvedCompanyId = await ensureUserOnboarded(session.user);
       if (cancelled) return;
-      if (error || !profile?.company_id) {
-        console.error('Failed to resolve company for current user', error);
+      if (!resolvedCompanyId) {
         setPricingLoading(false); // fall back to defaults rather than blocking the app
         return;
       }
-      setCompanyId(profile.company_id);
-      const saved = await loadPricing(profile.company_id);
+      setCompanyId(resolvedCompanyId);
+      const saved = await loadPricing(resolvedCompanyId);
       if (cancelled) return;
       if (saved) {
         setPricing(saved);
       } else {
-        // First sign-in for this company: seed their row with the defaults
-        await savePricing(profile.company_id, DEFAULT_PRICING);
+        // No pricing row yet for this company: seed it with the defaults
+        await savePricing(resolvedCompanyId, DEFAULT_PRICING);
       }
       setPricingLoading(false);
     })();
