@@ -7,6 +7,7 @@ import React from 'react';
 import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, DynamicPricing } from '../types';
 import { COLORS_PALETTE, FENCE_PRICES } from '../utils';
 import { CLIENT_CONFIG } from '../clientConfig';
+import { savePricing } from '../lib/pricing';
 import { 
   Fence, 
   Palette, 
@@ -48,6 +49,7 @@ interface SidebarControlsProps {
   setIsLeftPanelOpen?: (val: boolean) => void;
   pricing: DynamicPricing;
   setPricing: React.Dispatch<React.SetStateAction<DynamicPricing>>;
+  companyId: string | null;
   slatProfile: '65' | '90';
   setSlatProfile: (profile: '65' | '90') => void;
 }
@@ -76,6 +78,7 @@ export default function SidebarControls({
   setIsLeftPanelOpen,
   pricing,
   setPricing,
+  companyId,
   slatProfile,
   setSlatProfile
 }: SidebarControlsProps) {
@@ -808,9 +811,7 @@ export default function SidebarControls({
                       doubleGateCost: 750
                     };
                     setPricing(defaultRates);
-                    try {
-                      localStorage.setItem('fencing_custom_pricing', JSON.stringify(defaultRates));
-                    } catch (e) {}
+                    if (companyId) savePricing(companyId, defaultRates);
                   }}
                   className="flex items-center gap-1 text-[9px] font-bold text-[#ff6a1f] hover:text-[#ff6a1f] bg-[#ffe3d3]/20 px-2 py-1 border border-[#ffd4bd]/30 rounded transition cursor-pointer select-none font-mono"
                   title="Reset base rates to corporate default standards"
@@ -838,7 +839,7 @@ export default function SidebarControls({
                           onChange={(e) => {
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, slatMaterialCost: val }));
-                            try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, slatMaterialCost: val })); } catch {}
+                            if (companyId) savePricing(companyId, { ...pricing, slatMaterialCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -853,7 +854,7 @@ export default function SidebarControls({
                           onChange={(e) => {
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, bladeMaterialCost: val }));
-                            try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, bladeMaterialCost: val })); } catch {}
+                            if (companyId) savePricing(companyId, { ...pricing, bladeMaterialCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -868,7 +869,7 @@ export default function SidebarControls({
                           onChange={(e) => {
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, postRailMaterialCost: val }));
-                            try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, postRailMaterialCost: val })); } catch {}
+                            if (companyId) savePricing(companyId, { ...pricing, postRailMaterialCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -891,7 +892,7 @@ export default function SidebarControls({
                           onChange={(e) => {
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, slatLaborCost: val }));
-                            try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, slatLaborCost: val })); } catch {}
+                            if (companyId) savePricing(companyId, { ...pricing, slatLaborCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -906,7 +907,7 @@ export default function SidebarControls({
                           onChange={(e) => {
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, bladeLaborCost: val }));
-                            try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, bladeLaborCost: val })); } catch {}
+                            if (companyId) savePricing(companyId, { ...pricing, bladeLaborCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -921,7 +922,7 @@ export default function SidebarControls({
                           onChange={(e) => {
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, postRailLaborCost: val }));
-                            try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, postRailLaborCost: val })); } catch {}
+                            if (companyId) savePricing(companyId, { ...pricing, postRailLaborCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -943,7 +944,7 @@ export default function SidebarControls({
                         onChange={(e) => {
                           const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setPricing(prev => ({ ...prev, cornerPostCost: val }));
-                          try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, cornerPostCost: val })); } catch {}
+                          if (companyId) savePricing(companyId, { ...pricing, cornerPostCost: val });
                         }}
                         className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                         min="0"
@@ -957,7 +958,7 @@ export default function SidebarControls({
                         onChange={(e) => {
                           const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setPricing(prev => ({ ...prev, hPostCost: val }));
-                          try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, hPostCost: val })); } catch {}
+                          if (companyId) savePricing(companyId, { ...pricing, hPostCost: val });
                         }}
                         className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                         min="0"
@@ -971,7 +972,7 @@ export default function SidebarControls({
                         onChange={(e) => {
                           const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setPricing(prev => ({ ...prev, gatePostCost: val }));
-                          try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, gatePostCost: val })); } catch {}
+                          if (companyId) savePricing(companyId, { ...pricing, gatePostCost: val });
                         }}
                         className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                         min="0"
@@ -985,7 +986,7 @@ export default function SidebarControls({
                         onChange={(e) => {
                           const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setPricing(prev => ({ ...prev, decorativePostCost: val }));
-                          try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, decorativePostCost: val })); } catch {}
+                          if (companyId) savePricing(companyId, { ...pricing, decorativePostCost: val });
                         }}
                         className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                         min="0"
@@ -1006,7 +1007,7 @@ export default function SidebarControls({
                         onChange={(e) => {
                           const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setPricing(prev => ({ ...prev, singleGateCost: val }));
-                          try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, singleGateCost: val })); } catch {}
+                          if (companyId) savePricing(companyId, { ...pricing, singleGateCost: val });
                         }}
                         className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                         min="0"
@@ -1020,7 +1021,7 @@ export default function SidebarControls({
                         onChange={(e) => {
                           const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                           setPricing(prev => ({ ...prev, doubleGateCost: val }));
-                          try { localStorage.setItem('fencing_custom_pricing', JSON.stringify({ ...pricing, doubleGateCost: val })); } catch {}
+                          if (companyId) savePricing(companyId, { ...pricing, doubleGateCost: val });
                         }}
                         className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                         min="0"

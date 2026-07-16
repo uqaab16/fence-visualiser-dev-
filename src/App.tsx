@@ -11,6 +11,8 @@ import FenceCanvas from './components/FenceCanvas';
 import EstimateSummary from './components/EstimateSummary';
 import { CLIENT_CONFIG } from './clientConfig';
 import { useAuth } from './hooks/useAuth';
+import { supabase } from './lib/supabase';
+import { loadPricing, savePricing } from './lib/pricing';
 import {
   ShieldCheck,
   HelpCircle,
@@ -35,6 +37,24 @@ const DEFAULT_POSTS: Post[] = [
   { id: 'p2', x: 50, y: 79, type: 'corner' },
   { id: 'p3', x: 89, y: 73, type: 'gate' }
 ];
+
+// Corporate default estimator rates — used until the company's saved rates
+// load from Supabase, and seeded as the first row for new companies.
+const DEFAULT_PRICING: DynamicPricing = {
+  slatMaterialCost: 135,
+  postRailMaterialCost: 105,
+  bladeMaterialCost: 155,
+  slatLaborCost: 85,
+  postRailLaborCost: 75,
+  bladeLaborCost: 85,
+  standardPostCost: 0,
+  cornerPostCost: 65,
+  hPostCost: 95,
+  gatePostCost: 85,
+  decorativePostCost: 145,
+  singleGateCost: 350,
+  doubleGateCost: 750
+};
 
 const DEFAULT_SEGMENTS: Segment[] = [
   { 
@@ -75,28 +95,43 @@ export default function App() {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'material' | 'color' | 'posts' | 'gates' | 'settings'>('material');
 
-  // Pricing card settings state
-  const [pricing, setPricing] = useState<DynamicPricing>(() => {
-    try {
-      const stored = localStorage.getItem('fencing_custom_pricing');
-      if (stored) return JSON.parse(stored);
-    } catch {}
-    return {
-      slatMaterialCost: 135,
-      postRailMaterialCost: 105,
-      bladeMaterialCost: 155,
-      slatLaborCost: 85,
-      postRailLaborCost: 75,
-      bladeLaborCost: 85,
-      standardPostCost: 0,
-      cornerPostCost: 65,
-      hPostCost: 95,
-      gatePostCost: 85,
-      decorativePostCost: 145,
-      singleGateCost: 350,
-      doubleGateCost: 750
-    };
-  });
+  // Pricing card settings state — loaded per-company from Supabase after sign-in
+  const [pricing, setPricing] = useState<DynamicPricing>(DEFAULT_PRICING);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [pricingLoading, setPricingLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (!session?.user) {
+      setCompanyId(null);
+      setPricingLoading(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', session.user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !profile?.company_id) {
+        console.error('Failed to resolve company for current user', error);
+        setPricingLoading(false); // fall back to defaults rather than blocking the app
+        return;
+      }
+      setCompanyId(profile.company_id);
+      const saved = await loadPricing(profile.company_id);
+      if (cancelled) return;
+      if (saved) {
+        setPricing(saved);
+      } else {
+        // First sign-in for this company: seed their row with the defaults
+        await savePricing(profile.company_id, DEFAULT_PRICING);
+      }
+      setPricingLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [session?.user?.id]);
 
   // Interactive core state
   const [material, setMaterial] = useState<FenceMaterial>('slat_fencing');
@@ -257,6 +292,16 @@ export default function App() {
     );
   }
 
+  // Never render the studio with placeholder rates — wait for the company's
+  // saved pricing to load from Supabase first.
+  if (pricingLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#f3efe6]">
+        <div className="text-[#5f6266] text-sm font-mono animate-pulse">Loading rates...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-full max-w-full bg-[#f3efe6] text-[#1a1c1e] overflow-hidden font-sans select-none">
       
@@ -413,6 +458,7 @@ export default function App() {
               setIsLeftPanelOpen={setIsLeftPanelOpen}
               pricing={pricing}
               setPricing={setPricing}
+              companyId={companyId}
               slatProfile={slatProfile}
               setSlatProfile={setSlatProfile}
             />
