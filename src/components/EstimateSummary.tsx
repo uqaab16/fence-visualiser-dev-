@@ -118,42 +118,22 @@ export default function EstimateSummary({
     return items;
   };
 
-  const buildPdfData = (): QuotePdfData => {
-    const now = new Date();
-    const expiry = new Date(now.getTime() + CLIENT_CONFIG.quoteValidityDays * 24 * 60 * 60 * 1000);
-    const fmt = (d: Date) =>
-      d.toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return {
-      quoteNumber: `${CLIENT_CONFIG.proposalIdPrefix}-${Date.now().toString().slice(-5)}`,
-      dateStr: fmt(now),
-      expiryStr: fmt(expiry),
-      customer: { name: fullName, email, phone, address },
-      spec: {
-        material: FENCE_PRICES[material].label,
-        height,
-        color: color.name,
-        totalMeters: estimate.totalMeters,
-        gatesCount: gatesList.length
-      },
-      lineItems: buildPdfLineItems(),
-      total: estimate.totalPrice
-    };
-  };
-
-  const pdfFileName = () => {
-    const safeName = (fullName || 'Fence').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'Fence';
-    const dateFile = new Date().toLocaleDateString('en-AU').replace(/\//g, '-');
-    return `Quote-${safeName}-${dateFile}.pdf`;
-  };
-
+  // PDF generation for the estimate panel buttons.
+  // Both Download and Share require a saved quote — if none exists yet, open
+  // the customer form so the user submits first. This ensures a PDF is never
+  // generated without real customer details attached.
   const handleDownloadPdf = async () => {
+    if (sentInquiries.length === 0) {
+      setShowQuoteModal(true);
+      return;
+    }
+    const inq = sentInquiries[0];
     setIsGeneratingPdf(true);
     setPdfStatus('');
     try {
-      // Lazy-load jsPDF + the builder only when actually generating a PDF.
       const { buildQuotePdf } = await import('../pdfQuote');
-      const doc = await buildQuotePdf(buildPdfData());
-      doc.save(pdfFileName());
+      const doc = await buildQuotePdf(buildPdfDataFromInquiry(inq));
+      doc.save(recordPdfFileName(inq));
       setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
     } catch (err) {
       console.error('PDF generation failed', err);
@@ -164,13 +144,17 @@ export default function EstimateSummary({
   };
 
   const handleSharePdf = async () => {
+    if (sentInquiries.length === 0) {
+      setShowQuoteModal(true);
+      return;
+    }
+    const inq = sentInquiries[0];
     setIsGeneratingPdf(true);
     setPdfStatus('');
     try {
-      // Lazy-load jsPDF + the builder only when actually generating a PDF.
       const { buildQuotePdf } = await import('../pdfQuote');
-      const doc = await buildQuotePdf(buildPdfData());
-      const fileName = pdfFileName();
+      const doc = await buildQuotePdf(buildPdfDataFromInquiry(inq));
+      const fileName = recordPdfFileName(inq);
       const blob = doc.output('blob');
       const file = new File([blob], fileName, { type: 'application/pdf' });
 
@@ -182,14 +166,12 @@ export default function EstimateSummary({
             text: `Fence quote from ${CLIENT_CONFIG.companyName}`
           });
         } catch (shareErr: any) {
-          // User dismissing the native share sheet is not an error we surface.
           if (shareErr && shareErr.name !== 'AbortError') {
             doc.save(fileName);
             setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
           }
         }
       } else {
-        // Web Share (with files) unsupported — fall back to a plain download.
         doc.save(fileName);
         setPdfStatus('PDF downloaded — you can now attach it in WhatsApp or email.');
       }
