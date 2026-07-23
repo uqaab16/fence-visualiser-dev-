@@ -534,6 +534,8 @@ export default function App() {
               propertyFrontage={propertyFrontage}
               setIsRightPanelOpen={setIsRightPanelOpen}
               customPricing={pricing}
+              companyId={companyId}
+              userId={session?.user?.id ?? null}
             />
           </div>
         )}

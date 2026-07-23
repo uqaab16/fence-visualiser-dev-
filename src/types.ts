@@ -66,6 +66,7 @@ export interface FencingPlan {
 
 export interface QuoteInquiry {
   id: string;
+  quoteNumber: string;
   fullName: string;
   email: string;
   phone: string;
@@ -78,7 +79,7 @@ export interface QuoteInquiry {
   costBreakdown?: { description: string; amount: number }[];
   message: string;
   status: 'pending' | 'reviewed' | 'accepted';
-  createdAt: string;
+  createdAt: string; // ISO 8601 string — format at render time, do not store pre-formatted
   planSummary: {
     material: string;
     height: number;

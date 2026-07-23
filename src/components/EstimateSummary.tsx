@@ -8,6 +8,7 @@ import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, QuoteInquiry, D
 import { estimateFencingCosts, FENCE_PRICES } from '../utils';
 import { CLIENT_CONFIG } from '../clientConfig';
 import type { QuotePdfData } from '../pdfQuote';
+import { loadQuotes, saveQuote, deleteAllQuotes } from '../lib/quotes';
 import {
   Building2,
   MapPin,
@@ -37,6 +38,8 @@ interface EstimateSummaryProps {
   propertyFrontage: number;
   setIsRightPanelOpen?: (val: boolean) => void;
   customPricing?: DynamicPricing;
+  companyId: string | null;
+  userId: string | null;
 }
 
 export default function EstimateSummary({
@@ -48,7 +51,9 @@ export default function EstimateSummary({
   segments,
   propertyFrontage,
   setIsRightPanelOpen,
-  customPricing
+  customPricing,
+  companyId,
+  userId
 }: EstimateSummaryProps) {
   // Option: Include installation
   const [includeInstall, setIncludeInstall] = useState(true);
@@ -69,17 +74,14 @@ export default function EstimateSummary({
   const [showCRMInbox, setShowCRMInbox] = useState(false);
   const [selectedPastInquiry, setSelectedPastInquiry] = useState<QuoteInquiry | null>(null);
 
-  // Load inquiries on mount
+  // Stable quote number captured at save time, used on the success screen.
+  const [savedQuoteNumber, setSavedQuoteNumber] = useState('');
+
+  // Load inquiries from Supabase when companyId is available.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('fencing_pro_quotes');
-      if (stored) {
-        setSentInquiries(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.warn('Unable to load quotes from localStorage', e);
-    }
-  }, []);
+    if (!companyId) return;
+    loadQuotes(companyId).then(setSentInquiries);
+  }, [companyId]);
 
   // Billing is bound directly to the locked map measurement (propertyFrontage), never to the
   // on-canvas post/segment geometry. The canvas is a visual preview only — how a fence line is
@@ -208,16 +210,12 @@ export default function EstimateSummary({
   const [recordPdfStatus, setRecordPdfStatus] = useState('');
 
   const buildPdfDataFromInquiry = (inq: QuoteInquiry): QuotePdfData => {
-    // The record id is `inquiry_<timestamp>`; recover the creation timestamp
-    // from it so the quote/expiry dates reflect when it was actually saved.
-    const digits = inq.id.replace(/[^0-9]/g, '');
-    const baseTs = digits ? parseInt(digits, 10) : Date.now();
-    const baseDate = new Date(baseTs);
+    const baseDate = new Date(inq.createdAt);
     const expiry = new Date(baseDate.getTime() + CLIENT_CONFIG.quoteValidityDays * 24 * 60 * 60 * 1000);
     const fmt = (d: Date) =>
       d.toLocaleDateString('en-AU', { day: '2-digit', month: '2-digit', year: 'numeric' });
     return {
-      quoteNumber: `${CLIENT_CONFIG.proposalIdPrefix}-${(digits || `${baseTs}`).slice(-5)}`,
+      quoteNumber: inq.quoteNumber,
       dateStr: fmt(baseDate),
       expiryStr: fmt(expiry),
       customer: { name: inq.fullName, email: inq.email, phone: inq.phone, address: inq.address },
@@ -242,9 +240,7 @@ export default function EstimateSummary({
 
   const recordPdfFileName = (inq: QuoteInquiry) => {
     const safeName = (inq.fullName || 'Fence').replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '') || 'Fence';
-    const digits = inq.id.replace(/[^0-9]/g, '');
-    const baseTs = digits ? parseInt(digits, 10) : Date.now();
-    const dateFile = new Date(baseTs).toLocaleDateString('en-AU').replace(/\//g, '-');
+    const dateFile = new Date(inq.createdAt).toLocaleDateString('en-AU').replace(/\//g, '-');
     return `Quote-${safeName}-${dateFile}.pdf`;
   };
 
@@ -304,14 +300,15 @@ export default function EstimateSummary({
   };
 
   // Submit quote to CRM handler
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email || !phone || !address) return;
 
     setIsSubmitting(true);
 
     const newInquiry: QuoteInquiry = {
-      id: `inquiry_${Date.now()}`,
+      id: '',
+      quoteNumber: '',
       fullName,
       email,
       phone,
@@ -327,13 +324,7 @@ export default function EstimateSummary({
       })),
       message: remarks,
       status: 'pending',
-      createdAt: new Date().toLocaleDateString('en-AU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
+      createdAt: new Date().toISOString(),
       planSummary: {
         material: FENCE_PRICES[material].label,
         height,
@@ -343,27 +334,30 @@ export default function EstimateSummary({
       }
     };
 
-    // Simulate server side post latency
-    setTimeout(() => {
-      const updated = [newInquiry, ...sentInquiries];
-      setSentInquiries(updated);
-      try {
-        localStorage.setItem('fencing_pro_quotes', JSON.stringify(updated));
-      } catch (err) {
-        console.error(err);
+    if (companyId && userId) {
+      const result = await saveQuote(companyId, userId, newInquiry);
+      if (result) {
+        newInquiry.id = result.id;
+        newInquiry.quoteNumber = result.quoteNumber;
+      } else {
+        // Supabase save failed — generate a local fallback so the success screen is never blank
+        newInquiry.id = `inquiry_${Date.now()}`;
+        newInquiry.quoteNumber = `${CLIENT_CONFIG.proposalIdPrefix}-${Date.now().toString().slice(-5)}`;
       }
-      setIsSubmitting(false);
-      setIsSubmitted(true);
-      
-      // Clear inputs
-      // Note: We clear the input variables so they are empty for the next form.
-      // But we preserve the values of fullName and address for the success screen rendering right below.
-    }, 1200);
+    } else {
+      newInquiry.id = `inquiry_${Date.now()}`;
+      newInquiry.quoteNumber = `${CLIENT_CONFIG.proposalIdPrefix}-${Date.now().toString().slice(-5)}`;
+    }
+
+    setSavedQuoteNumber(newInquiry.quoteNumber);
+    setSentInquiries([newInquiry, ...sentInquiries]);
+    setIsSubmitting(false);
+    setIsSubmitted(true);
   };
 
-  const clearCRMInboxes = () => {
+  const clearCRMInboxes = async () => {
     if (window.confirm('Are you sure you want to clear historic inquiries?')) {
-      localStorage.removeItem('fencing_pro_quotes');
+      if (companyId) await deleteAllQuotes(companyId);
       setSentInquiries([]);
     }
   };
@@ -558,7 +552,7 @@ export default function EstimateSummary({
                   </div>
                   <div className="text-[9px] text-[#5f6266] flex items-center justify-between mt-0.5 font-sans">
                     <span>{inq.planSummary?.material || "Fence Block"} ({inq.fenceLength}m)</span>
-                    <span className="text-[#5f6266] font-mono">{inq.createdAt}</span>
+                    <span className="text-[#5f6266] font-mono">{new Date(inq.createdAt).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                   <p className="text-[9.5px] leading-relaxed mt-1 italic font-light p-1.5 rounded border text-[#3c4045] bg-white border-[#d9d3c5]/80 line-clamp-1">
                     Address: {inq.address}
@@ -641,7 +635,7 @@ export default function EstimateSummary({
                 )}
                
                 <div className="text-[10px] text-[#5f6266] font-mono text-right mt-1">
-                  Submitted On: {selectedPastInquiry.createdAt}
+                  Submitted On: {new Date(selectedPastInquiry.createdAt).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
 
@@ -846,7 +840,7 @@ export default function EstimateSummary({
                     <span className="text-[9.5px] text-[#5f6266] font-extrabold uppercase block mb-3 font-mono">{CLIENT_CONFIG.companyLegalShort}</span>
                     <div className="grid grid-cols-2 gap-y-1.5 text-[11px] text-[#3c4045]">
                       <span>Proposal ID:</span>
-                      <span className="font-mono text-[#ff6a1f] text-right font-bold">#{CLIENT_CONFIG.proposalIdPrefix}-{Date.now().toString().slice(-5)}</span>
+                      <span className="font-mono text-[#ff6a1f] text-right font-bold">#{savedQuoteNumber}</span>
 
                       <span>Project Estimate:</span>
                       <span className="font-mono text-[#ff6a1f] text-right font-bold font-sans">${estimate.totalPrice.toLocaleString()}</span>
