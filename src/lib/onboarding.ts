@@ -57,32 +57,26 @@ export async function ensureUserOnboarded(user: User): Promise<string | null> {
       return existing.company_id;
     }
 
-    // 2a. First login — create the company.
-    const { data: company, error: companyError } = await supabase
-      .from('companies')
-      .insert({ name: companyNameFromEmail(user.email) })
-      .select('id')
-      .single();
+    // 2. First login — create company + profile atomically via SECURITY DEFINER
+    //    RPC. Runs as the function owner (postgres superuser), bypassing the RLS
+    //    RETURNING-visibility deadlock that occurs when no profile row exists yet.
+    //    The function is idempotent: if a profile already exists it returns the
+    //    existing company_id without writing anything new.
+    const { data: companyId, error: rpcError } = await supabase.rpc(
+      'create_company_and_profile',
+      { company_name: companyNameFromEmail(user.email) }
+    );
 
-    if (companyError || !company?.id) {
-      console.error('Onboarding: failed to create company', companyError);
+    if (rpcError || !companyId) {
+      console.error('Onboarding: RPC create_company_and_profile failed', rpcError);
       return null;
     }
 
-    // 2b. Link the user to the company as an admin.
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({ id: user.id, company_id: company.id, role: 'admin' });
+    // 3. Seed the company's default pricing row (separate step so the pricing
+    //    logic stays in pricing.ts and is not duplicated inside the SQL function).
+    await savePricing(companyId, DEFAULT_PRICING);
 
-    if (profileError) {
-      console.error('Onboarding: failed to create profile', profileError);
-      return null;
-    }
-
-    // 2c. Seed the company's default pricing row.
-    await savePricing(company.id, DEFAULT_PRICING);
-
-    return company.id;
+    return companyId as string;
   } catch (err) {
     console.error('Onboarding: unexpected error', err);
     return null;
