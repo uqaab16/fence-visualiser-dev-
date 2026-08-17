@@ -17,6 +17,9 @@
 --
 -- The function is idempotent: if a profile already exists it returns the
 -- existing company_id without inserting anything.
+--
+-- Note: profiles.email is NOT NULL — we read the value from auth.users inside
+-- the function (SECURITY DEFINER can access auth schema) and write it explicitly.
 
 CREATE OR REPLACE FUNCTION public.create_company_and_profile(company_name text)
 RETURNS uuid
@@ -26,6 +29,7 @@ SET search_path = public
 AS $$
 DECLARE
   v_user_id               uuid := auth.uid();
+  v_email                 text;
   v_company_id            uuid;
   v_existing_company_id   uuid;
 BEGIN
@@ -42,6 +46,10 @@ BEGIN
     RETURN v_existing_company_id;
   END IF;
 
+  -- Read the user's email from auth.users (accessible because SECURITY DEFINER
+  -- runs as postgres superuser; auth schema is otherwise off-limits to anon/authenticated).
+  SELECT email INTO v_email FROM auth.users WHERE id = v_user_id;
+
   -- Create the company. RETURNING works here because SECURITY DEFINER bypasses
   -- the USING visibility check on companies_tenant_isolation.
   INSERT INTO companies (name)
@@ -49,8 +57,9 @@ BEGIN
   RETURNING id INTO v_company_id;
 
   -- Link the user to the new company as admin.
-  INSERT INTO profiles (id, company_id, role)
-  VALUES (v_user_id, v_company_id, 'admin');
+  -- email is NOT NULL on profiles, so we populate it from auth.users.
+  INSERT INTO profiles (id, company_id, email, role)
+  VALUES (v_user_id, v_company_id, v_email, 'admin');
 
   RETURN v_company_id;
 END;
