@@ -98,6 +98,13 @@ export default function SidebarControls({
       subtitle: 'Vertical blade pickets',
       desc: 'Architectural vertical blade panels (65×16mm blades, 85mm pitch) on 40×40mm backing rails. 2364mm panel span. Premium modern look with a semi-open profile.',
       visual: 'repeating-linear-gradient(90deg, #3B3F42, #3B3F42 5px, transparent 5px, transparent 14px)'
+    },
+    {
+      id: 'post_and_rail' as FenceMaterial,
+      title: 'Post & Rail Fence',
+      subtitle: 'Timber posts + chainwire',
+      desc: 'Heavy-duty 80mm structural timber posts with black chainwire infill. Choose 2 or 3 rail layout. Classic rural and semi-rural boundary fencing.',
+      visual: 'repeating-linear-gradient(180deg, transparent, transparent 18px, #C19A6B 18px, #C19A6B 22px)'
     }
   ];
 
