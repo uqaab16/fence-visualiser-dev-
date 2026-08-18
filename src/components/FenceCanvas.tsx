@@ -1772,21 +1772,21 @@ export default function FenceCanvas({
                     const pw = 1.15 * scale;
                     const capH = 0.22 * scale;
                     // Grain lines at irregular x-offsets across post width
-                    const grainOffsets = [0.13, 0.32, 0.57, 0.76];
-                    // Knot positions (fraction of post height from top)
-                    const knotYFracs = [0.28, 0.62];
+                    const grainOffsets = [0.14, 0.33, 0.56, 0.78];
+                    // Knot positions (fraction of post height from ground up)
+                    const knotYFracs = [0.30, 0.65];
                     return (
                       <g key={key} className="pointer-events-none" filter="url(#pr-shadow)">
                         {/* Ground shadow ellipse */}
-                        <ellipse cx={px} cy={py + 0.22} rx={pw * 0.85} ry="0.16" fill="#000" opacity="0.28" />
+                        <ellipse cx={px} cy={py + 0.22} rx={pw * 0.85} ry="0.18" fill="#000" opacity="0.38" />
                         {/* Post body with horizontal gradient (lit left → dark right) */}
                         <path
                           d={`M ${px - pw/2} ${py + 0.3} L ${px - pw/2} ${py - vh} L ${px + pw/2} ${py - vh} L ${px + pw/2} ${py + 0.3} Z`}
                           fill={postGradId}
                           stroke={stainDark}
-                          strokeWidth="0.05"
+                          strokeWidth="0.08"
                         />
-                        {/* Vertical grain lines */}
+                        {/* Vertical grain lines — wider strokes so they read at typical canvas sizes */}
                         {grainOffsets.map((frac, gi) => {
                           const gx = px - pw/2 + frac * pw;
                           return (
@@ -1794,20 +1794,20 @@ export default function FenceCanvas({
                               x1={gx} y1={py + 0.3}
                               x2={gx} y2={py - vh}
                               stroke={stainDark}
-                              strokeWidth="0.07"
-                              strokeOpacity={0.10 + gi * 0.02}
+                              strokeWidth="0.18"
+                              strokeOpacity={0.22 + gi * 0.04}
                             />
                           );
                         })}
-                        {/* Knot ellipses */}
+                        {/* Knot ellipses — larger and darker so they read at normal zoom */}
                         {knotYFracs.map((frac, ki) => (
                           <ellipse key={ki}
-                            cx={px - pw * 0.08 + ki * pw * 0.18}
+                            cx={px - pw * 0.08 + ki * pw * 0.22}
                             cy={py - vh * frac}
-                            rx={0.19} ry={0.11}
-                            transform={`rotate(${ki === 0 ? -15 : 12}, ${px - pw * 0.08 + ki * pw * 0.18}, ${py - vh * frac})`}
+                            rx={pw * 0.28} ry={pw * 0.16}
+                            transform={`rotate(${ki === 0 ? -12 : 10}, ${px - pw * 0.08 + ki * pw * 0.22}, ${py - vh * frac})`}
                             fill={stainDark}
-                            fillOpacity="0.20"
+                            fillOpacity="0.42"
                           />
                         ))}
                         {/* Chamfered pyramid cap — 5-point shape: flat peak, angled shoulders */}
@@ -1866,8 +1866,8 @@ export default function FenceCanvas({
                               x1={ax} y1={ay - thA * 0.22}
                               x2={bx} y2={by - thB * 0.22}
                               stroke={stainDark}
-                              strokeWidth="0.06"
-                              strokeOpacity="0.12"
+                              strokeWidth="0.14"
+                              strokeOpacity="0.32"
                             />
                           </g>
                         );
@@ -2654,10 +2654,9 @@ export default function FenceCanvas({
                 let capHeight = 0.22 * scale;
 
                 if (material === 'post_and_rail') {
-                  // Stout representation representing the sturdy 80mm post request
-                  postWidth = 1.1 * scale; 
-                  postColorHex = '#C19A6B'; // Raw natural wood finish
-                  capHeight = 0.04 * scale;
+                  postWidth = 1.1 * scale;
+                  postColorHex = color.hex; // use selected stain colour
+                  capHeight = 0.22 * scale;
                 } else if (post.type === 'corner') {
                   postWidth = 0.85 * scale; // Heavier 80-100mm corner post
                 } else if (post.type === 'H-post') {
@@ -2674,38 +2673,55 @@ export default function FenceCanvas({
                 const x = post.x;
                 const y = post.y;
 
+                // For post_and_rail, compute stain-derived values matching renderTimberPost
+                const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
+                const prPostGrad = material === 'post_and_rail' ? (prIsRed ? 'url(#pr-post-red)' : 'url(#pr-post-tan)') : null;
+                const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
+                const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
+                const prGrainOffsets = [0.14, 0.33, 0.56, 0.78];
+                const prKnotYFracs = [0.30, 0.65];
+
                 return (
-                  <g key={post.id} className="pointer-events-none">
-                    
+                  <g key={post.id} className="pointer-events-none" filter={material === 'post_and_rail' ? 'url(#pr-shadow)' : undefined}>
+
                     {/* Post ground shadow anchor */}
-                    <ellipse cx={x} cy={y + 0.2} rx={postWidth * 0.9} ry="0.18" fill="#000" opacity="0.32" />
+                    <ellipse cx={x} cy={y + 0.2} rx={postWidth * 0.9} ry="0.18" fill="#000" opacity={material === 'post_and_rail' ? 0.38 : 0.32} />
 
                     {/* Main vertical post column */}
                     <path
-                      d={`
-                        M ${x - postWidth/2} ${y + 0.3} 
-                        L ${x - postWidth/2} ${y - vh} 
-                        L ${x + postWidth/2} ${y - vh} 
-                        L ${x + postWidth/2} ${y + 0.3} 
-                        Z
-                      `}
-                      fill={postColorHex}
-                      stroke="#000000"
-                      strokeWidth={strokeWidth}
+                      d={`M ${x - postWidth/2} ${y + 0.3} L ${x - postWidth/2} ${y - vh} L ${x + postWidth/2} ${y - vh} L ${x + postWidth/2} ${y + 0.3} Z`}
+                      fill={prPostGrad ?? postColorHex}
+                      stroke={material === 'post_and_rail' ? prStainDark : '#000000'}
+                      strokeWidth={material === 'post_and_rail' ? 0.08 : strokeWidth}
                     />
 
-                    {/* Accent wood texture for post and rail posts */}
-                    {material === 'post_and_rail' && (
-                      <path
-                        d={`M ${x} ${y + 0.3} L ${x} ${y - vh}`}
-                        fill="none"
-                        stroke="url(#timber-grain)"
-                        strokeWidth={postWidth * 0.8}
-                        opacity="0.35"
-                      />
-                    )}
+                    {/* Timber grain lines — post_and_rail only */}
+                    {material === 'post_and_rail' && prGrainOffsets.map((frac, gi) => {
+                      const gx = x - postWidth/2 + frac * postWidth;
+                      return (
+                        <line key={gi}
+                          x1={gx} y1={y + 0.3}
+                          x2={gx} y2={y - vh}
+                          stroke={prStainDark}
+                          strokeWidth="0.18"
+                          strokeOpacity={0.22 + gi * 0.04}
+                        />
+                      );
+                    })}
 
-                    {/* High gloss visual depth highlight */}
+                    {/* Knot ellipses — post_and_rail only */}
+                    {material === 'post_and_rail' && prKnotYFracs.map((frac, ki) => (
+                      <ellipse key={ki}
+                        cx={x - postWidth * 0.08 + ki * postWidth * 0.22}
+                        cy={y - vh * frac}
+                        rx={postWidth * 0.28} ry={postWidth * 0.16}
+                        transform={`rotate(${ki === 0 ? -12 : 10}, ${x - postWidth * 0.08 + ki * postWidth * 0.22}, ${y - vh * frac})`}
+                        fill={prStainDark}
+                        fillOpacity="0.42"
+                      />
+                    ))}
+
+                    {/* High gloss visual depth highlight — non-timber materials only */}
                     {material !== 'post_and_rail' && (
                       <line
                         x1={x - postWidth/3}
@@ -2718,29 +2734,17 @@ export default function FenceCanvas({
                       />
                     )}
 
-                    {/* Highlight capping ornament / metal bracket on top */}
+                    {/* Cap — chamfered pyramid for post_and_rail, flat bracket for others */}
                     {material === 'post_and_rail' ? (
-                      // Authentic raw beveled flat top wood finish
                       <path
-                        d={`
-                          M ${x - postWidth/2 - 0.04} ${y - vh}
-                          L ${x} ${y - vh - 0.15 * scale}
-                          L ${x + postWidth/2 + 0.04} ${y - vh}
-                          Z
-                        `}
-                        fill="#7A5A35"
-                        stroke="#4a3116"
-                        strokeWidth="0.04"
+                        d={`M ${x - postWidth/2 - 0.06} ${y - vh} L ${x - postWidth * 0.12} ${y - vh - capHeight * 0.65} L ${x} ${y - vh - capHeight} L ${x + postWidth * 0.12} ${y - vh - capHeight * 0.65} L ${x + postWidth/2 + 0.06} ${y - vh} Z`}
+                        fill={prStainMid}
+                        stroke={prStainDark}
+                        strokeWidth="0.05"
                       />
                     ) : (
                       <path
-                        d={`
-                          M ${x - postWidth/2 - 0.06} ${y - vh}
-                          L ${x - postWidth/2 - 0.06} ${y - vh - capHeight}
-                          L ${x + postWidth/2 + 0.06} ${y - vh - capHeight}
-                          L ${x + postWidth/2 + 0.06} ${y - vh}
-                          Z
-                        `}
+                        d={`M ${x - postWidth/2 - 0.06} ${y - vh} L ${x - postWidth/2 - 0.06} ${y - vh - capHeight} L ${x + postWidth/2 + 0.06} ${y - vh - capHeight} L ${x + postWidth/2 + 0.06} ${y - vh} Z`}
                         fill={postColorHex}
                         stroke="#000"
                         strokeWidth="0.04"
