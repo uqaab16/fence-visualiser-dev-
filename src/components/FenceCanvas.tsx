@@ -1522,7 +1522,12 @@ export default function FenceCanvas({
                 // Structural line post count for this segment — pre-allocated so the total across
                 // all segments exactly matches the billed intermediatePostCount in estimateFencingCosts
                 const intermediateCount = intermediatePostCounts.get(seg.id) || 0;
-                const spanCount = intermediateCount + 1;
+
+                // Visual-only span count: scales post/panel density to the drawn pixel path length
+                // rather than the real-world metre count, preventing cramping when a short path
+                // represents a long fence on an uploaded photo.
+                const PIXELS_PER_VISUAL_SPAN = 8; // % units (posts proportional to canvas %)
+                const visualSpanCount = Math.max(1, Math.round(segmentLength / PIXELS_PER_VISUAL_SPAN));
 
                 // Perspective scaling factors for the start and end posts
                 const scaleStart = getPerspectiveScale(pStart.y);
@@ -1639,9 +1644,9 @@ export default function FenceCanvas({
                       })()}
 
                       {/* Mandatory structural line posts (2.4m max span) — billed in the quote, not decorative */}
-                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                      {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
                         const j = jIndex + 1;
-                        const t = j / spanCount;
+                        const t = j / visualSpanCount;
                         const px = pStart.x + t * segmentWidth;
                         const py = pStart.y + t * segmentHeight;
 
@@ -1836,9 +1841,9 @@ export default function FenceCanvas({
                       })}
 
                       {/* Mandatory structural line posts (2.4m max span) — billed in the quote, not decorative */}
-                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                      {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
                         const j = jIndex + 1;
-                        const t = j / spanCount;
+                        const t = j / visualSpanCount;
                         const px = pStart.x + t * segmentWidth;
                         const py = pStart.y + t * segmentHeight;
 
@@ -2020,9 +2025,9 @@ export default function FenceCanvas({
                       {Array.from({ length: numBlades }).map((_, k) => renderBlade(k))}
 
                       {/* Mandatory structural line posts (2.364m max span) — billed in the quote, not decorative */}
-                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                      {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
                         const j = jIndex + 1;
-                        const t = j / spanCount;
+                        const t = j / visualSpanCount;
                         const px = pStart.x + t * segmentWidth;
                         const py = pStart.y + t * segmentHeight;
 
@@ -2106,9 +2111,9 @@ export default function FenceCanvas({
                   const panelPath = (tA: number, tB: number) =>
                     `M ${xAt(tA)} ${yAt(tA)} L ${xAt(tB)} ${yAt(tB)} L ${xAt(tB)} ${yAt(tB) - vhAt(tB)} L ${xAt(tA)} ${yAt(tA) - vhAt(tA)} Z`;
 
-                  // 15 ribs per 2400mm structural span × spanCount spans
+                  // 15 ribs per 2400mm structural span × visualSpanCount spans (pixel-scaled, not metre-derived)
                   const ribsPerSpan = 15;
-                  const totalRibs = ribsPerSpan * spanCount;
+                  const totalRibs = ribsPerSpan * visualSpanCount;
                   const ribStrokeW = Math.max(0.35, segmentLength / 2800);
 
                   return (
@@ -2151,9 +2156,9 @@ export default function FenceCanvas({
                       })}
 
                       {/* 3. Panel join seam lines at 2400mm intervals */}
-                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                      {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
                         const j = jIndex + 1;
-                        const t = j / spanCount;
+                        const t = j / visualSpanCount;
                         if (seg.hasGate) {
                           const { startPct, endPct } = getGateSpanPcts(seg, segmentLength);
                           if (t >= startPct && t <= endPct) return null;
@@ -2200,9 +2205,9 @@ export default function FenceCanvas({
                       })}
 
                       {/* 6. Structural intermediate posts (one per 2400mm span) */}
-                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                      {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
                         const j = jIndex + 1;
-                        const t = j / spanCount;
+                        const t = j / visualSpanCount;
                         const px = pStart.x + t * segmentWidth;
                         const py = pStart.y + t * segmentHeight;
 
