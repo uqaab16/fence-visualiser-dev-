@@ -60,6 +60,7 @@ interface FenceCanvasProps {
   setIsLeftPanelOpen?: (val: boolean) => void;
   activeTab: string;
   slatProfile?: '65' | '90';
+  solidPanelProfile?: 'sawtooth' | 'trimline';
 }
 
 // Darken (factor < 1) or lighten (factor > 1) a #rrggbb hex color, used for procedural shading
@@ -101,7 +102,8 @@ export default function FenceCanvas({
   setIsFullScreen,
   setIsLeftPanelOpen,
   activeTab,
-  slatProfile = '65'
+  slatProfile = '65',
+  solidPanelProfile = 'trimline'
 }: FenceCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomBoxRef = useRef<HTMLDivElement>(null);
@@ -2054,6 +2056,186 @@ export default function FenceCanvas({
                       })}
 
                       {/* Selection Aura */}
+                      {isSelected && (
+                        <polygon
+                          points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`}
+                          fill="rgba(20, 184, 166, 0.06)"
+                          stroke="#14b8a6"
+                          strokeWidth="0.32"
+                          strokeDasharray="1 1"
+                        />
+                      )}
+                    </g>
+                  );
+                } else if (material === 'colorbond_solid_panel') {
+                  // ─── COLORBOND SOLID PANEL FENCING ────────────────────────────────────────
+                  // 2400mm standard panel kit (Sawtooth or Trimline profile).
+                  // ~15 vertical ribs per 2400mm span (150mm rib pitch) rendered as subtle
+                  // shadow/highlight lines on top of a solid flat panel fill.
+                  // Structural posts placed every 2400mm; seam lines mark panel joins.
+
+                  const isSawtooth = solidPanelProfile === 'sawtooth';
+
+                  // Thin cap rails at top and bottom (~25mm visible steel trim channel)
+                  const railMm = 25;
+                  const topCapFrac = (height - railMm) / height;
+                  const botCapFrac = railMm / height;
+
+                  // Tonal variants
+                  const panelFill = color.hex;
+                  const ribShadow = shadeHex(color.hex, 0.76);
+                  const ribLight = shadeHex(color.hex, 1.14);
+                  const capRailFill = shadeHex(color.hex, 0.80);
+                  const seamColor = shadeHex(color.hex, 0.60);
+
+                  // Perspective-correct position helpers along segment
+                  const xAt = (t: number) => pStart.x + t * segmentWidth;
+                  const yAt = (t: number) => pStart.y + t * segmentHeight;
+                  const vhAt = (t: number) => vhStart + t * (vhEnd - vhStart);
+
+                  // Gate opening span fractions
+                  const gatePcts = seg.hasGate ? getGateSpanPcts(seg, segmentLength) : null;
+                  const gS = gatePcts?.startPct ?? 0;
+                  const gE = gatePcts?.endPct ?? 0;
+
+                  // Panel fill spans: one quad normally, two when a gate cuts the panel
+                  const fillSpans: [number, number][] = seg.hasGate
+                    ? ([[0, gS], [gE, 1.0]] as [number, number][]).filter(([a, b]) => b > a)
+                    : [[0, 1.0]];
+
+                  const panelPath = (tA: number, tB: number) =>
+                    `M ${xAt(tA)} ${yAt(tA)} L ${xAt(tB)} ${yAt(tB)} L ${xAt(tB)} ${yAt(tB) - vhAt(tB)} L ${xAt(tA)} ${yAt(tA) - vhAt(tA)} Z`;
+
+                  // 15 ribs per 2400mm structural span × spanCount spans
+                  const ribsPerSpan = 15;
+                  const totalRibs = ribsPerSpan * spanCount;
+                  const ribStrokeW = Math.max(0.35, segmentLength / 2800);
+
+                  return (
+                    <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
+
+                      {/* 1. Base panel fill — solid quadrilateral(s) */}
+                      {fillSpans.map(([tA, tB], i) => (
+                        <path key={`cpfill-${i}`} d={panelPath(tA, tB)} fill={panelFill} />
+                      ))}
+
+                      {/* 2. Vertical rib / profile texture */}
+                      {Array.from({ length: totalRibs + 1 }).map((_, ri) => {
+                        const t = ri / totalRibs;
+                        if (seg.hasGate && t > gS && t < gE) return null;
+                        const bx = xAt(t);
+                        const by = yAt(t);
+                        const topY = by - vhAt(t);
+                        if (isSawtooth) {
+                          // Alternating lit/shadow strips simulate the V-groove zigzag cross-section
+                          const sw = Math.max(0.5, (segmentLength / totalRibs) * 0.45);
+                          return (
+                            <line key={`cprib-${ri}`}
+                              x1={bx} y1={topY} x2={bx} y2={by}
+                              stroke={ri % 2 === 0 ? ribLight : ribShadow}
+                              strokeWidth={sw}
+                              strokeOpacity="0.72"
+                            />
+                          );
+                        } else {
+                          // Trimline: faint shadow groove at each rib position
+                          return (
+                            <line key={`cprib-${ri}`}
+                              x1={bx} y1={topY} x2={bx} y2={by}
+                              stroke={ribShadow}
+                              strokeWidth={ribStrokeW}
+                              strokeOpacity="0.48"
+                            />
+                          );
+                        }
+                      })}
+
+                      {/* 3. Panel join seam lines at 2400mm intervals */}
+                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                        const j = jIndex + 1;
+                        const t = j / spanCount;
+                        if (seg.hasGate) {
+                          const { startPct, endPct } = getGateSpanPcts(seg, segmentLength);
+                          if (t >= startPct && t <= endPct) return null;
+                        }
+                        return (
+                          <line key={`cpseam-${j}`}
+                            x1={xAt(t)} y1={yAt(t)}
+                            x2={xAt(t)} y2={yAt(t) - vhAt(t)}
+                            stroke={seamColor}
+                            strokeWidth={Math.max(0.7, segmentLength / 1400)}
+                            strokeOpacity="0.58"
+                          />
+                        );
+                      })}
+
+                      {/* 4. Bottom cap rail */}
+                      {fillSpans.map(([tA, tB], i) => {
+                        const oA = vhAt(tA) * botCapFrac;
+                        const oB = vhAt(tB) * botCapFrac;
+                        return (
+                          <path key={`cpbotrail-${i}`}
+                            d={`M ${xAt(tA)} ${yAt(tA)} L ${xAt(tB)} ${yAt(tB)} L ${xAt(tB)} ${yAt(tB) - oB} L ${xAt(tA)} ${yAt(tA) - oA} Z`}
+                            fill={capRailFill}
+                            stroke="#00000030"
+                            strokeWidth="0.04"
+                          />
+                        );
+                      })}
+
+                      {/* 5. Top cap rail */}
+                      {fillSpans.map(([tA, tB], i) => {
+                        const oA = vhAt(tA) * topCapFrac;
+                        const oB = vhAt(tB) * topCapFrac;
+                        const thA = vhAt(tA) * (railMm / height);
+                        const thB = vhAt(tB) * (railMm / height);
+                        return (
+                          <path key={`cptoprail-${i}`}
+                            d={`M ${xAt(tA)} ${yAt(tA) - oA} L ${xAt(tB)} ${yAt(tB) - oB} L ${xAt(tB)} ${yAt(tB) - oB - thB} L ${xAt(tA)} ${yAt(tA) - oA - thA} Z`}
+                            fill={capRailFill}
+                            stroke="#00000030"
+                            strokeWidth="0.04"
+                          />
+                        );
+                      })}
+
+                      {/* 6. Structural intermediate posts (one per 2400mm span) */}
+                      {spanCount > 1 && Array.from({ length: spanCount - 1 }).map((_, jIndex) => {
+                        const j = jIndex + 1;
+                        const t = j / spanCount;
+                        const px = pStart.x + t * segmentWidth;
+                        const py = pStart.y + t * segmentHeight;
+
+                        if (seg.hasGate) {
+                          const { startPct, endPct } = getGateSpanPcts(seg, segmentLength);
+                          if (t >= startPct && t <= endPct) return null;
+                        }
+
+                        const scale = getPerspectiveScale(py);
+                        const vh = getVisualFenceHeight() * scale;
+                        const postWidth = 0.55 * scale;
+                        const capHeight = 0.24 * scale;
+
+                        return (
+                          <g key={`cppost-${j}`} className="pointer-events-none">
+                            <ellipse cx={px} cy={py + 0.2} rx={postWidth * 0.85} ry="0.16" fill="#000" opacity="0.28" />
+                            <path
+                              d={`M ${px - postWidth/2} ${py + 0.3} L ${px - postWidth/2} ${py - vh} L ${px + postWidth/2} ${py - vh} L ${px + postWidth/2} ${py + 0.3} Z`}
+                              fill={postColor.hex}
+                              stroke="#00000088"
+                              strokeWidth="0.04"
+                            />
+                            <path
+                              d={`M ${px - postWidth/2 - 0.06} ${py - vh} L ${px - postWidth/2 - 0.06} ${py - vh - capHeight} L ${px + postWidth/2 + 0.06} ${py - vh - capHeight} L ${px + postWidth/2 + 0.06} ${py - vh} Z`}
+                              fill={postColor.hex}
+                              stroke="#000"
+                              strokeWidth="0.04"
+                            />
+                          </g>
+                        );
+                      })}
+
+                      {/* Selection aura */}
                       {isSelected && (
                         <polygon
                           points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`}

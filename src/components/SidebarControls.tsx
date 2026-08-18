@@ -52,6 +52,8 @@ interface SidebarControlsProps {
   companyId: string | null;
   slatProfile: '65' | '90';
   setSlatProfile: (profile: '65' | '90') => void;
+  solidPanelProfile: 'sawtooth' | 'trimline';
+  setSolidPanelProfile: (profile: 'sawtooth' | 'trimline') => void;
 }
 
 export default function SidebarControls({
@@ -80,7 +82,9 @@ export default function SidebarControls({
   setPricing,
   companyId,
   slatProfile,
-  setSlatProfile
+  setSlatProfile,
+  solidPanelProfile,
+  setSolidPanelProfile
 }: SidebarControlsProps) {
 
   // Fencing Types Configuration metadata for visuals
@@ -105,6 +109,13 @@ export default function SidebarControls({
       subtitle: 'Timber posts + chainwire',
       desc: 'Heavy-duty 80mm structural timber posts with black chainwire infill. Choose 2 or 3 rail layout. Classic rural and semi-rural boundary fencing.',
       visual: 'repeating-linear-gradient(180deg, transparent, transparent 18px, #C19A6B 18px, #C19A6B 22px)'
+    },
+    {
+      id: 'colorbond_solid_panel' as FenceMaterial,
+      title: 'Colorbond Solid Panel',
+      subtitle: 'Sawtooth or Trimline steel sheet',
+      desc: 'Genuine BlueScope Colorbond steel infill sheet panels (2400mm wide kit). Full privacy boundary fence available in Sawtooth or Trimline profile.',
+      visual: '#C5C2AA'
     }
   ];
 
@@ -350,6 +361,46 @@ export default function SidebarControls({
             )}
 
             {/* Post & Rail Custom Options block (2 or 3 Rails, 80mm structural details) */}
+            {material === 'colorbond_solid_panel' && (
+              <div className="border-t border-[#d9d3c5] pt-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#ff6a1f] flex items-center gap-1.5 font-sans">
+                    <Sliders className="w-3.5 h-3.5 text-[#5f6266]" />
+                    Panel Profile
+                  </span>
+                  <span className="text-[9px] bg-[#ffe3d3]/40 text-[#ff6a1f] border border-[#ffd4bd]/40 px-2 py-0.5 rounded font-mono font-bold uppercase">Procedural SVG</span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    id="solid_panel_profile_trimline"
+                    onClick={() => setSolidPanelProfile('trimline')}
+                    className={`flex-1 text-center py-2.5 rounded-lg text-xs font-semibold select-none cursor-pointer border transition ${
+                      solidPanelProfile === 'trimline'
+                        ? 'bg-[#ff6a1f] text-white border-[#ff6a1f] font-bold shadow-md'
+                        : 'bg-[#f3efe6] text-[#5f6266] border border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e]'
+                    }`}
+                  >
+                    Trimline
+                  </button>
+                  <button
+                    id="solid_panel_profile_sawtooth"
+                    onClick={() => setSolidPanelProfile('sawtooth')}
+                    className={`flex-1 text-center py-2.5 rounded-lg text-xs font-semibold select-none cursor-pointer border transition ${
+                      solidPanelProfile === 'sawtooth'
+                        ? 'bg-[#ff6a1f] text-white border-[#ff6a1f] font-bold shadow-md'
+                        : 'bg-[#f3efe6] text-[#5f6266] border border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e]'
+                    }`}
+                  >
+                    Sawtooth
+                  </button>
+                </div>
+                <div className="bg-[#f3efe6] border border-[#d9d3c5] p-2.5 rounded-lg flex items-start gap-2 text-[10px] text-[#5f6266] leading-relaxed font-sans">
+                  <Info className="w-3.5 h-3.5 shrink-0 text-[#ff6a1f] mt-0.5" />
+                  <span>Trimline has a flat face with subtle vertical rib lines. Sawtooth has a zigzag corrugated profile — identical appearance from both sides (neighbour-friendly).</span>
+                </div>
+              </div>
+            )}
+
             {material === 'post_and_rail' && (
               <div className="border-t border-[#d9d3c5] pt-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
@@ -815,7 +866,9 @@ export default function SidebarControls({
                       gatePostCost: 85,
                       decorativePostCost: 145,
                       singleGateCost: 350,
-                      doubleGateCost: 750
+                      doubleGateCost: 750,
+                      colorbondPanelMaterialCost: 130,
+                      colorbondPanelLaborCost: 85
                     };
                     setPricing(defaultRates);
                     if (companyId) savePricing(companyId, defaultRates);
@@ -834,7 +887,7 @@ export default function SidebarControls({
                 {/* Section A: Panels */}
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">
-                    {material === 'slat_fencing' ? 'Slat Panels (m)' : material === 'aluminium_blade' ? 'Blade Panels (m)' : 'Post & Rail Panels (m)'}
+                    {material === 'slat_fencing' ? 'Slat Panels (m)' : material === 'aluminium_blade' ? 'Blade Panels (m)' : material === 'colorbond_solid_panel' ? 'Colorbond Panels (m)' : 'Post & Rail Panels (m)'}
                   </span>
                   <div className="grid grid-cols-1 gap-2">
                     {material === 'slat_fencing' ? (
@@ -862,6 +915,21 @@ export default function SidebarControls({
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, bladeMaterialCost: val }));
                             if (companyId) savePricing(companyId, { ...pricing, bladeMaterialCost: val });
+                          }}
+                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+                          min="0"
+                        />
+                      </div>
+                    ) : material === 'colorbond_solid_panel' ? (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Colorbond Panel Material ($ / meter)</label>
+                        <input
+                          type="number"
+                          value={pricing.colorbondPanelMaterialCost}
+                          onChange={(e) => {
+                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                            setPricing(prev => ({ ...prev, colorbondPanelMaterialCost: val }));
+                            if (companyId) savePricing(companyId, { ...pricing, colorbondPanelMaterialCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -915,6 +983,21 @@ export default function SidebarControls({
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, bladeLaborCost: val }));
                             if (companyId) savePricing(companyId, { ...pricing, bladeLaborCost: val });
+                          }}
+                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+                          min="0"
+                        />
+                      </div>
+                    ) : material === 'colorbond_solid_panel' ? (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Colorbond Panel Labour ($ / meter)</label>
+                        <input
+                          type="number"
+                          value={pricing.colorbondPanelLaborCost}
+                          onChange={(e) => {
+                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                            setPricing(prev => ({ ...prev, colorbondPanelLaborCost: val }));
+                            if (companyId) savePricing(companyId, { ...pricing, colorbondPanelLaborCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"

@@ -102,6 +102,8 @@ const BASE_CUSTOM: DynamicPricing = {
   decorativePostCost: 145,
   singleGateCost: 350,
   doubleGateCost: 750,
+  colorbondPanelMaterialCost: 130,
+  colorbondPanelLaborCost: 85,
 };
 
 describe('estimateFencingCosts — custom pricing overrides', () => {

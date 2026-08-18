@@ -17,7 +17,13 @@ export const COLORS_PALETTE: ColorOption[] = [
   { name: 'Manor Red', hex: '#6A2D2B', isColorbond: true, desc: 'Deep red ochre / heritage red' },
   { name: 'Dune', hex: '#C1B8A7', isColorbond: true, desc: 'Warm sand-beige, balancing warmth and cool' },
   { name: 'Shale Grey', hex: '#BEC2C1', isColorbond: true, desc: 'Soft silver-grey, light and modern' },
-  { name: 'Raw Natural Wood', hex: '#C19A6B', isColorbond: false, desc: 'Traditional rustic raw wood with authentic grain' }
+  { name: 'Raw Natural Wood', hex: '#C19A6B', isColorbond: false, desc: 'Traditional rustic raw wood with authentic grain' },
+  { name: 'Evening Haze', hex: '#C5C2AA', isColorbond: true, desc: 'Warm greige — soft, contemporary, and versatile' },
+  { name: 'Paperbark', hex: '#CABFA4', isColorbond: true, desc: 'Warm parchment cream, organic and natural' },
+  { name: 'Domain', hex: '#E8DBAE', isColorbond: true, desc: 'Light sandy gold, warm and airy' },
+  { name: 'Riversand', hex: '#9D8D76', isColorbond: true, desc: 'Mid warm sandy brown-grey' },
+  { name: 'Ironstone', hex: '#3E434C', isColorbond: true, desc: 'Dark cool grey, strong and contemporary' },
+  { name: 'Wallaby', hex: '#7F7C78', isColorbond: true, desc: 'Warm mid grey-brown, earthy and versatile' }
 ];
 
 export const FENCE_PRICES: Record<FenceMaterial, { basePerMeter: number; label: string }> = {
@@ -32,6 +38,13 @@ export const FENCE_PRICES: Record<FenceMaterial, { basePerMeter: number; label: 
   aluminium_blade: {
     label: 'Aluminium Blade Fencing',
     basePerMeter: 155
+  },
+  colorbond_solid_panel: {
+    // Kit cost $142.99 / 2.4m = ~$60/m panels + posts + rails included.
+    // Rounded to $130 to land between post_and_rail ($105) and slat ($135),
+    // reflecting simpler install than slat but premium Colorbond sheet product.
+    label: 'Colorbond Solid Panel Fence',
+    basePerMeter: 130
   }
 };
 
@@ -40,7 +53,8 @@ export const FENCE_PRICES: Record<FenceMaterial, { basePerMeter: number; label: 
 export const MATERIAL_MAX_SPAN: Record<FenceMaterial, number> = {
   slat_fencing: 2.4,    // AS-2423 standard 2400mm panel
   post_and_rail: 2.4,   // AS-2423 standard 2400mm panel
-  aluminium_blade: 2.364 // CAD-derived: 2364mm max structural blade panel span
+  aluminium_blade: 2.364, // CAD-derived: 2364mm max structural blade panel span
+  colorbond_solid_panel: 2.4  // 2400mm standard panel kit width
 };
 
 export const POST_UPGRADE_COSTS = {
@@ -92,6 +106,7 @@ export function estimateFencingCosts(
   const baseRate = customPricing
     ? (material === 'slat_fencing' ? customPricing.slatMaterialCost
       : material === 'aluminium_blade' ? customPricing.bladeMaterialCost
+      : material === 'colorbond_solid_panel' ? customPricing.colorbondPanelMaterialCost
       : customPricing.postRailMaterialCost)
     : (materialDetails?.basePerMeter || 100);
 
@@ -132,6 +147,7 @@ export function estimateFencingCosts(
   const laborRatePerMeter = customPricing
     ? (material === 'slat_fencing' ? customPricing.slatLaborCost
       : material === 'aluminium_blade' ? customPricing.bladeLaborCost
+      : material === 'colorbond_solid_panel' ? customPricing.colorbondPanelLaborCost
       : customPricing.postRailLaborCost)
     : defaultLaborRate;
 

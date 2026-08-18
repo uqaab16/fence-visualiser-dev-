@@ -53,7 +53,9 @@ const DEFAULT_PRICING: DynamicPricing = {
   gatePostCost: 85,
   decorativePostCost: 145,
   singleGateCost: 350,
-  doubleGateCost: 750
+  doubleGateCost: 750,
+  colorbondPanelMaterialCost: 130,
+  colorbondPanelLaborCost: 85
 };
 
 const DEFAULT_SEGMENTS: Segment[] = [
@@ -137,6 +139,7 @@ export default function App() {
   const [postColor, setPostColor] = useState<ColorOption>(COLORS_PALETTE.find(c => c.name === 'Monument Grey') || COLORS_PALETTE[0]);
   const [railCount, setRailCount] = useState<2 | 3>(3);
   const [slatProfile, setSlatProfile] = useState<'65' | '90'>('65');
+  const [solidPanelProfile, setSolidPanelProfile] = useState<'sawtooth' | 'trimline'>('trimline');
   const [fenceScale, setFenceScale] = useState<number>(1.0); // locked to 1.0 (controlled by global height drop-down)
   const [propertyFrontage, setPropertyFrontage] = useState<number>(15); // standard 15m front lot
 
@@ -458,6 +461,8 @@ export default function App() {
               companyId={companyId}
               slatProfile={slatProfile}
               setSlatProfile={setSlatProfile}
+              solidPanelProfile={solidPanelProfile}
+              setSolidPanelProfile={setSolidPanelProfile}
             />
           </div>
         )}
@@ -516,6 +521,7 @@ export default function App() {
             setIsLeftPanelOpen={setIsLeftPanelOpen}
             activeTab={activeTab}
             slatProfile={slatProfile}
+            solidPanelProfile={solidPanelProfile}
           />
         </div>
 

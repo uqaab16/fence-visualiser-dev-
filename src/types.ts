@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type FenceMaterial = 'slat_fencing' | 'post_and_rail' | 'aluminium_blade';
+export type FenceMaterial = 'slat_fencing' | 'post_and_rail' | 'aluminium_blade' | 'colorbond_solid_panel';
 
 export type FenceHeight = 900 | 1200 | 1500 | 1800 | 2100;
 
@@ -49,6 +49,8 @@ export interface DynamicPricing {
   decorativePostCost: number;
   singleGateCost: number;
   doubleGateCost: number;
+  colorbondPanelMaterialCost: number;
+  colorbondPanelLaborCost: number;
 }
 
 export interface FencingPlan {
