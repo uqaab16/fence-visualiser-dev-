@@ -30,8 +30,10 @@ interface SidebarControlsProps {
   setActiveTab: (tab: 'material' | 'color' | 'posts' | 'gates' | 'settings') => void;
   material: FenceMaterial;
   setMaterial: (mat: FenceMaterial) => void;
-  railCount: 2 | 3;
-  setRailCount: (count: 2 | 3) => void;
+  railCount: 2 | 3 | 4;
+  setRailCount: (count: 2 | 3 | 4) => void;
+  includeChainwire: boolean;
+  setIncludeChainwire: (val: boolean) => void;
   height: FenceHeight;
   setHeight: (h: FenceHeight) => void;
   color: ColorOption;
@@ -84,7 +86,9 @@ export default function SidebarControls({
   slatProfile,
   setSlatProfile,
   solidPanelProfile,
-  setSolidPanelProfile
+  setSolidPanelProfile,
+  includeChainwire,
+  setIncludeChainwire
 }: SidebarControlsProps) {
 
   // Fencing Types Configuration metadata for visuals
@@ -412,31 +416,35 @@ export default function SidebarControls({
                 </div>
                 
                 <div className="flex gap-2">
+                  {([2, 3, 4] as const).map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setRailCount(n)}
+                      className={`flex-1 text-center py-2.5 rounded-lg text-xs font-semibold select-none cursor-pointer border transition ${
+                        railCount === n
+                          ? 'bg-[#ff6a1f] text-white border-[#ff6a1f] font-bold shadow-md'
+                          : 'bg-[#f3efe6] text-[#5f6266] border border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e]'
+                      }`}
+                    >
+                      {n} Rails
+                    </button>
+                  ))}
+                </div>
+
+                {/* Chainwire mesh toggle — off by default */}
+                <div className="flex items-center justify-between bg-[#f3efe6] border border-[#d9d3c5] rounded-lg px-3 py-2.5">
+                  <span className="text-xs font-semibold text-[#1a1c1e]">Include Chainwire Mesh</span>
                   <button
-                    onClick={() => setRailCount(2)}
-                    className={`flex-1 text-center py-2.5 rounded-lg text-xs font-semibold select-none cursor-pointer border transition ${
-                      railCount === 2
-                        ? 'bg-[#ff6a1f] text-white border-[#ff6a1f] font-bold shadow-md'
-                        : 'bg-[#f3efe6] text-[#5f6266] border border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e]'
-                    }`}
+                    onClick={() => setIncludeChainwire(!includeChainwire)}
+                    className={`relative w-10 h-5 rounded-full transition-colors duration-200 ${includeChainwire ? 'bg-[#ff6a1f]' : 'bg-[#d9d3c5]'}`}
                   >
-                    2 Rails Layout
-                  </button>
-                  <button
-                    onClick={() => setRailCount(3)}
-                    className={`flex-1 text-center py-2.5 rounded-lg text-xs font-semibold select-none cursor-pointer border transition ${
-                      railCount === 3
-                        ? 'bg-[#ff6a1f] text-white border-[#ff6a1f] font-bold shadow-md'
-                        : 'bg-[#f3efe6] text-[#5f6266] border border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e]'
-                    }`}
-                  >
-                    3 Rails Layout
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${includeChainwire ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </button>
                 </div>
-                
+
                 <div className="bg-[#f3efe6] border border-[#d9d3c5] p-2.5 rounded-lg flex items-start gap-2 text-[10px] text-[#5f6266] leading-relaxed font-sans">
                   <Info className="w-3.5 h-3.5 shrink-0 text-[#ff6a1f] mt-0.5" />
-                  <span>Posts are represented as heavy-duty 80mm structural timber posts. Select either the traditional 2-rail design or premium 3-rail layout finish.</span>
+                  <span>Posts are heavy-duty 80mm structural timber. Choose 2, 3, or 4-rail layout. Chainwire mesh is optional — off by default for a clean rustic look.</span>
                 </div>
               </div>
             )}
@@ -459,7 +467,7 @@ export default function SidebarControls({
             <div className="grid grid-cols-4 gap-2 border-b border-[#d9d3c5] pb-5">
               {COLORS_PALETTE.filter((pal) => {
                 if (material === 'post_and_rail') {
-                  return pal.name === 'Raw Natural Wood';
+                  return ['Natural Tan', 'Reddish-Brown'].includes(pal.name);
                 } else {
                   return pal.isColorbond;
                 }
@@ -469,15 +477,11 @@ export default function SidebarControls({
                   <button
                     key={pal.name}
                     onClick={() => {
-                      if (material !== 'post_and_rail') {
-                        setColor(pal);
-                        setPostColor(pal);
-                      }
+                      setColor(pal);
+                      setPostColor(pal);
                     }}
                     title={`${pal.name}: ${pal.desc || ''}`}
-                    className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition select-none group relative ${
-                      material === 'post_and_rail' ? 'cursor-default' : 'cursor-pointer'
-                    } ${
+                    className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition select-none group relative cursor-pointer ${
                       isSelected 
                         ? 'bg-[#ece7db] border-[#ff6a1f]/60 shadow-md' 
                         : 'bg-[#f3efe6]/60 border-transparent hover:bg-[#f3efe6] hover:border-[#cfc8b8]'
@@ -572,9 +576,7 @@ export default function SidebarControls({
                 )}
               </div>
               <p className="text-[10px] text-[#5f6266] leading-relaxed italic">
-                {material === 'post_and_rail' 
-                  ? 'Raw premium-grade timber featuring authentic grains. Left untreated for natural silvering or ready for light weather sealing.'
-                  : color.desc}
+                {material === 'post_and_rail' ? color.desc : color.desc}
               </p>
             </div>
           </div>

@@ -61,6 +61,8 @@ interface FenceCanvasProps {
   activeTab: string;
   slatProfile?: '65' | '90';
   solidPanelProfile?: 'sawtooth' | 'trimline';
+  includeChainwire?: boolean;
+  railCount?: 2 | 3 | 4;
 }
 
 // Darken (factor < 1) or lighten (factor > 1) a #rrggbb hex color, used for procedural shading
@@ -103,7 +105,8 @@ export default function FenceCanvas({
   setIsLeftPanelOpen,
   activeTab,
   slatProfile = '65',
-  solidPanelProfile = 'trimline'
+  solidPanelProfile = 'trimline',
+  includeChainwire = false
 }: FenceCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomBoxRef = useRef<HTMLDivElement>(null);
@@ -1474,6 +1477,35 @@ export default function FenceCanvas({
                 <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
               </linearGradient>
 
+              {/* Post & Rail — post body gradients (horizontal: lit left → shadow right) */}
+              <linearGradient id="pr-post-tan" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#dda96a" stopOpacity="1" />
+                <stop offset="40%"  stopColor="#c8965a" stopOpacity="1" />
+                <stop offset="100%" stopColor="#8f6235" stopOpacity="1" />
+              </linearGradient>
+              <linearGradient id="pr-post-red" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#9b4f3d" stopOpacity="1" />
+                <stop offset="40%"  stopColor="#7a3b2e" stopOpacity="1" />
+                <stop offset="100%" stopColor="#4e2219" stopOpacity="1" />
+              </linearGradient>
+
+              {/* Post & Rail — rail body gradients (vertical: lit top → shadow bottom) */}
+              <linearGradient id="pr-rail-tan" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stopColor="#dda96a" stopOpacity="1" />
+                <stop offset="45%"  stopColor="#c8965a" stopOpacity="1" />
+                <stop offset="100%" stopColor="#8f6235" stopOpacity="1" />
+              </linearGradient>
+              <linearGradient id="pr-rail-red" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%"   stopColor="#9b4f3d" stopOpacity="1" />
+                <stop offset="45%"  stopColor="#7a3b2e" stopOpacity="1" />
+                <stop offset="100%" stopColor="#4e2219" stopOpacity="1" />
+              </linearGradient>
+
+              {/* Post & Rail — soft drop-shadow filter */}
+              <filter id="pr-shadow" x="-10%" y="-10%" width="130%" height="160%">
+                <feDropShadow dx="0" dy="0.45" stdDeviation="0.35" floodOpacity="0.32" />
+              </filter>
+
               {/* Foreground auto-layering mask to dynamically hide parts of the fence behind mailboxes, trees, or pillars */}
               <mask id="fence-foreground-mask">
                 {/* Default to white so the entire fence is visible */}
@@ -1719,190 +1751,159 @@ export default function FenceCanvas({
 
                 } else if (material === 'post_and_rail') {
                   // DRAW CLASSIC TIMBER POST & RAIL
-                  const rails = railCount === 2 ? [0.35, 0.78] : [0.22, 0.52, 0.82];
-                  const railThickness = 0.58; // thick structural rail
-                  const woodColorHex = '#C19A6B'; // Raw natural timber warm hue
+                  // Rail vertical positions (as fraction of fence height from ground up)
+                  const railPositions =
+                    railCount === 2 ? [0.32, 0.75]
+                    : railCount === 4 ? [0.18, 0.42, 0.65, 0.88]
+                    : [0.20, 0.52, 0.84]; // 3 rails default
+                  const railThickness = 0.52;
+
+                  // Resolve stain from chosen colour name
+                  const isRedStain = color.name === 'Reddish-Brown';
+                  const postGradId = isRedStain ? 'url(#pr-post-red)' : 'url(#pr-post-tan)';
+                  const railGradId = isRedStain ? 'url(#pr-rail-red)' : 'url(#pr-rail-tan)';
+                  const stainDark  = isRedStain ? '#2e1108' : '#6b3e18';
+                  const stainMid   = isRedStain ? '#4e2219' : '#a0682e';
+
+                  // Helper: draw one post column (shared by end-posts rendered by the post-node layer
+                  // and intermediate posts rendered here in the segment loop)
+                  const renderTimberPost = (px: number, py: number, scale: number, key: string) => {
+                    const vh = getVisualFenceHeight() * scale;
+                    const pw = 1.15 * scale;
+                    const capH = 0.22 * scale;
+                    // Grain lines at irregular x-offsets across post width
+                    const grainOffsets = [0.13, 0.32, 0.57, 0.76];
+                    // Knot positions (fraction of post height from top)
+                    const knotYFracs = [0.28, 0.62];
+                    return (
+                      <g key={key} className="pointer-events-none" filter="url(#pr-shadow)">
+                        {/* Ground shadow ellipse */}
+                        <ellipse cx={px} cy={py + 0.22} rx={pw * 0.85} ry="0.16" fill="#000" opacity="0.28" />
+                        {/* Post body with horizontal gradient (lit left → dark right) */}
+                        <path
+                          d={`M ${px - pw/2} ${py + 0.3} L ${px - pw/2} ${py - vh} L ${px + pw/2} ${py - vh} L ${px + pw/2} ${py + 0.3} Z`}
+                          fill={postGradId}
+                          stroke={stainDark}
+                          strokeWidth="0.05"
+                        />
+                        {/* Vertical grain lines */}
+                        {grainOffsets.map((frac, gi) => {
+                          const gx = px - pw/2 + frac * pw;
+                          return (
+                            <line key={gi}
+                              x1={gx} y1={py + 0.3}
+                              x2={gx} y2={py - vh}
+                              stroke={stainDark}
+                              strokeWidth="0.07"
+                              strokeOpacity={0.10 + gi * 0.02}
+                            />
+                          );
+                        })}
+                        {/* Knot ellipses */}
+                        {knotYFracs.map((frac, ki) => (
+                          <ellipse key={ki}
+                            cx={px - pw * 0.08 + ki * pw * 0.18}
+                            cy={py - vh * frac}
+                            rx={0.19} ry={0.11}
+                            transform={`rotate(${ki === 0 ? -15 : 12}, ${px - pw * 0.08 + ki * pw * 0.18}, ${py - vh * frac})`}
+                            fill={stainDark}
+                            fillOpacity="0.20"
+                          />
+                        ))}
+                        {/* Chamfered pyramid cap — 5-point shape: flat peak, angled shoulders */}
+                        <path
+                          d={`
+                            M ${px - pw/2 - 0.06} ${py - vh}
+                            L ${px - pw * 0.12} ${py - vh - capH * 0.65}
+                            L ${px} ${py - vh - capH}
+                            L ${px + pw * 0.12} ${py - vh - capH * 0.65}
+                            L ${px + pw/2 + 0.06} ${py - vh}
+                            Z
+                          `}
+                          fill={stainMid}
+                          stroke={stainDark}
+                          strokeWidth="0.04"
+                        />
+                      </g>
+                    );
+                  };
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
-                      
-                      {/* Back wire mesh backing details for authentic rural/client look */}
-                      <polygon
-                        points={`
-                          ${pStart.x},${pStart.y}
-                          ${pEnd.x},${pEnd.y}
-                          ${pEnd.x},${pEnd.y - vhEnd}
-                          ${pStart.x},${pStart.y - vhStart}
-                        `}
-                        fill="url(#black-chainwire-pattern)"
-                        stroke="none"
-                        opacity="0.85"
-                      />
 
-                      {/* Horizontal stout timber rails */}
-                      {rails.map((heightPct, rIdx) => {
+                      {/* Optional chainwire mesh — behind the rails, low opacity so it reads as thin wire */}
+                      {includeChainwire && (
+                        <polygon
+                          points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`}
+                          fill="url(#black-chainwire-pattern)"
+                          stroke="none"
+                          opacity="0.28"
+                        />
+                      )}
+
+                      {/* Horizontal timber rails */}
+                      {railPositions.map((heightPct, rIdx) => {
                         const offsetStart = vhStart * heightPct;
-                        const offsetEnd = vhEnd * heightPct;
-                        const railThickStart = railThickness * scaleStart;
-                        const railThickEnd = railThickness * scaleEnd;
+                        const offsetEnd   = vhEnd   * heightPct;
+                        const rtStart = railThickness * scaleStart;
+                        const rtEnd   = railThickness * scaleEnd;
 
                         const x1 = pStart.x;
                         const y1 = pStart.y - offsetStart;
                         const x2 = pEnd.x;
                         const y2 = pEnd.y - offsetEnd;
 
-                        // Support skipping rail parts for gates
-                        if (seg.hasGate) {
-                          const { startPct: pt1, endPct: pt2 } = getGateSpanPcts(seg, segmentLength);
-
-                          const gX1_val = x1 + pt1 * segmentWidth;
-                          const gY1_val = y1 + pt1 * segmentHeight;
-                          const gX2_val = x1 + pt2 * segmentWidth;
-                          const gY2_val = y1 + pt2 * segmentHeight;
-
-                          const gTopY1_y = gStopYPercent(gY1_val, railThickStart, pt1, railThickEnd - railThickStart);
-                          const gTopY2_y = gStopYPercent(gY2_val, railThickStart, pt2, railThickEnd - railThickStart);
-
-                          function gStopYPercent(iy: number, baseThick: number, p: number, dThick: number) {
-                            return iy - (baseThick + p * dThick);
-                          }
-
-                          return (
-                            <g key={rIdx}>
-                              {/* Left of gate rail part */}
-                              <path
-                                d={`
-                                  M ${x1} ${y1} 
-                                  L ${gX1_val} ${gY1_val} 
-                                  L ${gX1_val} ${gTopY1_y} 
-                                  L ${x1} ${y1 - railThickStart} 
-                                  Z
-                                `}
-                                fill={woodColorHex}
-                                stroke="#4a3116"
-                                strokeWidth="0.08"
-                              />
-                              {/* Timber textures */}
-                              <path
-                                d={`M ${x1} ${y1 - 0.05} L ${gX1_val} ${gY1_val - 0.05}`}
-                                fill="none"
-                                stroke="url(#timber-grain)"
-                                strokeWidth={railThickStart}
-                                opacity="0.45"
-                              />
-                              {/* Right of gate rail part */}
-                              <path
-                                d={`
-                                  M ${gX2_val} ${gY2_val} 
-                                  L ${x2} ${y2} 
-                                  L ${x2} ${y2 - railThickEnd} 
-                                  L ${gX2_val} ${gTopY2_y} 
-                                  Z
-                                `}
-                                fill={woodColorHex}
-                                stroke="#4a3116"
-                                strokeWidth="0.08"
-                              />
-                              <path
-                                d={`M ${gX2_val} ${gY2_val - 0.05} L ${x2} ${y2 - 0.05}`}
-                                fill="none"
-                                stroke="url(#timber-grain)"
-                                strokeWidth={railThickEnd}
-                                opacity="0.45"
-                              />
-                            </g>
-                          );
-                        }
-
-                        return (
-                          <g key={rIdx}>
+                        const drawRail = (ax: number, ay: number, bx: number, by: number, thA: number, thB: number, key: string) => (
+                          <g key={key} filter="url(#pr-shadow)">
                             <path
-                              d={`
-                                M ${x1} ${y1} 
-                                L ${x2} ${y2} 
-                                L ${x2} ${y2 - railThickEnd} 
-                                L ${x1} ${y1 - railThickStart} 
-                                Z
-                              `}
-                              fill={woodColorHex}
-                              stroke="#4a3116"
-                              strokeWidth="0.08"
+                              d={`M ${ax} ${ay} L ${bx} ${by} L ${bx} ${by - thB} L ${ax} ${ay - thA} Z`}
+                              fill={railGradId}
+                              stroke={stainDark}
+                              strokeWidth="0.06"
                             />
-                            {/* Accent grain overlay texture */}
-                            <path
-                              d={`M ${x1} ${y1 - 0.05} L ${x2} ${y2 - 0.05}`}
-                              fill="none"
-                              stroke="url(#timber-grain)"
-                              strokeWidth={railThickStart + 0.5 * (railThickEnd - railThickStart)}
-                              opacity="0.45"
+                            {/* Single horizontal grain line near top of rail */}
+                            <line
+                              x1={ax} y1={ay - thA * 0.22}
+                              x2={bx} y2={by - thB * 0.22}
+                              stroke={stainDark}
+                              strokeWidth="0.06"
+                              strokeOpacity="0.12"
                             />
                           </g>
                         );
+
+                        if (seg.hasGate) {
+                          const { startPct: pt1, endPct: pt2 } = getGateSpanPcts(seg, segmentLength);
+                          const gX1 = x1 + pt1 * segmentWidth, gY1 = y1 + pt1 * segmentHeight;
+                          const gX2 = x1 + pt2 * segmentWidth, gY2 = y1 + pt2 * segmentHeight;
+                          const thAt = (p: number) => rtStart + p * (rtEnd - rtStart);
+                          return (
+                            <g key={rIdx}>
+                              {drawRail(x1, y1, gX1, gY1, rtStart, thAt(pt1), 'L')}
+                              {drawRail(gX2, gY2, x2, y2, thAt(pt2), rtEnd, 'R')}
+                            </g>
+                          );
+                        }
+                        return drawRail(x1, y1, x2, y2, rtStart, rtEnd, String(rIdx));
                       })}
 
-                      {/* Mandatory structural line posts (2.4m max span) — billed in the quote, not decorative */}
+                      {/* Intermediate structural posts */}
                       {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
                         const j = jIndex + 1;
                         const t = j / visualSpanCount;
                         const px = pStart.x + t * segmentWidth;
                         const py = pStart.y + t * segmentHeight;
-
-                        // Skip drawing intermediate pillar if it drops exactly within a gate span
                         if (seg.hasGate) {
                           const { startPct, endPct } = getGateSpanPcts(seg, segmentLength);
                           if (t >= startPct && t <= endPct) return null;
                         }
-
-                        const scale = getPerspectiveScale(py);
-                        const vh = getVisualFenceHeight() * scale;
-
-                        const postWidth = 1.1 * scale; // stout representation of 80mm post
-                        const postColorHex = '#C19A6B'; // raw timber warm look
-
-                        return (
-                          <g key={`mid-post-wood-${j}`} className="pointer-events-none">
-                            {/* Shadow */}
-                            <ellipse cx={px} cy={py + 0.2} rx={postWidth * 0.9} ry="0.18" fill="#000" opacity="0.32" />
-
-                            {/* Column */}
-                            <path
-                              d={`
-                                M ${px - postWidth/2} ${py + 0.3} 
-                                L ${px - postWidth/2} ${py - vh} 
-                                L ${px + postWidth/2} ${py - vh} 
-                                L ${px + postWidth/2} ${py + 0.3} 
-                                Z
-                              `}
-                              fill={postColorHex}
-                              stroke="#000000"
-                              strokeWidth="0.04"
-                            />
-
-                            {/* Cap beveling */}
-                            <path
-                              d={`
-                                M ${px - postWidth/2 - 0.04} ${py - vh}
-                                L ${px} ${py - vh - 0.15 * scale}
-                                L ${px + postWidth/2 + 0.04} ${py - vh}
-                                Z
-                              `}
-                              fill="#7A5A35"
-                              stroke="#4a3116"
-                              strokeWidth="0.04"
-                            />
-                          </g>
-                        );
+                        return renderTimberPost(px, py, getPerspectiveScale(py), `mid-post-wood-${j}`);
                       })}
 
                       {/* Selection Aura */}
                       {isSelected && (
                         <polygon
-                          points={`
-                            ${pStart.x},${pStart.y}
-                            ${pEnd.x},${pEnd.y}
-                            ${pEnd.x},${pEnd.y - vhEnd}
-                            ${pStart.x},${pStart.y - vhStart}
-                          `}
+                          points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`}
                           fill="rgba(20, 184, 166, 0.05)"
                           stroke="#14b8a6"
                           strokeWidth="0.3"

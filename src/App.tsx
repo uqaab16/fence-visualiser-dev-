@@ -137,7 +137,8 @@ export default function App() {
   const [height, setHeight] = useState<FenceHeight>(1500);
   const [color, setColor] = useState<ColorOption>(COLORS_PALETTE.find(c => c.name === 'Monument Grey') || COLORS_PALETTE[0]);
   const [postColor, setPostColor] = useState<ColorOption>(COLORS_PALETTE.find(c => c.name === 'Monument Grey') || COLORS_PALETTE[0]);
-  const [railCount, setRailCount] = useState<2 | 3>(3);
+  const [railCount, setRailCount] = useState<2 | 3 | 4>(3);
+  const [includeChainwire, setIncludeChainwire] = useState<boolean>(false);
   const [slatProfile, setSlatProfile] = useState<'65' | '90'>('65');
   const [solidPanelProfile, setSolidPanelProfile] = useState<'sawtooth' | 'trimline'>('trimline');
   const [fenceScale, setFenceScale] = useState<number>(1.0); // locked to 1.0 (controlled by global height drop-down)
@@ -430,7 +431,7 @@ export default function App() {
                 setMaterial(mat);
                 // Default logical colors when selecting corresponding materials to match looks!
                 if (mat === 'post_and_rail') {
-                  const woodOpt = COLORS_PALETTE.find(c => c.name === 'Raw Natural Wood') || COLORS_PALETTE[3];
+                  const woodOpt = COLORS_PALETTE.find(c => c.name === 'Natural Tan') || COLORS_PALETTE[3];
                   setColor(woodOpt);
                   setPostColor(woodOpt);
                 } else {
@@ -441,6 +442,8 @@ export default function App() {
               }}
               railCount={railCount}
               setRailCount={setRailCount}
+              includeChainwire={includeChainwire}
+              setIncludeChainwire={setIncludeChainwire}
               height={height}
               setHeight={setHeight}
               color={color}
@@ -522,6 +525,7 @@ export default function App() {
             activeTab={activeTab}
             slatProfile={slatProfile}
             solidPanelProfile={solidPanelProfile}
+            includeChainwire={includeChainwire}
           />
         </div>
 

@@ -18,6 +18,8 @@ export const COLORS_PALETTE: ColorOption[] = [
   { name: 'Dune', hex: '#C1B8A7', isColorbond: true, desc: 'Warm sand-beige, balancing warmth and cool' },
   { name: 'Shale Grey', hex: '#BEC2C1', isColorbond: true, desc: 'Soft silver-grey, light and modern' },
   { name: 'Raw Natural Wood', hex: '#C19A6B', isColorbond: false, desc: 'Traditional rustic raw wood with authentic grain' },
+  { name: 'Natural Tan', hex: '#C8965A', isColorbond: false, desc: 'Warm honey-tan timber stain — sun-kissed rustic look' },
+  { name: 'Reddish-Brown', hex: '#7A3B2E', isColorbond: false, desc: 'Deep reddish-brown cedar stain — rich, uniform finish' },
   { name: 'Evening Haze', hex: '#C5C2AA', isColorbond: true, desc: 'Warm greige — soft, contemporary, and versatile' },
   { name: 'Paperbark', hex: '#CABFA4', isColorbond: true, desc: 'Warm parchment cream, organic and natural' },
   { name: 'Domain', hex: '#E8DBAE', isColorbond: true, desc: 'Light sandy gold, warm and airy' },
