@@ -34,7 +34,6 @@ import {
 
 interface FenceCanvasProps {
   material: FenceMaterial;
-  railCount?: 2 | 3;
   height: FenceHeight;
   color: ColorOption;
   posts: Post[];
@@ -1760,64 +1759,55 @@ export default function FenceCanvas({
 
                   // Resolve stain from chosen colour name
                   const isRedStain = color.name === 'Reddish-Brown';
-                  const postGradId = isRedStain ? 'url(#pr-post-red)' : 'url(#pr-post-tan)';
-                  const railGradId = isRedStain ? 'url(#pr-rail-red)' : 'url(#pr-rail-tan)';
+                  const texHref = isRedStain
+                    ? '/Think-Fencing-PVC-Post-and-Rail-Fence-x4-Red-Gum-1.jpg'
+                    : '/Home-post-and-rail-fencing-416x312.jpg';
                   const stainDark  = isRedStain ? '#2e1108' : '#6b3e18';
                   const stainMid   = isRedStain ? '#4e2219' : '#a0682e';
 
-                  // Helper: draw one post column (shared by end-posts rendered by the post-node layer
-                  // and intermediate posts rendered here in the segment loop)
+                  // Helper: draw one post column with photo texture clipped to its rect.
+                  // clipPath + image are both in root SVG space (no transforms anywhere in this
+                  // render path), so absolute coords are all that's needed.
                   const renderTimberPost = (px: number, py: number, scale: number, key: string) => {
                     const vh = getVisualFenceHeight() * scale;
                     const pw = 1.15 * scale;
                     const capH = 0.22 * scale;
-                    // Grain lines at irregular x-offsets across post width
-                    const grainOffsets = [0.14, 0.33, 0.56, 0.78];
-                    // Knot positions (fraction of post height from ground up)
-                    const knotYFracs = [0.30, 0.65];
+                    const left  = px - pw / 2;
+                    const top   = py - vh;
+                    const bottom = py + 0.3;
+                    const clipId = `pr-clip-post-${key}`;
                     return (
                       <g key={key} className="pointer-events-none" filter="url(#pr-shadow)">
+                        <defs>
+                          <clipPath id={clipId}>
+                            <path d={`M ${left} ${bottom} L ${left} ${top} L ${px + pw/2} ${top} L ${px + pw/2} ${bottom} Z`} />
+                          </clipPath>
+                        </defs>
                         {/* Ground shadow ellipse */}
                         <ellipse cx={px} cy={py + 0.22} rx={pw * 0.85} ry="0.18" fill="#000" opacity="0.38" />
-                        {/* Post body with horizontal gradient (lit left → dark right) */}
+                        {/* Post body — photo texture clipped to post rect */}
+                        <image
+                          href={texHref}
+                          x={left} y={top}
+                          width={pw} height={bottom - top}
+                          preserveAspectRatio="xMidYMid slice"
+                          clipPath={`url(#${clipId})`}
+                        />
+                        {/* Outline stroke over the texture */}
                         <path
-                          d={`M ${px - pw/2} ${py + 0.3} L ${px - pw/2} ${py - vh} L ${px + pw/2} ${py - vh} L ${px + pw/2} ${py + 0.3} Z`}
-                          fill={postGradId}
+                          d={`M ${left} ${bottom} L ${left} ${top} L ${px + pw/2} ${top} L ${px + pw/2} ${bottom} Z`}
+                          fill="none"
                           stroke={stainDark}
                           strokeWidth="0.08"
                         />
-                        {/* Vertical grain lines — wider strokes so they read at typical canvas sizes */}
-                        {grainOffsets.map((frac, gi) => {
-                          const gx = px - pw/2 + frac * pw;
-                          return (
-                            <line key={gi}
-                              x1={gx} y1={py + 0.3}
-                              x2={gx} y2={py - vh}
-                              stroke={stainDark}
-                              strokeWidth="0.18"
-                              strokeOpacity={0.22 + gi * 0.04}
-                            />
-                          );
-                        })}
-                        {/* Knot ellipses — larger and darker so they read at normal zoom */}
-                        {knotYFracs.map((frac, ki) => (
-                          <ellipse key={ki}
-                            cx={px - pw * 0.08 + ki * pw * 0.22}
-                            cy={py - vh * frac}
-                            rx={pw * 0.28} ry={pw * 0.16}
-                            transform={`rotate(${ki === 0 ? -12 : 10}, ${px - pw * 0.08 + ki * pw * 0.22}, ${py - vh * frac})`}
-                            fill={stainDark}
-                            fillOpacity="0.42"
-                          />
-                        ))}
-                        {/* Chamfered pyramid cap — 5-point shape: flat peak, angled shoulders */}
+                        {/* Chamfered pyramid cap */}
                         <path
                           d={`
-                            M ${px - pw/2 - 0.06} ${py - vh}
-                            L ${px - pw * 0.12} ${py - vh - capH * 0.65}
-                            L ${px} ${py - vh - capH}
-                            L ${px + pw * 0.12} ${py - vh - capH * 0.65}
-                            L ${px + pw/2 + 0.06} ${py - vh}
+                            M ${left - 0.06} ${top}
+                            L ${px - pw * 0.12} ${top - capH * 0.65}
+                            L ${px} ${top - capH}
+                            L ${px + pw * 0.12} ${top - capH * 0.65}
+                            L ${px + pw/2 + 0.06} ${top}
                             Z
                           `}
                           fill={stainMid}
@@ -1853,24 +1843,34 @@ export default function FenceCanvas({
                         const x2 = pEnd.x;
                         const y2 = pEnd.y - offsetEnd;
 
-                        const drawRail = (ax: number, ay: number, bx: number, by: number, thA: number, thB: number, key: string) => (
-                          <g key={key} filter="url(#pr-shadow)">
-                            <path
-                              d={`M ${ax} ${ay} L ${bx} ${by} L ${bx} ${by - thB} L ${ax} ${ay - thA} Z`}
-                              fill={railGradId}
-                              stroke={stainDark}
-                              strokeWidth="0.06"
-                            />
-                            {/* Single horizontal grain line near top of rail */}
-                            <line
-                              x1={ax} y1={ay - thA * 0.22}
-                              x2={bx} y2={by - thB * 0.22}
-                              stroke={stainDark}
-                              strokeWidth="0.14"
-                              strokeOpacity="0.32"
-                            />
-                          </g>
-                        );
+                        const drawRail = (ax: number, ay: number, bx: number, by: number, thA: number, thB: number, key: string) => {
+                          // Bounding box of this rail trapezoid in root SVG space
+                          const rLeft  = Math.min(ax, bx);
+                          const rTop   = Math.min(ay - thA, by - thB);
+                          const rRight = Math.max(ax, bx);
+                          const rBot   = Math.max(ay, by);
+                          const clipId = `pr-clip-rail-${seg.id}-${key}`;
+                          const panelPath = `M ${ax} ${ay} L ${bx} ${by} L ${bx} ${by - thB} L ${ax} ${ay - thA} Z`;
+                          return (
+                            <g key={key} filter="url(#pr-shadow)">
+                              <defs>
+                                <clipPath id={clipId}>
+                                  <path d={panelPath} />
+                                </clipPath>
+                              </defs>
+                              {/* Photo texture clipped to rail trapezoid */}
+                              <image
+                                href={texHref}
+                                x={rLeft} y={rTop}
+                                width={rRight - rLeft} height={rBot - rTop}
+                                preserveAspectRatio="xMidYMid slice"
+                                clipPath={`url(#${clipId})`}
+                              />
+                              {/* Outline stroke */}
+                              <path d={panelPath} fill="none" stroke={stainDark} strokeWidth="0.06" />
+                            </g>
+                          );
+                        };
 
                         if (seg.hasGate) {
                           const { startPct: pt1, endPct: pt2 } = getGateSpanPcts(seg, segmentLength);
@@ -2675,11 +2675,11 @@ export default function FenceCanvas({
 
                 // For post_and_rail, compute stain-derived values matching renderTimberPost
                 const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
-                const prPostGrad = material === 'post_and_rail' ? (prIsRed ? 'url(#pr-post-red)' : 'url(#pr-post-tan)') : null;
+                const prTexHref = prIsRed
+                  ? '/Think-Fencing-PVC-Post-and-Rail-Fence-x4-Red-Gum-1.jpg'
+                  : '/Home-post-and-rail-fencing-416x312.jpg';
                 const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
                 const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
-                const prGrainOffsets = [0.14, 0.33, 0.56, 0.78];
-                const prKnotYFracs = [0.30, 0.65];
 
                 return (
                   <g key={post.id} className="pointer-events-none" filter={material === 'post_and_rail' ? 'url(#pr-shadow)' : undefined}>
@@ -2688,38 +2688,41 @@ export default function FenceCanvas({
                     <ellipse cx={x} cy={y + 0.2} rx={postWidth * 0.9} ry="0.18" fill="#000" opacity={material === 'post_and_rail' ? 0.38 : 0.32} />
 
                     {/* Main vertical post column */}
-                    <path
-                      d={`M ${x - postWidth/2} ${y + 0.3} L ${x - postWidth/2} ${y - vh} L ${x + postWidth/2} ${y - vh} L ${x + postWidth/2} ${y + 0.3} Z`}
-                      fill={prPostGrad ?? postColorHex}
-                      stroke={material === 'post_and_rail' ? prStainDark : '#000000'}
-                      strokeWidth={material === 'post_and_rail' ? 0.08 : strokeWidth}
-                    />
-
-                    {/* Timber grain lines — post_and_rail only */}
-                    {material === 'post_and_rail' && prGrainOffsets.map((frac, gi) => {
-                      const gx = x - postWidth/2 + frac * postWidth;
+                    {material === 'post_and_rail' ? (() => {
+                      const pLeft = x - postWidth / 2;
+                      const pTop  = y - vh;
+                      const pBot  = y + 0.3;
+                      const clipId = `pr-clip-node-${post.id}`;
                       return (
-                        <line key={gi}
-                          x1={gx} y1={y + 0.3}
-                          x2={gx} y2={y - vh}
-                          stroke={prStainDark}
-                          strokeWidth="0.18"
-                          strokeOpacity={0.22 + gi * 0.04}
-                        />
+                        <>
+                          <defs>
+                            <clipPath id={clipId}>
+                              <path d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`} />
+                            </clipPath>
+                          </defs>
+                          <image
+                            href={prTexHref}
+                            x={pLeft} y={pTop}
+                            width={postWidth} height={pBot - pTop}
+                            preserveAspectRatio="xMidYMid slice"
+                            clipPath={`url(#${clipId})`}
+                          />
+                          <path
+                            d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`}
+                            fill="none"
+                            stroke={prStainDark}
+                            strokeWidth="0.08"
+                          />
+                        </>
                       );
-                    })}
-
-                    {/* Knot ellipses — post_and_rail only */}
-                    {material === 'post_and_rail' && prKnotYFracs.map((frac, ki) => (
-                      <ellipse key={ki}
-                        cx={x - postWidth * 0.08 + ki * postWidth * 0.22}
-                        cy={y - vh * frac}
-                        rx={postWidth * 0.28} ry={postWidth * 0.16}
-                        transform={`rotate(${ki === 0 ? -12 : 10}, ${x - postWidth * 0.08 + ki * postWidth * 0.22}, ${y - vh * frac})`}
-                        fill={prStainDark}
-                        fillOpacity="0.42"
+                    })() : (
+                      <path
+                        d={`M ${x - postWidth/2} ${y + 0.3} L ${x - postWidth/2} ${y - vh} L ${x + postWidth/2} ${y - vh} L ${x + postWidth/2} ${y + 0.3} Z`}
+                        fill={postColorHex}
+                        stroke="#000000"
+                        strokeWidth={strokeWidth}
                       />
-                    ))}
+                    )}
 
                     {/* High gloss visual depth highlight — non-timber materials only */}
                     {material !== 'post_and_rail' && (
