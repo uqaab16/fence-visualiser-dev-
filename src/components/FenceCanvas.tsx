@@ -34,7 +34,6 @@ import {
 
 interface FenceCanvasProps {
   material: FenceMaterial;
-  railCount?: 2 | 3;
   height: FenceHeight;
   color: ColorOption;
   posts: Post[];
@@ -1477,29 +1476,23 @@ export default function FenceCanvas({
                 <stop offset="100%" stopColor="#000000" stopOpacity="0.3" />
               </linearGradient>
 
-              {/* Post & Rail — post body gradients (horizontal: lit left → shadow right) */}
-              <linearGradient id="pr-post-tan" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor="#dda96a" stopOpacity="1" />
-                <stop offset="40%"  stopColor="#c8965a" stopOpacity="1" />
-                <stop offset="100%" stopColor="#8f6235" stopOpacity="1" />
-              </linearGradient>
-              <linearGradient id="pr-post-red" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor="#9b4f3d" stopOpacity="1" />
-                <stop offset="40%"  stopColor="#7a3b2e" stopOpacity="1" />
-                <stop offset="100%" stopColor="#4e2219" stopOpacity="1" />
-              </linearGradient>
-
-              {/* Post & Rail — rail body gradients (vertical: lit top → shadow bottom) */}
-              <linearGradient id="pr-rail-tan" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="#dda96a" stopOpacity="1" />
-                <stop offset="45%"  stopColor="#c8965a" stopOpacity="1" />
-                <stop offset="100%" stopColor="#8f6235" stopOpacity="1" />
-              </linearGradient>
-              <linearGradient id="pr-rail-red" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="#9b4f3d" stopOpacity="1" />
-                <stop offset="45%"  stopColor="#7a3b2e" stopOpacity="1" />
-                <stop offset="100%" stopColor="#4e2219" stopOpacity="1" />
-              </linearGradient>
+              {/* Post & Rail — photo texture patterns. Image displayed at 1/10th scale in SVG % units.
+                  Tile: 10×15 SVG units (~80×120px at 800px canvas width).
+                  x/y offsets pan the full image so the clean timber-grain crop region starts at tile origin.
+                  Natural Tan  (416×312px): crop starts at pixel (275,85)  → SVG (-27.5, -8.5)
+                  Reddish-Brown (1000×700px): crop starts at pixel (55,320) → SVG (-5.5, -32.0) */}
+              <pattern id="pr-tex-tan" patternUnits="userSpaceOnUse" width="10" height="15">
+                <image href="/textures/pr-natural-tan.jpg"
+                  x="-27.5" y="-8.5"
+                  width="41.6" height="31.2"
+                  preserveAspectRatio="xMinYMin slice" />
+              </pattern>
+              <pattern id="pr-tex-red" patternUnits="userSpaceOnUse" width="10" height="15">
+                <image href="/textures/pr-reddish-brown.jpg"
+                  x="-5.5" y="-32.0"
+                  width="100" height="70"
+                  preserveAspectRatio="xMinYMin slice" />
+              </pattern>
 
               {/* Post & Rail — soft drop-shadow filter */}
               <filter id="pr-shadow" x="-10%" y="-10%" width="130%" height="160%">
@@ -1760,8 +1753,7 @@ export default function FenceCanvas({
 
                   // Resolve stain from chosen colour name
                   const isRedStain = color.name === 'Reddish-Brown';
-                  const postGradId = isRedStain ? 'url(#pr-post-red)' : 'url(#pr-post-tan)';
-                  const railGradId = isRedStain ? 'url(#pr-rail-red)' : 'url(#pr-rail-tan)';
+                  const postTexId = isRedStain ? 'url(#pr-tex-red)' : 'url(#pr-tex-tan)';
                   const stainDark  = isRedStain ? '#2e1108' : '#6b3e18';
                   const stainMid   = isRedStain ? '#4e2219' : '#a0682e';
 
@@ -1771,46 +1763,18 @@ export default function FenceCanvas({
                     const vh = getVisualFenceHeight() * scale;
                     const pw = 1.15 * scale;
                     const capH = 0.22 * scale;
-                    // Grain lines at irregular x-offsets across post width
-                    const grainOffsets = [0.14, 0.33, 0.56, 0.78];
-                    // Knot positions (fraction of post height from ground up)
-                    const knotYFracs = [0.30, 0.65];
                     return (
                       <g key={key} className="pointer-events-none" filter="url(#pr-shadow)">
                         {/* Ground shadow ellipse */}
                         <ellipse cx={px} cy={py + 0.22} rx={pw * 0.85} ry="0.18" fill="#000" opacity="0.38" />
-                        {/* Post body with horizontal gradient (lit left → dark right) */}
+                        {/* Post body — photo texture fill */}
                         <path
                           d={`M ${px - pw/2} ${py + 0.3} L ${px - pw/2} ${py - vh} L ${px + pw/2} ${py - vh} L ${px + pw/2} ${py + 0.3} Z`}
-                          fill={postGradId}
+                          fill={postTexId}
                           stroke={stainDark}
                           strokeWidth="0.08"
                         />
-                        {/* Vertical grain lines — wider strokes so they read at typical canvas sizes */}
-                        {grainOffsets.map((frac, gi) => {
-                          const gx = px - pw/2 + frac * pw;
-                          return (
-                            <line key={gi}
-                              x1={gx} y1={py + 0.3}
-                              x2={gx} y2={py - vh}
-                              stroke={stainDark}
-                              strokeWidth="0.18"
-                              strokeOpacity={0.22 + gi * 0.04}
-                            />
-                          );
-                        })}
-                        {/* Knot ellipses — larger and darker so they read at normal zoom */}
-                        {knotYFracs.map((frac, ki) => (
-                          <ellipse key={ki}
-                            cx={px - pw * 0.08 + ki * pw * 0.22}
-                            cy={py - vh * frac}
-                            rx={pw * 0.28} ry={pw * 0.16}
-                            transform={`rotate(${ki === 0 ? -12 : 10}, ${px - pw * 0.08 + ki * pw * 0.22}, ${py - vh * frac})`}
-                            fill={stainDark}
-                            fillOpacity="0.42"
-                          />
-                        ))}
-                        {/* Chamfered pyramid cap — 5-point shape: flat peak, angled shoulders */}
+                        {/* Chamfered pyramid cap */}
                         <path
                           d={`
                             M ${px - pw/2 - 0.06} ${py - vh}
@@ -1857,17 +1821,9 @@ export default function FenceCanvas({
                           <g key={key} filter="url(#pr-shadow)">
                             <path
                               d={`M ${ax} ${ay} L ${bx} ${by} L ${bx} ${by - thB} L ${ax} ${ay - thA} Z`}
-                              fill={railGradId}
+                              fill={postTexId}
                               stroke={stainDark}
                               strokeWidth="0.06"
-                            />
-                            {/* Single horizontal grain line near top of rail */}
-                            <line
-                              x1={ax} y1={ay - thA * 0.22}
-                              x2={bx} y2={by - thB * 0.22}
-                              stroke={stainDark}
-                              strokeWidth="0.14"
-                              strokeOpacity="0.32"
                             />
                           </g>
                         );
@@ -2675,11 +2631,9 @@ export default function FenceCanvas({
 
                 // For post_and_rail, compute stain-derived values matching renderTimberPost
                 const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
-                const prPostGrad = material === 'post_and_rail' ? (prIsRed ? 'url(#pr-post-red)' : 'url(#pr-post-tan)') : null;
+                const prTexId = prIsRed ? 'url(#pr-tex-red)' : 'url(#pr-tex-tan)';
                 const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
                 const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
-                const prGrainOffsets = [0.14, 0.33, 0.56, 0.78];
-                const prKnotYFracs = [0.30, 0.65];
 
                 return (
                   <g key={post.id} className="pointer-events-none" filter={material === 'post_and_rail' ? 'url(#pr-shadow)' : undefined}>
@@ -2690,36 +2644,10 @@ export default function FenceCanvas({
                     {/* Main vertical post column */}
                     <path
                       d={`M ${x - postWidth/2} ${y + 0.3} L ${x - postWidth/2} ${y - vh} L ${x + postWidth/2} ${y - vh} L ${x + postWidth/2} ${y + 0.3} Z`}
-                      fill={prPostGrad ?? postColorHex}
+                      fill={material === 'post_and_rail' ? prTexId : postColorHex}
                       stroke={material === 'post_and_rail' ? prStainDark : '#000000'}
                       strokeWidth={material === 'post_and_rail' ? 0.08 : strokeWidth}
                     />
-
-                    {/* Timber grain lines — post_and_rail only */}
-                    {material === 'post_and_rail' && prGrainOffsets.map((frac, gi) => {
-                      const gx = x - postWidth/2 + frac * postWidth;
-                      return (
-                        <line key={gi}
-                          x1={gx} y1={y + 0.3}
-                          x2={gx} y2={y - vh}
-                          stroke={prStainDark}
-                          strokeWidth="0.18"
-                          strokeOpacity={0.22 + gi * 0.04}
-                        />
-                      );
-                    })}
-
-                    {/* Knot ellipses — post_and_rail only */}
-                    {material === 'post_and_rail' && prKnotYFracs.map((frac, ki) => (
-                      <ellipse key={ki}
-                        cx={x - postWidth * 0.08 + ki * postWidth * 0.22}
-                        cy={y - vh * frac}
-                        rx={postWidth * 0.28} ry={postWidth * 0.16}
-                        transform={`rotate(${ki === 0 ? -12 : 10}, ${x - postWidth * 0.08 + ki * postWidth * 0.22}, ${y - vh * frac})`}
-                        fill={prStainDark}
-                        fillOpacity="0.42"
-                      />
-                    ))}
 
                     {/* High gloss visual depth highlight — non-timber materials only */}
                     {material !== 'post_and_rail' && (
