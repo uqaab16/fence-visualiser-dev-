@@ -1755,7 +1755,7 @@ export default function FenceCanvas({
                     railCount === 2 ? [0.32, 0.75]
                     : railCount === 4 ? [0.18, 0.42, 0.65, 0.88]
                     : [0.20, 0.52, 0.84]; // 3 rails default
-                  const railThickness = 0.52;
+                  const railThickness = 1.4;
 
                   // Resolve stain from chosen colour name
                   const isRedStain = color.name === 'Reddish-Brown';
@@ -2676,8 +2676,8 @@ export default function FenceCanvas({
                 // For post_and_rail, compute stain-derived values matching renderTimberPost
                 const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
                 const prTexHref = prIsRed
-                  ? '/Think-Fencing-PVC-Post-and-Rail-Fence-x4-Red-Gum-1.jpg'
-                  : '/Home-post-and-rail-fencing-416x312.jpg';
+                  ? '/pr-red-texture.jpg'
+                  : '/pr-tan-texture.jpg';
                 const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
                 const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
 
