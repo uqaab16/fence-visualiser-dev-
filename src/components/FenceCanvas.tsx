@@ -1179,7 +1179,7 @@ export default function FenceCanvas({
   const getVisualFenceHeight = () => {
     // height parameter is 900, 1200, 1500, 1800, 2100 mm.
     // Convert this to base canvas coordinates percentages.
-    const basePct = (height / 1800) * 24;
+    const basePct = (height / 1800) * 32;
     return basePct * fenceScale;
   };
 
