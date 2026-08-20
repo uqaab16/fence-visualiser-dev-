@@ -1505,6 +1505,16 @@ export default function FenceCanvas({
                 <feDropShadow dx="0" dy="0.45" stdDeviation="0.35" floodOpacity="0.32" />
               </filter>
 
+              {/* Post & Rail — Natural Tan colour correction: slight desaturate + lighten */}
+              <filter id="pr-tan-adjust" colorInterpolationFilters="sRGB">
+                <feColorMatrix type="saturate" values="0.85"/>
+                <feComponentTransfer>
+                  <feFuncR type="linear" slope="1.08" intercept="0.02"/>
+                  <feFuncG type="linear" slope="1.06" intercept="0.02"/>
+                  <feFuncB type="linear" slope="1.04" intercept="0.02"/>
+                </feComponentTransfer>
+              </filter>
+
               {/* Foreground auto-layering mask to dynamically hide parts of the fence behind mailboxes, trees, or pillars */}
               <mask id="fence-foreground-mask">
                 {/* Default to white so the entire fence is visible */}
@@ -1762,6 +1772,7 @@ export default function FenceCanvas({
                   const texHref = isRedStain
                     ? '/pr-red-texture.jpg'
                     : '/pr-tan-texture.jpg';
+                  const texFilter = isRedStain ? undefined : 'url(#pr-tan-adjust)';
                   const stainDark  = isRedStain ? '#2e1108' : '#6b3e18';
                   const stainMid   = isRedStain ? '#4e2219' : '#a0682e';
 
@@ -1792,6 +1803,7 @@ export default function FenceCanvas({
                           width={pw} height={bottom - top}
                           preserveAspectRatio="xMidYMid slice"
                           clipPath={`url(#${clipId})`}
+                          filter={texFilter}
                         />
                         {/* Outline stroke over the texture */}
                         <path
@@ -1865,6 +1877,7 @@ export default function FenceCanvas({
                                 width={rRight - rLeft} height={rBot - rTop}
                                 preserveAspectRatio="xMidYMid slice"
                                 clipPath={`url(#${clipId})`}
+                                filter={texFilter}
                               />
                               {/* Outline stroke */}
                               <path d={panelPath} fill="none" stroke={stainDark} strokeWidth="0.06" />
@@ -2678,6 +2691,7 @@ export default function FenceCanvas({
                 const prTexHref = prIsRed
                   ? '/pr-red-texture.jpg'
                   : '/pr-tan-texture.jpg';
+                const prTexFilter = prIsRed ? undefined : 'url(#pr-tan-adjust)';
                 const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
                 const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
 
@@ -2706,6 +2720,7 @@ export default function FenceCanvas({
                             width={postWidth} height={pBot - pTop}
                             preserveAspectRatio="xMidYMid slice"
                             clipPath={`url(#${clipId})`}
+                            filter={prTexFilter}
                           />
                           <path
                             d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`}
