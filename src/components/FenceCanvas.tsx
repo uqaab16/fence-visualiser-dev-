@@ -1567,8 +1567,9 @@ export default function FenceCanvas({
                 // Visual-only span count: scales post/panel density to the drawn pixel path length
                 // rather than the real-world metre count, preventing cramping when a short path
                 // represents a long fence on an uploaded photo.
-                const PIXELS_PER_VISUAL_SPAN = 8; // % units (posts proportional to canvas %)
-                const visualSpanCount = Math.max(1, Math.round(segmentLength / PIXELS_PER_VISUAL_SPAN));
+                // Span width scales with rendered fence height — taller fence = wider post spacing
+                const spanPixelSize = getVisualFenceHeight() * 0.7;
+                const visualSpanCount = Math.max(1, Math.round(segmentLength / spanPixelSize));
 
                 // Perspective scaling factors for the start and end posts
                 const scaleStart = getPerspectiveScale(pStart.y);
