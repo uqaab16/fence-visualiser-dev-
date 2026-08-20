@@ -1700,7 +1700,7 @@ export default function FenceCanvas({
                         const scale = getPerspectiveScale(py);
                         const vh = getVisualFenceHeight() * scale;
 
-                        let postWidth = 0.5 * scale;
+                        let postWidth = vh * 0.055;
                         let postColorHex = postColor.hex;
                         let capHeight = 0.22 * scale;
 
@@ -1765,7 +1765,7 @@ export default function FenceCanvas({
                     railCount === 2 ? [0.32, 0.75]
                     : railCount === 4 ? [0.18, 0.42, 0.65, 0.88]
                     : [0.20, 0.52, 0.84]; // 3 rails default
-                  const railThickness = 1.4;
+                  const railThickness = getVisualFenceHeight() * 0.10;
 
                   // Resolve stain from chosen colour name
                   const isRedStain = color.name === 'Reddish-Brown';
@@ -1781,7 +1781,7 @@ export default function FenceCanvas({
                   // render path), so absolute coords are all that's needed.
                   const renderTimberPost = (px: number, py: number, scale: number, key: string) => {
                     const vh = getVisualFenceHeight() * scale;
-                    const pw = 1.15 * scale;
+                    const pw = vh * 0.075;
                     const capH = 0.22 * scale;
                     const left  = px - pw / 2;
                     const top   = py - vh;
@@ -2052,7 +2052,7 @@ export default function FenceCanvas({
 
                         const scale = getPerspectiveScale(py);
                         const vh = getVisualFenceHeight() * scale;
-                        const postWidth = 0.55 * scale;
+                        const postWidth = vh * 0.055;
                         const capHeight = 0.24 * scale;
 
                         return (
@@ -2232,7 +2232,7 @@ export default function FenceCanvas({
 
                         const scale = getPerspectiveScale(py);
                         const vh = getVisualFenceHeight() * scale;
-                        const postWidth = 0.55 * scale;
+                        const postWidth = vh * 0.055;
                         const capHeight = 0.24 * scale;
 
                         return (
@@ -2661,21 +2661,21 @@ export default function FenceCanvas({
                 const vh = getVisualFenceHeight() * scale;
 
                 // Determine post thickness & details based on selection type
-                let postWidth = 0.5 * scale; // standard 50mm * perspective
+                let postWidth = vh * 0.055; // proportional to rendered height
                 let postColorHex = postColor.hex;
                 let strokeWidth = 0.05;
                 let capHeight = 0.22 * scale;
 
                 if (material === 'post_and_rail') {
-                  postWidth = 1.1 * scale;
+                  postWidth = vh * 0.075;
                   postColorHex = color.hex; // use selected stain colour
                   capHeight = 0.22 * scale;
                 } else if (post.type === 'corner') {
-                  postWidth = 0.85 * scale; // Heavier 80-100mm corner post
+                  postWidth = vh * 0.065;
                 } else if (post.type === 'H-post') {
-                  postWidth = 0.95 * scale; // Distinct slide gate column
+                  postWidth = vh * 0.070;
                 } else if (post.type === 'decorative') {
-                  postWidth = 1.35 * scale; // Sandstone/concrete pillar
+                  postWidth = vh * 0.090; // Sandstone/concrete pillar
                   postColorHex = '#d1c7bd'; // Cream sandstone visual
                   capHeight = 0.45 * scale;
                 } else if (post.type === 'gate') {
