@@ -153,6 +153,13 @@ export default function App() {
   const [backgroundUrl, setBackgroundUrl] = useState<string>("");
   const [customImageUploaded, setCustomImageUploaded] = useState<boolean>(false);
 
+  // Photo-scale calibration: canvas-% per real-world metre, null = not calibrated
+  const [photoScale, setPhotoScale] = useState<number | null>(null);
+  const handleSetBackgroundUrl = (url: string) => {
+    setBackgroundUrl(url);
+    setPhotoScale(null); // reset calibration when photo changes
+  };
+
   // Focus inspection state
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
@@ -466,6 +473,7 @@ export default function App() {
               setSlatProfile={setSlatProfile}
               solidPanelProfile={solidPanelProfile}
               setSolidPanelProfile={setSolidPanelProfile}
+              photoScaleCalibrated={photoScale !== null}
             />
           </div>
         )}
@@ -506,9 +514,11 @@ export default function App() {
             segments={segments}
             setSegments={setSegments}
             backgroundUrl={backgroundUrl}
-            setBackgroundUrl={setBackgroundUrl}
+            setBackgroundUrl={handleSetBackgroundUrl}
             customImageUploaded={customImageUploaded}
             setCustomImageUploaded={setCustomImageUploaded}
+            photoScale={photoScale}
+            setPhotoScale={setPhotoScale}
             fenceScale={fenceScale}
             setFenceScale={setFenceScale}
             postColor={postColor}

@@ -56,6 +56,7 @@ interface SidebarControlsProps {
   setSlatProfile: (profile: '65' | '90') => void;
   solidPanelProfile: 'sawtooth' | 'trimline';
   setSolidPanelProfile: (profile: 'sawtooth' | 'trimline') => void;
+  photoScaleCalibrated?: boolean;
 }
 
 export default function SidebarControls({
@@ -88,7 +89,8 @@ export default function SidebarControls({
   solidPanelProfile,
   setSolidPanelProfile,
   includeChainwire,
-  setIncludeChainwire
+  setIncludeChainwire,
+  photoScaleCalibrated = false
 }: SidebarControlsProps) {
 
   // Fencing Types Configuration metadata for visuals
@@ -315,6 +317,12 @@ export default function SidebarControls({
                   );
                 })}
               </div>
+              {!photoScaleCalibrated && (
+                <p className="text-[10px] text-[#ff6a1f] leading-normal gap-1 flex items-start bg-[#fff4ee] border border-[#ff6a1f]/20 rounded-lg px-2.5 py-2">
+                  <Info className="w-3 h-3 text-[#ff6a1f] shrink-0 mt-0.5" />
+                  Use <strong className="mx-0.5">📐 Set Scale</strong> in the canvas toolbar for accurate height sizing against your uploaded photo.
+                </p>
+              )}
               <p className="text-[10px] text-[#5f6266] leading-normal gap-1 flex items-start">
                 <Info className="w-3 h-3 text-[#5f6266] shrink-0 mt-0.5" />
                 Typical Australian residential boundary fences peak at 1800mm — check your local council requirements. Heights over 1800mm may require DA approvals.

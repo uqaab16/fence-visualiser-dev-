@@ -62,6 +62,8 @@ interface FenceCanvasProps {
   solidPanelProfile?: 'sawtooth' | 'trimline';
   includeChainwire?: boolean;
   railCount?: 2 | 3 | 4;
+  photoScale?: number | null;
+  setPhotoScale?: (val: number | null) => void;
 }
 
 // Darken (factor < 1) or lighten (factor > 1) a #rrggbb hex color, used for procedural shading
@@ -105,7 +107,9 @@ export default function FenceCanvas({
   activeTab,
   slatProfile = '65',
   solidPanelProfile = 'trimline',
-  includeChainwire = false
+  includeChainwire = false,
+  photoScale = null,
+  setPhotoScale
 }: FenceCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const zoomBoxRef = useRef<HTMLDivElement>(null);
@@ -116,6 +120,13 @@ export default function FenceCanvas({
   const [isGlobalDragging, setIsGlobalDragging] = useState(false);
   const [showHelperGrid, setShowHelperGrid] = useState(true);
   const [showSatelliteModal, setShowSatelliteModal] = useState(false);
+
+  // Set Scale tool state
+  const [isScaleMode, setIsScaleMode] = useState(false);
+  const [scalePoint1, setScalePoint1] = useState<{ x: number; y: number } | null>(null);
+  const [scalePoint2, setScalePoint2] = useState<{ x: number; y: number } | null>(null);
+  const [showScaleInput, setShowScaleInput] = useState(false);
+  const [scaleInputValue, setScaleInputValue] = useState('');
 
   // States for Undo/Redo design layout rollback
   const [history, setHistory] = useState<{ posts: Post[]; segments: Segment[] }[]>([]);
@@ -559,6 +570,17 @@ export default function FenceCanvas({
   const [bgClickStart, setBgClickStart] = useState<{ x: number, y: number } | null>(null);
 
   const handlePointerDownBackground = (e: React.PointerEvent) => {
+    if (isScaleMode && !showScaleInput) {
+      e.stopPropagation();
+      const coords = getPercentageCoords(e.clientX, e.clientY);
+      if (!scalePoint1) {
+        setScalePoint1(coords);
+      } else {
+        setScalePoint2(coords);
+        setShowScaleInput(true);
+      }
+      return;
+    }
     if (isBrushMode) {
       e.stopPropagation();
       try {
@@ -1177,9 +1199,13 @@ export default function FenceCanvas({
 
   // Scale the fence height visually on canvas, matching height drop-down & scaling factor
   const getVisualFenceHeight = () => {
-    // height parameter is 900, 1200, 1500, 1800, 2100 mm.
-    // Convert this to base canvas coordinates percentages.
-    const basePct = (height / 1800) * 11; // 1800mm is ~11% of the image height visually
+    const heightMeters = height / 1000;
+    if (photoScale !== null) {
+      // Calibrated: use photo-derived canvas-% per metre
+      return heightMeters * photoScale * fenceScale;
+    }
+    // Fallback: hardcoded constant calibrated to the default placeholder image
+    const basePct = (height / 1800) * 11;
     return basePct * fenceScale;
   };
 
@@ -1236,6 +1262,30 @@ export default function FenceCanvas({
             className="btn-tool"
           >
             <span>🛰️ Map Measure</span>
+          </button>
+
+          {/* Set Scale Tool */}
+          <button
+            onClick={() => {
+              if (isScaleMode) {
+                // Cancel / exit scale mode
+                setIsScaleMode(false);
+                setScalePoint1(null);
+                setScalePoint2(null);
+                setShowScaleInput(false);
+                setScaleInputValue('');
+              } else {
+                setIsScaleMode(true);
+                setScalePoint1(null);
+                setScalePoint2(null);
+                setShowScaleInput(false);
+                setScaleInputValue('');
+              }
+            }}
+            title={photoScale !== null ? `Photo calibrated (${photoScale.toFixed(1)} %/m) — click to recalibrate` : 'Calibrate fence height to match this photo'}
+            className={`btn-tool ${isScaleMode ? 'is-active' : ''}`}
+          >
+            <span>{photoScale !== null ? '📐 Scale Set ✓' : '📐 Set Scale'}</span>
           </button>
 
           {/* Foreground Layering Brush Tool */}
@@ -2886,6 +2936,90 @@ export default function FenceCanvas({
             </svg>
           )}
 
+          {/* Set Scale overlay: instruction banner, drawn line, input dialog */}
+          {isScaleMode && (
+            <>
+              {/* Instruction banner */}
+              {!showScaleInput && (
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 z-40 bg-[#1a1c1e]/90 text-white text-[11px] font-semibold px-4 py-2 rounded-full shadow-lg pointer-events-none select-none">
+                  {!scalePoint1 ? 'Click the START of a known object (e.g. top of a door)' : 'Click the END of that object'}
+                </div>
+              )}
+
+              {/* Drawn line between point 1 and point 2 */}
+              {scalePoint1 && (
+                <svg className="absolute inset-0 w-full h-full pointer-events-none z-30" viewBox="0 0 100 100" preserveAspectRatio="none">
+                  {scalePoint2 ? (
+                    <>
+                      <line
+                        x1={scalePoint1.x} y1={scalePoint1.y}
+                        x2={scalePoint2.x} y2={scalePoint2.y}
+                        stroke="#ff6a1f" strokeWidth="0.4" strokeDasharray="1 0.5"
+                      />
+                      <circle cx={scalePoint1.x} cy={scalePoint1.y} r="0.8" fill="#ff6a1f" />
+                      <circle cx={scalePoint2.x} cy={scalePoint2.y} r="0.8" fill="#ff6a1f" />
+                    </>
+                  ) : (
+                    <circle cx={scalePoint1.x} cy={scalePoint1.y} r="0.8" fill="#ff6a1f" />
+                  )}
+                </svg>
+              )}
+
+              {/* Real-world length input dialog */}
+              {showScaleInput && scalePoint1 && scalePoint2 && (
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white border border-[#d9d3c5] rounded-xl shadow-2xl p-5 flex flex-col gap-3 w-72 select-none">
+                  <div className="text-[12px] font-bold text-[#1a1c1e]">What is the real-world length of this line?</div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0.1"
+                      step="0.1"
+                      placeholder="e.g. 2.1"
+                      value={scaleInputValue}
+                      onChange={e => setScaleInputValue(e.target.value)}
+                      autoFocus
+                      className="flex-1 border border-[#d9d3c5] rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#ff6a1f]/40"
+                    />
+                    <span className="text-[11px] text-[#5f6266] font-medium">metres</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const metres = parseFloat(scaleInputValue);
+                        if (!isNaN(metres) && metres > 0 && scalePoint1 && scalePoint2) {
+                          const dx = scalePoint2.x - scalePoint1.x;
+                          const dy = scalePoint2.y - scalePoint1.y;
+                          const dist = Math.sqrt(dx * dx + dy * dy); // canvas-% distance
+                          const scale = dist / metres;
+                          setPhotoScale?.(scale);
+                        }
+                        setIsScaleMode(false);
+                        setScalePoint1(null);
+                        setScalePoint2(null);
+                        setShowScaleInput(false);
+                        setScaleInputValue('');
+                      }}
+                      className="flex-1 bg-[#ff6a1f] text-white rounded-lg py-2 text-[11px] font-bold hover:bg-[#e55a14] transition"
+                    >
+                      Set Scale
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsScaleMode(false);
+                        setScalePoint1(null);
+                        setScalePoint2(null);
+                        setShowScaleInput(false);
+                        setScaleInputValue('');
+                      }}
+                      className="flex-1 bg-[#f3efe6] border border-[#d9d3c5] text-[#5f6266] rounded-lg py-2 text-[11px] font-medium hover:bg-[#ece7db] transition"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
           </div>
         </div>
 
