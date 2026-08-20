@@ -1760,8 +1760,8 @@ export default function FenceCanvas({
                   // Resolve stain from chosen colour name
                   const isRedStain = color.name === 'Reddish-Brown';
                   const texHref = isRedStain
-                    ? '/Think-Fencing-PVC-Post-and-Rail-Fence-x4-Red-Gum-1.jpg'
-                    : '/Home-post-and-rail-fencing-416x312.jpg';
+                    ? '/pr-red-texture.jpg'
+                    : '/pr-tan-texture.jpg';
                   const stainDark  = isRedStain ? '#2e1108' : '#6b3e18';
                   const stainMid   = isRedStain ? '#4e2219' : '#a0682e';
 
