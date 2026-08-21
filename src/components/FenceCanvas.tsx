@@ -1587,15 +1587,15 @@ export default function FenceCanvas({
                   // DRAW HORIZONTAL SLATS (Modern colorbond or metal slat layout)
                   const isChunky = slatProfile === '90';
                   const baseVh = getVisualFenceHeight();
-                  // Target count: baseVh*0.75 - 4 for 65mm; Math.floor(baseVh) - 4 for 90mm
-                  // This gives ~20 slats at 1800mm (65mm) and ~28 at 1800mm (90mm).
+                  // 65mm: ~20 slats at 1800mm with slightly thicker slat body (less gap)
+                  // 90mm: ~13 slats at 1800mm with much thicker slat body (genuinely chunky look)
                   const slatTotal = Math.max(
                     isChunky
-                      ? Math.floor(baseVh) - 4
-                      : Math.round(baseVh * 0.75) - 4,
+                      ? Math.round(baseVh * 0.40) + 1   // ~13 at 1800mm
+                      : Math.round(baseVh * 0.75) - 4,  // ~20 at 1800mm
                     4
                   );
-                  const slatBodyH = isChunky ? 0.85 : 0.55; // physical slat thickness (fixed)
+                  const slatBodyH = isChunky ? 1.30 : 0.68; // 90mm: thick/chunky; 65mm: slightly thicker than before
                   const pitch = baseVh / slatTotal;          // total slot height per slat
                   const slatGap = pitch - slatBodyH;         // remaining space = gap
                   const slatRatio = slatBodyH / pitch;       // fill fraction for rendering
