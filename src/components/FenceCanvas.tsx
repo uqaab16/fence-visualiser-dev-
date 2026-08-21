@@ -1567,8 +1567,12 @@ export default function FenceCanvas({
                 // Visual-only span count: scales post/panel density to the drawn pixel path length
                 // rather than the real-world metre count, preventing cramping when a short path
                 // represents a long fence on an uploaded photo.
-                // Span width scales with rendered fence height — taller fence = wider post spacing
-                const spanPixelSize = getVisualFenceHeight() * 0.7;
+                // Span width: convert fence height (y-SVG-units) to pixels, target 3:1 bay ratio,
+                // then convert back to x-SVG-units — bridges the different x/y pixel scales.
+                const pixPerXUnit = containerSize.width / 100;
+                const pixPerYUnit = containerSize.height / 100;
+                const fenceHeightPx = getVisualFenceHeight() * pixPerYUnit;
+                const spanPixelSize = (fenceHeightPx * 3.0) / pixPerXUnit;
                 const visualSpanCount = Math.max(1, Math.round(segmentLength / spanPixelSize));
 
                 // Perspective scaling factors for the start and end posts
@@ -1582,12 +1586,20 @@ export default function FenceCanvas({
                 if (material === 'slat_fencing') {
                   // DRAW HORIZONTAL SLATS (Modern colorbond or metal slat layout)
                   const isChunky = slatProfile === '90';
-                  const slatHeight = isChunky ? 0.85 : 0.55;
-                  const slatGap = isChunky ? 0.15 : 0.18;
-                  const slatRatio = isChunky ? 0.85 : 0.80;
-                  // Base slat total calculated off structural fence height
                   const baseVh = getVisualFenceHeight();
-                  const slatTotal = Math.max(Math.floor(baseVh / (slatHeight + slatGap)), 6);
+                  // Target count: baseVh*0.75 - 4 for 65mm; Math.floor(baseVh) - 4 for 90mm
+                  // This gives ~20 slats at 1800mm (65mm) and ~28 at 1800mm (90mm).
+                  const slatTotal = Math.max(
+                    isChunky
+                      ? Math.floor(baseVh) - 4
+                      : Math.round(baseVh * 0.75) - 4,
+                    4
+                  );
+                  const slatBodyH = isChunky ? 0.85 : 0.55; // physical slat thickness (fixed)
+                  const pitch = baseVh / slatTotal;          // total slot height per slat
+                  const slatGap = pitch - slatBodyH;         // remaining space = gap
+                  const slatRatio = slatBodyH / pitch;       // fill fraction for rendering
+                  const slatHeight = slatBodyH;
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
