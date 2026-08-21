@@ -223,10 +223,10 @@ export default function FenceCanvas({
 
   // Perspective scaling mathematical model
   const getPerspectiveScale = (yPct: number) => {
-    const baselineY = 75; // Standard camera baseline
-    const slope = 0.0125; // 1.25% change in scale for every percent of depth
+    const baselineY = 65; // Reference fence position (~65% down frame for standing-height camera)
+    const slope = 0.040; // Implies horizon at y=40, realistic for residential exterior photos
     const scale = 1.0 + (yPct - baselineY) * slope;
-    return Math.min(Math.max(scale, 0.45), 2.5);
+    return Math.min(Math.max(scale, 0.20), 2.5);
   };
 
   // Helper to calculate locked physical gate widths as exact SVG percentages
