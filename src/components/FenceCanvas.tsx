@@ -1547,20 +1547,87 @@ export default function FenceCanvas({
             {/* DRAG-AND-DROP DISPLACEMENT LAYER (Translates whole fence globally with the layering mask applied) */}
             <g transform={`translate(${globalOffset.x}, ${globalOffset.y})`} mask="url(#fence-foreground-mask)">
               
-              {/* 1. SECTIONS / FENCE PANELS IN-FILLS LAYER — sorted furthest-first */}
-              {[...segments]
-                .sort((a, b) => {
-                  const pa = posts.find(p => p.id === a.startPostId);
-                  const pb = posts.find(p => p.id === a.endPostId);
-                  const qa = posts.find(p => p.id === b.startPostId);
-                  const qb = posts.find(p => p.id === b.endPostId);
-                  const ayAvg = pa && pb ? (pa.y + pb.y) / 2 : 0;
-                  const byAvg = qa && qb ? (qa.y + qb.y) / 2 : 0;
-                  return ayAvg - byAvg;
-                })
-                .map((seg, sIdx) => {
-                const pStart = posts.find(p => p.id === seg.startPostId);
-                const pEnd = posts.find(p => p.id === seg.endPostId);
+              {/* Unified depth-sorted render — far segments first so closer ones always occlude them.
+                  Each segment renders: panel infill → gate overlay → its own end posts.
+                  renderedPostIds prevents a shared corner post painting twice. */}
+              {(() => {
+                const sorted = [...segments]
+                  .map(seg => {
+                    const pStart = posts.find(p => p.id === seg.startPostId);
+                    const pEnd   = posts.find(p => p.id === seg.endPostId);
+                    const avgY   = pStart && pEnd ? (pStart.y + pEnd.y) / 2 : 0;
+                    return { seg, pStart, pEnd, avgY };
+                  })
+                  .sort((a, b) => a.avgY - b.avgY);
+                const renderedPostIds = new Set<string>();
+
+                const renderPost = (post: typeof posts[0]) => {
+                  const isSelected = selectedPostId === post.id;
+                  const scale = getPerspectiveScale(post.y);
+                  const vh = getVisualFenceHeight() * scale;
+                  let postWidth = vh * 0.055;
+                  let postColorHex = postColor.hex;
+                  let strokeWidth = 0.05;
+                  let capHeight = 0.22 * scale;
+                  if (material === 'post_and_rail') {
+                    postWidth = vh * 0.075;
+                    postColorHex = color.hex;
+                    capHeight = 0.22 * scale;
+                  } else if (post.type === 'corner') {
+                    postWidth = vh * 0.065;
+                  } else if (post.type === 'H-post') {
+                    postWidth = vh * 0.070;
+                  } else if (post.type === 'decorative') {
+                    postWidth = vh * 0.090;
+                    postColorHex = '#d1c7bd';
+                    capHeight = 0.45 * scale;
+                  } else if (post.type === 'gate') {
+                    postWidth = 0.8 * scale;
+                  }
+                  const x = post.x;
+                  const y = post.y;
+                  const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
+                  const prTexHref = prIsRed ? '/pr-red-texture.jpg' : '/pr-tan-texture.jpg';
+                  const prTexFilter = prIsRed ? undefined : 'url(#pr-tan-adjust)';
+                  const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
+                  const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
+                  return (
+                    <g key={post.id} className="pointer-events-none" filter={material === 'post_and_rail' ? 'url(#pr-shadow)' : undefined}>
+                      <ellipse cx={x} cy={y + 0.2} rx={postWidth * 0.9} ry="0.18" fill="#000" opacity={material === 'post_and_rail' ? 0.38 : 0.32} />
+                      {material === 'post_and_rail' ? (() => {
+                        const pLeft = x - postWidth / 2;
+                        const pTop  = y - vh;
+                        const pBot  = y + 0.3;
+                        const clipId = `pr-clip-node-${post.id}`;
+                        return (
+                          <>
+                            <defs><clipPath id={clipId}><path d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`} /></clipPath></defs>
+                            <image href={prTexHref} x={pLeft} y={pTop} width={postWidth} height={pBot - pTop} preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clipId})`} filter={prTexFilter} />
+                            <path d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`} fill="none" stroke={prStainDark} strokeWidth="0.08" />
+                          </>
+                        );
+                      })() : (
+                        <path d={`M ${x - postWidth/2} ${y + 0.3} L ${x - postWidth/2} ${y - vh} L ${x + postWidth/2} ${y - vh} L ${x + postWidth/2} ${y + 0.3} Z`} fill={postColorHex} stroke="#000000" strokeWidth={strokeWidth} />
+                      )}
+                      {material !== 'post_and_rail' && (
+                        <line x1={x - postWidth/3} y1={y + 0.2} x2={x - postWidth/3} y2={y - vh} stroke="#ffffff" strokeWidth={postWidth * 0.16} opacity={post.type === 'decorative' ? 0.1 : 0.28} />
+                      )}
+                      {material === 'post_and_rail' ? (
+                        <path d={`M ${x - postWidth/2 - 0.06} ${y - vh} L ${x - postWidth * 0.12} ${y - vh - capHeight * 0.65} L ${x} ${y - vh - capHeight} L ${x + postWidth * 0.12} ${y - vh - capHeight * 0.65} L ${x + postWidth/2 + 0.06} ${y - vh} Z`} fill={prStainMid} stroke={prStainDark} strokeWidth="0.05" />
+                      ) : (
+                        <path d={`M ${x - postWidth/2 - 0.06} ${y - vh} L ${x - postWidth/2 - 0.06} ${y - vh - capHeight} L ${x + postWidth/2 + 0.06} ${y - vh - capHeight} L ${x + postWidth/2 + 0.06} ${y - vh} Z`} fill={postColorHex} stroke="#000" strokeWidth="0.04" />
+                      )}
+                      {post.type === 'decorative' && material !== 'post_and_rail' && (
+                        <polygon points={`${x - postWidth/2 - 0.06},${y - vh - capHeight} ${x + postWidth/2 + 0.06},${y - vh - capHeight} ${x},${y - vh - capHeight - 0.25 * scale}`} fill="#b0a59a" stroke="#000" strokeWidth="0.04" />
+                      )}
+                      {isSelected && (
+                        <rect x={x - postWidth/2 - 0.4} y={y - vh - capHeight - 0.4} width={postWidth + 0.8} height={vh + capHeight + 1.1} fill="none" stroke="#14b8a6" strokeWidth="0.25" strokeDasharray="0.8 0.8" />
+                      )}
+                    </g>
+                  );
+                };
+
+                return sorted.map(({ seg, pStart, pEnd }, sIdx) => {
                 if (!pStart || !pEnd) return null;
                 if (seg.isStandaloneGate) return null;
 
@@ -1593,6 +1660,7 @@ export default function FenceCanvas({
                 const vhEnd = getVisualFenceHeight() * scaleEnd;
 
                 // Rendering materials procedurally inside SVG
+                const panelEl: React.ReactNode = (() => {
                 if (material === 'slat_fencing') {
                   // DRAW HORIZONTAL SLATS (Modern colorbond or metal slat layout)
                   const isChunky = slatProfile === '90';
@@ -2291,31 +2359,11 @@ export default function FenceCanvas({
                   );
                 }
                 return null;
-              })}
+                })();
 
-              {/* 2. GATES OVERLAY LAYER — sorted furthest-first to match panel order */}
-              {[...segments]
-                .sort((a, b) => {
-                  const pa = posts.find(p => p.id === a.startPostId);
-                  const pb = posts.find(p => p.id === a.endPostId);
-                  const qa = posts.find(p => p.id === b.startPostId);
-                  const qb = posts.find(p => p.id === b.endPostId);
-                  const ayAvg = pa && pb ? (pa.y + pb.y) / 2 : 0;
-                  const byAvg = qa && qb ? (qa.y + qb.y) / 2 : 0;
-                  return ayAvg - byAvg;
-                })
-                .map((seg) => {
+                // ── GATE OVERLAY for this segment ──────────────────────────────────────
+                const gateEl: React.ReactNode = (() => {
                 if (!seg.hasGate) return null;
-                const pStart = posts.find(p => p.id === seg.startPostId);
-                const pEnd = posts.find(p => p.id === seg.endPostId);
-                if (!pStart || !pEnd) return null;
-
-                const isSelected = selectedSegmentId === seg.id;
-
-                // Perspective scales for gate corners
-                const segmentWidth = pEnd.x - pStart.x;
-                const segmentHeight = pEnd.y - pStart.y;
-                const segmentLength = Math.sqrt(segmentWidth ** 2 + segmentHeight ** 2) || 1;
 
                 const { startPct: gStartPct, endPct: gEndPct } = getGateSpanPcts(seg, segmentLength);
 
@@ -2683,155 +2731,19 @@ export default function FenceCanvas({
                     )}
                   </g>
                 );
-              })}
+                })();
 
-              {/* 3. STRUCTURAL VERTICAL POSTS & ANCHOR PILLARS — sorted furthest-first */}
-              {[...posts].sort((a, b) => a.y - b.y).map((post, pIdx) => {
-                const isSelected = selectedPostId === post.id;
+                // ── END POSTS for this segment (deduped via renderedPostIds) ──────────
+                const postEls = [pStart, pEnd].filter((p): p is typeof posts[0] => {
+                  if (!p || renderedPostIds.has(p.id)) return false;
+                  renderedPostIds.add(p.id);
+                  return true;
+                }).map(renderPost);
 
-                // Perspective values
-                const scale = getPerspectiveScale(post.y);
-                const vh = getVisualFenceHeight() * scale;
+                return <React.Fragment key={sIdx}>{panelEl}{gateEl}{postEls}</React.Fragment>;
+              });
 
-                // Determine post thickness & details based on selection type
-                let postWidth = vh * 0.055; // proportional to rendered height
-                let postColorHex = postColor.hex;
-                let strokeWidth = 0.05;
-                let capHeight = 0.22 * scale;
-
-                if (material === 'post_and_rail') {
-                  postWidth = vh * 0.075;
-                  postColorHex = color.hex; // use selected stain colour
-                  capHeight = 0.22 * scale;
-                } else if (post.type === 'corner') {
-                  postWidth = vh * 0.065;
-                } else if (post.type === 'H-post') {
-                  postWidth = vh * 0.070;
-                } else if (post.type === 'decorative') {
-                  postWidth = vh * 0.090; // Sandstone/concrete pillar
-                  postColorHex = '#d1c7bd'; // Cream sandstone visual
-                  capHeight = 0.45 * scale;
-                } else if (post.type === 'gate') {
-                  postWidth = 0.8 * scale;
-                }
-
-                // Visual bounds
-                const x = post.x;
-                const y = post.y;
-
-                // For post_and_rail, compute stain-derived values matching renderTimberPost
-                const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
-                const prTexHref = prIsRed
-                  ? '/pr-red-texture.jpg'
-                  : '/pr-tan-texture.jpg';
-                const prTexFilter = prIsRed ? undefined : 'url(#pr-tan-adjust)';
-                const prStainDark = prIsRed ? '#2e1108' : '#6b3e18';
-                const prStainMid  = prIsRed ? '#4e2219' : '#a0682e';
-
-                return (
-                  <g key={post.id} className="pointer-events-none" filter={material === 'post_and_rail' ? 'url(#pr-shadow)' : undefined}>
-
-                    {/* Post ground shadow anchor */}
-                    <ellipse cx={x} cy={y + 0.2} rx={postWidth * 0.9} ry="0.18" fill="#000" opacity={material === 'post_and_rail' ? 0.38 : 0.32} />
-
-                    {/* Main vertical post column */}
-                    {material === 'post_and_rail' ? (() => {
-                      const pLeft = x - postWidth / 2;
-                      const pTop  = y - vh;
-                      const pBot  = y + 0.3;
-                      const clipId = `pr-clip-node-${post.id}`;
-                      return (
-                        <>
-                          <defs>
-                            <clipPath id={clipId}>
-                              <path d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`} />
-                            </clipPath>
-                          </defs>
-                          <image
-                            href={prTexHref}
-                            x={pLeft} y={pTop}
-                            width={postWidth} height={pBot - pTop}
-                            preserveAspectRatio="xMidYMid slice"
-                            clipPath={`url(#${clipId})`}
-                            filter={prTexFilter}
-                          />
-                          <path
-                            d={`M ${pLeft} ${pBot} L ${pLeft} ${pTop} L ${x + postWidth/2} ${pTop} L ${x + postWidth/2} ${pBot} Z`}
-                            fill="none"
-                            stroke={prStainDark}
-                            strokeWidth="0.08"
-                          />
-                        </>
-                      );
-                    })() : (
-                      <path
-                        d={`M ${x - postWidth/2} ${y + 0.3} L ${x - postWidth/2} ${y - vh} L ${x + postWidth/2} ${y - vh} L ${x + postWidth/2} ${y + 0.3} Z`}
-                        fill={postColorHex}
-                        stroke="#000000"
-                        strokeWidth={strokeWidth}
-                      />
-                    )}
-
-                    {/* High gloss visual depth highlight — non-timber materials only */}
-                    {material !== 'post_and_rail' && (
-                      <line
-                        x1={x - postWidth/3}
-                        y1={y + 0.2}
-                        x2={x - postWidth/3}
-                        y2={y - vh}
-                        stroke="#ffffff"
-                        strokeWidth={postWidth * 0.16}
-                        opacity={post.type === 'decorative' ? 0.1 : 0.28}
-                      />
-                    )}
-
-                    {/* Cap — chamfered pyramid for post_and_rail, flat bracket for others */}
-                    {material === 'post_and_rail' ? (
-                      <path
-                        d={`M ${x - postWidth/2 - 0.06} ${y - vh} L ${x - postWidth * 0.12} ${y - vh - capHeight * 0.65} L ${x} ${y - vh - capHeight} L ${x + postWidth * 0.12} ${y - vh - capHeight * 0.65} L ${x + postWidth/2 + 0.06} ${y - vh} Z`}
-                        fill={prStainMid}
-                        stroke={prStainDark}
-                        strokeWidth="0.05"
-                      />
-                    ) : (
-                      <path
-                        d={`M ${x - postWidth/2 - 0.06} ${y - vh} L ${x - postWidth/2 - 0.06} ${y - vh - capHeight} L ${x + postWidth/2 + 0.06} ${y - vh - capHeight} L ${x + postWidth/2 + 0.06} ${y - vh} Z`}
-                        fill={postColorHex}
-                        stroke="#000"
-                        strokeWidth="0.04"
-                      />
-                    )}
-
-                    {/* Decorative cap peak ornament */}
-                    {post.type === 'decorative' && material !== 'post_and_rail' && (
-                      <polygon
-                        points={`
-                          ${x - postWidth/2 - 0.06},${y - vh - capHeight}
-                          ${x + postWidth/2 + 0.06},${y - vh - capHeight}
-                          ${x},${y - vh - capHeight - 0.25 * scale}
-                        `}
-                        fill="#b0a59a"
-                        stroke="#000"
-                        strokeWidth="0.04"
-                      />
-                    )}
-
-                    {/* Selected state overlay halo */}
-                    {isSelected && (
-                      <rect
-                        x={x - postWidth/2 - 0.4}
-                        y={y - vh - capHeight - 0.4}
-                        width={postWidth + 0.8}
-                        height={vh + capHeight + 1.1}
-                        fill="none"
-                        stroke="#14b8a6"
-                        strokeWidth="0.25"
-                        strokeDasharray="0.8 0.8"
-                      />
-                    )}
-                  </g>
-                );
-              })}
+              })()}
 
             </g>
           </svg>
