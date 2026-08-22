@@ -1547,8 +1547,18 @@ export default function FenceCanvas({
             {/* DRAG-AND-DROP DISPLACEMENT LAYER (Translates whole fence globally with the layering mask applied) */}
             <g transform={`translate(${globalOffset.x}, ${globalOffset.y})`} mask="url(#fence-foreground-mask)">
               
-              {/* 1. SECTIONS / FENCE PANELS IN-FILLS LAYER */}
-              {segments.map((seg, sIdx) => {
+              {/* 1. SECTIONS / FENCE PANELS IN-FILLS LAYER — sorted furthest-first */}
+              {[...segments]
+                .sort((a, b) => {
+                  const pa = posts.find(p => p.id === a.startPostId);
+                  const pb = posts.find(p => p.id === a.endPostId);
+                  const qa = posts.find(p => p.id === b.startPostId);
+                  const qb = posts.find(p => p.id === b.endPostId);
+                  const ayAvg = pa && pb ? (pa.y + pb.y) / 2 : 0;
+                  const byAvg = qa && qb ? (qa.y + qb.y) / 2 : 0;
+                  return ayAvg - byAvg;
+                })
+                .map((seg, sIdx) => {
                 const pStart = posts.find(p => p.id === seg.startPostId);
                 const pEnd = posts.find(p => p.id === seg.endPostId);
                 if (!pStart || !pEnd) return null;
@@ -2283,8 +2293,18 @@ export default function FenceCanvas({
                 return null;
               })}
 
-              {/* 2. GATES OVERLAY LAYER (Placed precisely on top of linked fence sections) */}
-              {segments.map((seg) => {
+              {/* 2. GATES OVERLAY LAYER — sorted furthest-first to match panel order */}
+              {[...segments]
+                .sort((a, b) => {
+                  const pa = posts.find(p => p.id === a.startPostId);
+                  const pb = posts.find(p => p.id === a.endPostId);
+                  const qa = posts.find(p => p.id === b.startPostId);
+                  const qb = posts.find(p => p.id === b.endPostId);
+                  const ayAvg = pa && pb ? (pa.y + pb.y) / 2 : 0;
+                  const byAvg = qa && qb ? (qa.y + qb.y) / 2 : 0;
+                  return ayAvg - byAvg;
+                })
+                .map((seg) => {
                 if (!seg.hasGate) return null;
                 const pStart = posts.find(p => p.id === seg.startPostId);
                 const pEnd = posts.find(p => p.id === seg.endPostId);
@@ -2665,8 +2685,8 @@ export default function FenceCanvas({
                 );
               })}
 
-              {/* 3. STRUCTURAL VERTICAL POSTS & ANCHOR PILLARS WITH PERSPECTIVE */}
-              {posts.map((post, pIdx) => {
+              {/* 3. STRUCTURAL VERTICAL POSTS & ANCHOR PILLARS — sorted furthest-first */}
+              {[...posts].sort((a, b) => a.y - b.y).map((post, pIdx) => {
                 const isSelected = selectedPostId === post.id;
 
                 // Perspective values
