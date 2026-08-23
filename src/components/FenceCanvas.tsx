@@ -226,7 +226,7 @@ export default function FenceCanvas({
     const baselineY = 65; // Reference fence position (~65% down frame for standing-height camera)
     const slope = 0.040; // Implies horizon at y=40, realistic for residential exterior photos
     const scale = 1.0 + (yPct - baselineY) * slope;
-    return Math.min(Math.max(scale, 0.20), 2.5);
+    return Math.min(Math.max(scale, 0.50), 1.60);
   };
 
   // Helper to calculate locked physical gate widths as exact SVG percentages
