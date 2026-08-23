@@ -566,7 +566,29 @@ export default function FenceCanvas({
     e.stopPropagation();
 
     if (isInsertPostMode) {
-      insertPostOnSegmentClick();
+      // Compute t directly from click position — don't rely on hover state
+      const coords = getPercentageCoords(e.clientX, e.clientY);
+      const cursorX = coords.x - globalOffset.x;
+      const cursorY = coords.y - globalOffset.y;
+      const seg = segments.find(s => s.id === segId);
+      if (seg) {
+        const pA = posts.find(p => p.id === seg.startPostId);
+        const pB = posts.find(p => p.id === seg.endPostId);
+        if (pA && pB) {
+          const dx = pB.x - pA.x, dy = pB.y - pA.y;
+          const len2 = dx * dx + dy * dy;
+          if (len2 > 0) {
+            const t = Math.max(0, Math.min(1, ((cursorX - pA.x) * dx + (cursorY - pA.y) * dy) / len2));
+            const segLen = Math.hypot(dx, dy);
+            const MIN_DIST = 5;
+            if (t * segLen >= MIN_DIST && (1 - t) * segLen >= MIN_DIST) {
+              handleSegmentClick(seg, t);
+              setIsInsertPostMode(false);
+              setInsertPostHover(null);
+            }
+          }
+        }
+      }
       return;
     }
 
@@ -644,7 +666,7 @@ export default function FenceCanvas({
       const cursorX = coords.x - globalOffset.x;
       const cursorY = coords.y - globalOffset.y;
       const MIN_DIST = 5; // % canvas units from endpoint — refuse placement closer than this
-      const HOVER_THRESHOLD = 4; // max % distance from segment line to count as "hovering"
+      const HOVER_THRESHOLD = 8; // max % distance from segment line to count as "hovering"
 
       let best: typeof insertPostHover = null;
       let bestDist = Infinity;
