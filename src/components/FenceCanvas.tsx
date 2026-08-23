@@ -378,7 +378,7 @@ export default function FenceCanvas({
     // Seed default fence positions for the demo house so there is a pre-configured fence layout
     const DEFAULT_POSTS: Post[] = [
       { id: 'p1', x: 11, y: 76, type: 'standard' },
-      { id: 'p2', x: 50, y: 79, type: 'corner' },
+      { id: 'p2', x: 50, y: 79, type: 'standard' },
       { id: 'p3', x: 89, y: 73, type: 'gate' }
     ];
 
@@ -1607,10 +1607,6 @@ export default function FenceCanvas({
                     postWidth = vh * 0.075;
                     postColorHex = color.hex;
                     capHeight = 0.22 * scale;
-                  } else if (post.type === 'corner') {
-                    postWidth = vh * 0.065;
-                  } else if (post.type === 'H-post') {
-                    postWidth = vh * 0.070;
                   } else if (post.type === 'decorative') {
                     postWidth = vh * 0.090;
                     postColorHex = '#d1c7bd';
@@ -1618,6 +1614,8 @@ export default function FenceCanvas({
                   } else if (post.type === 'gate') {
                     postWidth = 0.8 * scale;
                   }
+                  // 'corner' and 'H-post' intentionally use the same width as 'standard'
+                  // so all non-gate posts on a fence run appear uniformly sized.
                   const x = post.x;
                   const y = post.y;
                   const prIsRed = material === 'post_and_rail' && color.name === 'Reddish-Brown';
