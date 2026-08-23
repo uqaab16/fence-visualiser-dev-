@@ -697,13 +697,8 @@ export default function FenceCanvas({
 
     if (activeDragId) {
       const coords = getPercentageCoords(e.clientX, e.clientY);
-      let targetX = coords.x - globalOffset.x;
-      let targetY = coords.y - globalOffset.y;
-
-      if (showHelperGrid) {
-        targetX = snapToGrid(targetX);
-        targetY = snapToGrid(targetY);
-      }
+      const targetX = coords.x - globalOffset.x;
+      const targetY = coords.y - globalOffset.y;
 
       const oldPost = posts.find(p => p.id === activeDragId);
       if (oldPost) {
