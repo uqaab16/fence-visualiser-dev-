@@ -2369,10 +2369,11 @@ export default function FenceCanvas({
                   const frameThickStart = vhStart * 0.028; // ~25mm frame channel top & bottom
                   const frameThickEnd   = vhEnd   * 0.028;
 
-                  // Hole pattern dimensions — scaled to fence height so density stays consistent
-                  // at all height options. holeStep ≈ 13.5mm pitch; holeR ≈ 9mm/2 = 4.5mm.
-                  const holeStep = getVisualFenceHeight() * 0.052;
-                  const holeR    = holeStep * 0.34; // 9/13.5 * 0.5 ≈ 0.33 — visible but not over-punched
+                  // Fine-mesh hole pattern: ~55 rows at 1800mm → reads as perforated screen at screen distance.
+                  // Each tile is a transparent "hole" background; a small colored circle represents the metal land.
+                  // Open area ≈ 1 − π(0.33)² ≈ 65.7% transparent, matching the see-through real product.
+                  const holeStep = getVisualFenceHeight() * 0.018; // 65% smaller than previous 0.052
+                  const metalR   = holeStep * 0.33; // radius of solid metal dot (background = hole / transparent)
                   const patternId = `perf-holes-${seg.id}`;
 
                   // Clip the perforated quad so holes don't bleed outside the panel boundary
@@ -2397,18 +2398,19 @@ export default function FenceCanvas({
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
                       <defs>
-                        {/* Uniform round-hole dot grid — scales with fence height */}
+                        {/* Fine-mesh pattern: transparent background (= hole) + colored circle (= metal land).
+                            Background photo shows through the ~66% open area between circles. */}
                         <pattern id={patternId} x="0" y="0" width={holeStep} height={holeStep} patternUnits="userSpaceOnUse">
-                          <circle cx={holeStep / 2} cy={holeStep / 2} r={holeR} fill="rgba(0,0,0,0.52)" />
+                          <circle cx={holeStep / 2} cy={holeStep / 2} r={metalR} fill={color.hex} />
                         </pattern>
                         <clipPath id={clipId}>
                           <path d={panelPath} />
                         </clipPath>
                       </defs>
 
-                      {/* 1. Solid base panel fill per span (with gate cutouts) */}
+                      {/* 1. Faint ambient tint — real perforated metal has slight haze at viewing angles */}
                       {fillSpans.map(([tA, tB], i) => (
-                        <path key={`pf-fill-${i}`} d={spanPath(tA, tB)} fill={color.hex} opacity={0.88} />
+                        <path key={`pf-fill-${i}`} d={spanPath(tA, tB)} fill={color.hex} opacity={0.09} />
                       ))}
 
                       {/* 2. Dot-grid perforation overlay — clipped to panel outline */}
