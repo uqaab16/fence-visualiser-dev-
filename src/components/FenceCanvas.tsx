@@ -540,7 +540,7 @@ export default function FenceCanvas({
 
   const handlePointerDownBackground = (e: React.PointerEvent) => {
     if (isInsertPostMode) {
-      // Clicking empty canvas in insert-post mode cancels the mode
+      console.log('[InsertPost] handlePointerDownBackground fired in insert mode — cancelling (click missed segment)');
       setIsInsertPostMode(false);
       setInsertPostHover(null);
       return;
@@ -566,16 +566,25 @@ export default function FenceCanvas({
     e.stopPropagation();
 
     if (isInsertPostMode) {
-      // Use the already-computed ghost position (insertPostHover) so the post
-      // inserts exactly where the ghost was showing — not re-projected from the
-      // raw click coords (which land on the wide panel fill, not on the segment line).
+      console.log('[InsertPost] handlePointerDownSegment fired', {
+        segId,
+        isInsertPostMode,
+        insertPostHover,
+        hoverSegmentId: insertPostHover?.segmentId,
+        segmentIdMatch: insertPostHover?.segmentId === segId,
+        hoverValid: insertPostHover?.valid,
+      });
       if (insertPostHover && insertPostHover.valid && insertPostHover.segmentId === segId) {
         const seg = segments.find(s => s.id === segId);
+        console.log('[InsertPost] guard passed, seg found:', !!seg, 't:', insertPostHover.t);
         if (seg) {
+          console.log('[InsertPost] calling handleSegmentClick');
           handleSegmentClick(seg, insertPostHover.t);
           setIsInsertPostMode(false);
           setInsertPostHover(null);
         }
+      } else {
+        console.log('[InsertPost] guard FAILED — insertPostHover:', insertPostHover, 'segId:', segId);
       }
       return;
     }
@@ -688,6 +697,7 @@ export default function FenceCanvas({
         }
       }
 
+      if (best !== null) console.log('[InsertPost] hover set:', best.segmentId, 't:', best.t.toFixed(3), 'valid:', best.valid);
       setInsertPostHover(best);
       return;
     }
@@ -852,9 +862,11 @@ export default function FenceCanvas({
   // Each sub-segment inherits the original's properties; gate is transferred
   // to whichever sub-segment contains the gate's centre position.
   const handleSegmentClick = (segment: Segment, t: number) => {
+    console.log('[InsertPost] handleSegmentClick called, t:', t, 'segment:', segment.id);
     pushHistory();
     const startPost = posts.find(p => p.id === segment.startPostId);
     const endPost   = posts.find(p => p.id === segment.endPostId);
+    console.log('[InsertPost] startPost:', startPost, 'endPost:', endPost);
     if (!startPost || !endPost) return;
 
     const px = startPost.x + (endPost.x - startPost.x) * t;
@@ -898,6 +910,7 @@ export default function FenceCanvas({
       } : {}),
     };
 
+    console.log('[InsertPost] state update — new post:', newPost, 'seg1:', seg1, 'seg2:', seg2);
     setPosts(prev => [...prev, newPost]);
     setSegments(prev => [
       ...prev.filter(s => s.id !== segment.id),
