@@ -541,11 +541,60 @@ export default function FenceCanvas({
   // Convert background drag to pan/drag selector & empty click-to-deselect
   const [bgClickStart, setBgClickStart] = useState<{ x: number, y: number } | null>(null);
 
-  const handlePointerDownBackground = (e: React.PointerEvent) => {
-    if (isInsertPostMode) {
-      console.log('[InsertPost] handlePointerDownBackground fired in insert mode — cancelling (click missed segment)');
+  // Shared helper: project click coords onto nearest valid segment and insert a post.
+  // Returns true if a post was inserted (caller should exit early), false otherwise.
+  const tryInsertPostAtClick = (clientX: number, clientY: number): boolean => {
+    const coords = getPercentageCoords(clientX, clientY);
+    const cursorX = coords.x - globalOffset.x;
+    const cursorY = coords.y - globalOffset.y;
+    const MIN_DIST = 5;
+    const CLICK_THRESHOLD = 12; // generous — covers the full visual panel width
+
+    let bestSeg: Segment | null = null;
+    let bestT = 0;
+    let bestDist = Infinity;
+
+    for (const seg of segments) {
+      if (seg.isStandaloneGate) continue;
+      const pA = posts.find(p => p.id === seg.startPostId);
+      const pB = posts.find(p => p.id === seg.endPostId);
+      if (!pA || !pB) continue;
+      const dx = pB.x - pA.x, dy = pB.y - pA.y;
+      const len2 = dx * dx + dy * dy;
+      if (len2 === 0) continue;
+      const t = Math.max(0, Math.min(1, ((cursorX - pA.x) * dx + (cursorY - pA.y) * dy) / len2));
+      const projX = pA.x + t * dx, projY = pA.y + t * dy;
+      const dist = Math.hypot(cursorX - projX, cursorY - projY);
+      if (dist < CLICK_THRESHOLD && dist < bestDist) {
+        const segLen = Math.hypot(dx, dy);
+        if (t * segLen >= MIN_DIST && (1 - t) * segLen >= MIN_DIST) {
+          bestDist = dist;
+          bestSeg = seg;
+          bestT = t;
+        }
+      }
+    }
+
+    if (bestSeg) {
+      handleSegmentClick(bestSeg, bestT);
       setIsInsertPostMode(false);
       insertPostHoverRef.current = null; setInsertPostHover(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handlePointerDownBackground = (e: React.PointerEvent) => {
+    if (isInsertPostMode) {
+      // The click landed on the background (not on a segment SVG element).
+      // Still try to find the nearest segment — the cursor may be within the visual
+      // fence panel but on empty SVG space between elements (no pointer-events coverage).
+      const inserted = tryInsertPostAtClick(e.clientX, e.clientY);
+      if (!inserted) {
+        // Genuinely missed every segment — cancel the mode.
+        setIsInsertPostMode(false);
+        insertPostHoverRef.current = null; setInsertPostHover(null);
+      }
       return;
     }
 
@@ -569,19 +618,8 @@ export default function FenceCanvas({
     e.stopPropagation();
 
     if (isInsertPostMode) {
-      // Read from ref — always reflects the latest hover value, avoids stale closure from
-      // React 18 batched state updates (insertPostHover state was null at click time).
-      const hover = insertPostHoverRef.current;
-      console.log('[InsertPost] click — ref hover:', hover, 'segId:', segId);
-      if (hover && hover.valid && hover.segmentId === segId) {
-        const seg = segments.find(s => s.id === segId);
-        if (seg) {
-          console.log('[InsertPost] inserting at t:', hover.t);
-          handleSegmentClick(seg, hover.t);
-          setIsInsertPostMode(false);
-          insertPostHoverRef.current = null; setInsertPostHover(null);
-        }
-      }
+      // Compute t from the click's own coordinates — no dependency on prior hover state.
+      tryInsertPostAtClick(e.clientX, e.clientY);
       return;
     }
 
@@ -693,7 +731,6 @@ export default function FenceCanvas({
         }
       }
 
-      if (best !== null) console.log('[InsertPost] hover set:', best.segmentId, 't:', best.t.toFixed(3), 'valid:', best.valid);
       insertPostHoverRef.current = best;
       setInsertPostHover(best);
       return;
@@ -859,11 +896,9 @@ export default function FenceCanvas({
   // Each sub-segment inherits the original's properties; gate is transferred
   // to whichever sub-segment contains the gate's centre position.
   const handleSegmentClick = (segment: Segment, t: number) => {
-    console.log('[InsertPost] handleSegmentClick called, t:', t, 'segment:', segment.id);
     pushHistory();
     const startPost = posts.find(p => p.id === segment.startPostId);
     const endPost   = posts.find(p => p.id === segment.endPostId);
-    console.log('[InsertPost] startPost:', startPost, 'endPost:', endPost);
     if (!startPost || !endPost) return;
 
     const px = startPost.x + (endPost.x - startPost.x) * t;
@@ -907,7 +942,6 @@ export default function FenceCanvas({
       } : {}),
     };
 
-    console.log('[InsertPost] state update — new post:', newPost, 'seg1:', seg1, 'seg2:', seg2);
     setPosts(prev => [...prev, newPost]);
     setSegments(prev => [
       ...prev.filter(s => s.id !== segment.id),
@@ -918,15 +952,6 @@ export default function FenceCanvas({
     setSelectedSegmentId(null);
   };
 
-  // Called when user clicks a valid hover point in Insert Post mode
-  const insertPostOnSegmentClick = () => {
-    if (!insertPostHover || !insertPostHover.valid) return;
-    const seg = segments.find(s => s.id === insertPostHover.segmentId);
-    if (!seg) return;
-    handleSegmentClick(seg, insertPostHover.t);
-    setIsInsertPostMode(false);
-    setInsertPostHover(null);
-  };
 
   // Add a brand new node, extending straight from the selected post, or leftmost/rightmost endpoints in selected direction
   const addPostDirect = (direction: 'left' | 'right') => {
