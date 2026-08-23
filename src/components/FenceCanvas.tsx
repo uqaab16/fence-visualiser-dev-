@@ -566,27 +566,15 @@ export default function FenceCanvas({
     e.stopPropagation();
 
     if (isInsertPostMode) {
-      // Compute t directly from click position — don't rely on hover state
-      const coords = getPercentageCoords(e.clientX, e.clientY);
-      const cursorX = coords.x - globalOffset.x;
-      const cursorY = coords.y - globalOffset.y;
-      const seg = segments.find(s => s.id === segId);
-      if (seg) {
-        const pA = posts.find(p => p.id === seg.startPostId);
-        const pB = posts.find(p => p.id === seg.endPostId);
-        if (pA && pB) {
-          const dx = pB.x - pA.x, dy = pB.y - pA.y;
-          const len2 = dx * dx + dy * dy;
-          if (len2 > 0) {
-            const t = Math.max(0, Math.min(1, ((cursorX - pA.x) * dx + (cursorY - pA.y) * dy) / len2));
-            const segLen = Math.hypot(dx, dy);
-            const MIN_DIST = 5;
-            if (t * segLen >= MIN_DIST && (1 - t) * segLen >= MIN_DIST) {
-              handleSegmentClick(seg, t);
-              setIsInsertPostMode(false);
-              setInsertPostHover(null);
-            }
-          }
+      // Use the already-computed ghost position (insertPostHover) so the post
+      // inserts exactly where the ghost was showing — not re-projected from the
+      // raw click coords (which land on the wide panel fill, not on the segment line).
+      if (insertPostHover && insertPostHover.valid && insertPostHover.segmentId === segId) {
+        const seg = segments.find(s => s.id === segId);
+        if (seg) {
+          handleSegmentClick(seg, insertPostHover.t);
+          setIsInsertPostMode(false);
+          setInsertPostHover(null);
         }
       }
       return;
