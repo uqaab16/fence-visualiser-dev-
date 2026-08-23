@@ -55,7 +55,9 @@ const DEFAULT_PRICING: DynamicPricing = {
   singleGateCost: 350,
   doubleGateCost: 750,
   colorbondPanelMaterialCost: 130,
-  colorbondPanelLaborCost: 85
+  colorbondPanelLaborCost: 85,
+  perforatedMaterialCost: 185,
+  perforatedLaborCost: 85
 };
 
 const DEFAULT_SEGMENTS: Segment[] = [
@@ -434,6 +436,10 @@ export default function App() {
                   const woodOpt = COLORS_PALETTE.find(c => c.name === 'Natural Tan') || COLORS_PALETTE[3];
                   setColor(woodOpt);
                   setPostColor(woodOpt);
+                } else if (mat === 'aluminium_perforated') {
+                  const blackOpt = COLORS_PALETTE.find(c => c.name === 'Black') || COLORS_PALETTE[0];
+                  setColor(blackOpt);
+                  setPostColor(blackOpt);
                 } else {
                   const monOpt = COLORS_PALETTE.find(c => c.name === 'Monument Grey') || COLORS_PALETTE[0];
                   setColor(monOpt);

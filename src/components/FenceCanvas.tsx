@@ -2357,6 +2357,131 @@ export default function FenceCanvas({
                       )}
                     </g>
                   );
+                } else if (material === 'aluminium_perforated') {
+                  // ─── ALUMINIUM PERFORATED PANEL FENCING ────────────────────────────────
+                  // Pool-compliant framed panel with uniform 9mm punched round holes on a
+                  // ~13.5mm grid (AS1926.1). Rendered as an SVG <pattern> dot grid over a
+                  // solid base fill so it reads semi-transparent like the real product.
+
+                  // Frame/post colour: slightly darkened version of the panel colour for the
+                  // extruded aluminium frame channel that surrounds each 2000mm panel.
+                  const frameFill = shadeHex(color.hex, 0.78);
+                  const frameThickStart = vhStart * 0.028; // ~25mm frame channel top & bottom
+                  const frameThickEnd   = vhEnd   * 0.028;
+
+                  // Hole pattern dimensions — scaled to fence height so density stays consistent
+                  // at all height options. holeStep ≈ 13.5mm pitch; holeR ≈ 9mm/2 = 4.5mm.
+                  const holeStep = getVisualFenceHeight() * 0.052;
+                  const holeR    = holeStep * 0.34; // 9/13.5 * 0.5 ≈ 0.33 — visible but not over-punched
+                  const patternId = `perf-holes-${seg.id}`;
+
+                  // Clip the perforated quad so holes don't bleed outside the panel boundary
+                  const clipId = `perf-clip-${seg.id}`;
+                  const panelPath = `M ${pStart.x} ${pStart.y} L ${pEnd.x} ${pEnd.y} L ${pEnd.x} ${pEnd.y - vhEnd} L ${pStart.x} ${pStart.y - vhStart} Z`;
+
+                  // Gate openings
+                  const gatePcts = seg.hasGate ? getGateSpanPcts(seg, segmentLength) : null;
+                  const gS = gatePcts?.startPct ?? 0;
+                  const gE = gatePcts?.endPct ?? 0;
+                  const fillSpans: [number, number][] = seg.hasGate
+                    ? ([[0, gS], [gE, 1.0]] as [number, number][]).filter(([a, b]) => b > a)
+                    : [[0, 1.0]];
+
+                  const xAt = (t: number) => pStart.x + t * segmentWidth;
+                  const yAt = (t: number) => pStart.y + t * segmentHeight;
+                  const vhAt = (t: number) => vhStart + t * (vhEnd - vhStart);
+
+                  const spanPath = (tA: number, tB: number) =>
+                    `M ${xAt(tA)} ${yAt(tA)} L ${xAt(tB)} ${yAt(tB)} L ${xAt(tB)} ${yAt(tB) - vhAt(tB)} L ${xAt(tA)} ${yAt(tA) - vhAt(tA)} Z`;
+
+                  return (
+                    <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
+                      <defs>
+                        {/* Uniform round-hole dot grid — scales with fence height */}
+                        <pattern id={patternId} x="0" y="0" width={holeStep} height={holeStep} patternUnits="userSpaceOnUse">
+                          <circle cx={holeStep / 2} cy={holeStep / 2} r={holeR} fill="rgba(0,0,0,0.52)" />
+                        </pattern>
+                        <clipPath id={clipId}>
+                          <path d={panelPath} />
+                        </clipPath>
+                      </defs>
+
+                      {/* 1. Solid base panel fill per span (with gate cutouts) */}
+                      {fillSpans.map(([tA, tB], i) => (
+                        <path key={`pf-fill-${i}`} d={spanPath(tA, tB)} fill={color.hex} opacity={0.88} />
+                      ))}
+
+                      {/* 2. Dot-grid perforation overlay — clipped to panel outline */}
+                      {fillSpans.map(([tA, tB], i) => {
+                        const left  = Math.min(xAt(tA), xAt(tB));
+                        const right = Math.max(xAt(tA), xAt(tB));
+                        const top   = Math.min(yAt(tA) - vhAt(tA), yAt(tB) - vhAt(tB));
+                        const bot   = Math.max(yAt(tA), yAt(tB));
+                        return (
+                          <rect
+                            key={`pf-dots-${i}`}
+                            x={left} y={top}
+                            width={right - left} height={bot - top}
+                            fill={`url(#${patternId})`}
+                            clipPath={`url(#${clipId})`}
+                          />
+                        );
+                      })}
+
+                      {/* 3. Top frame rail */}
+                      {fillSpans.map(([tA, tB], i) => {
+                        const oA = vhAt(tA); const oB = vhAt(tB);
+                        return (
+                          <path key={`pf-topframe-${i}`}
+                            d={`M ${xAt(tA)} ${yAt(tA) - oA} L ${xAt(tB)} ${yAt(tB) - oB} L ${xAt(tB)} ${yAt(tB) - oB + frameThickEnd} L ${xAt(tA)} ${yAt(tA) - oA + frameThickStart} Z`}
+                            fill={frameFill} stroke="#00000030" strokeWidth="0.03"
+                          />
+                        );
+                      })}
+
+                      {/* 4. Bottom frame rail */}
+                      {fillSpans.map(([tA, tB], i) => (
+                        <path key={`pf-botframe-${i}`}
+                          d={`M ${xAt(tA)} ${yAt(tA)} L ${xAt(tB)} ${yAt(tB)} L ${xAt(tB)} ${yAt(tB) - frameThickEnd} L ${xAt(tA)} ${yAt(tA) - frameThickStart} Z`}
+                          fill={frameFill} stroke="#00000030" strokeWidth="0.03"
+                        />
+                      ))}
+
+                      {/* 5. Intermediate structural posts (one per 2000mm panel span) */}
+                      {visualSpanCount > 1 && Array.from({ length: visualSpanCount - 1 }).map((_, jIndex) => {
+                        const j = jIndex + 1;
+                        const t = j / visualSpanCount;
+                        const px = pStart.x + t * segmentWidth;
+                        const py = pStart.y + t * segmentHeight;
+                        if (seg.hasGate) {
+                          const { startPct, endPct } = getGateSpanPcts(seg, segmentLength);
+                          if (t >= startPct && t <= endPct) return null;
+                        }
+                        const sc = getPerspectiveScale(py);
+                        const vh = getVisualFenceHeight() * sc;
+                        const pw = vh * 0.055;
+                        const capH = 0.22 * sc;
+                        return (
+                          <g key={`pf-post-${j}`} className="pointer-events-none">
+                            <ellipse cx={px} cy={py + 0.2} rx={pw * 0.85} ry="0.16" fill="#000" opacity="0.28" />
+                            <path d={`M ${px - pw/2} ${py + 0.3} L ${px - pw/2} ${py - vh} L ${px + pw/2} ${py - vh} L ${px + pw/2} ${py + 0.3} Z`} fill={frameFill} stroke="#00000088" strokeWidth="0.04" />
+                            <path d={`M ${px - pw/2 - 0.06} ${py - vh} L ${px - pw/2 - 0.06} ${py - vh - capH} L ${px + pw/2 + 0.06} ${py - vh - capH} L ${px + pw/2 + 0.06} ${py - vh} Z`} fill={frameFill} stroke="#000" strokeWidth="0.04" />
+                          </g>
+                        );
+                      })}
+
+                      {/* 6. Selection aura */}
+                      {isSelected && (
+                        <polygon
+                          points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`}
+                          fill="rgba(20, 184, 166, 0.06)"
+                          stroke="#14b8a6"
+                          strokeWidth="0.32"
+                          strokeDasharray="1 1"
+                        />
+                      )}
+                    </g>
+                  );
                 }
                 return null;
                 })();

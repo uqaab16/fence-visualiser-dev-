@@ -104,6 +104,8 @@ const BASE_CUSTOM: DynamicPricing = {
   doubleGateCost: 750,
   colorbondPanelMaterialCost: 130,
   colorbondPanelLaborCost: 85,
+  perforatedMaterialCost: 185,
+  perforatedLaborCost: 85,
 };
 
 describe('estimateFencingCosts — custom pricing overrides', () => {

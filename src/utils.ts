@@ -25,7 +25,8 @@ export const COLORS_PALETTE: ColorOption[] = [
   { name: 'Domain', hex: '#E8DBAE', isColorbond: true, desc: 'Light sandy gold, warm and airy' },
   { name: 'Riversand', hex: '#9D8D76', isColorbond: true, desc: 'Mid warm sandy brown-grey' },
   { name: 'Ironstone', hex: '#3E434C', isColorbond: true, desc: 'Dark cool grey, strong and contemporary' },
-  { name: 'Wallaby', hex: '#7F7C78', isColorbond: true, desc: 'Warm mid grey-brown, earthy and versatile' }
+  { name: 'Wallaby', hex: '#7F7C78', isColorbond: true, desc: 'Warm mid grey-brown, earthy and versatile' },
+  { name: 'Silver Pearl Satin', hex: '#C9CACC', isColorbond: false, desc: 'Satin aluminium silver — clean, neutral powder-coat finish' }
 ];
 
 export const FENCE_PRICES: Record<FenceMaterial, { basePerMeter: number; label: string }> = {
@@ -47,6 +48,15 @@ export const FENCE_PRICES: Record<FenceMaterial, { basePerMeter: number; label: 
     // reflecting simpler install than slat but premium Colorbond sheet product.
     label: 'Colorbond Solid Panel Fence',
     basePerMeter: 130
+  },
+  aluminium_perforated: {
+    // Retail kit (2000×1200mm framed panel) retails A$549–594, ~$275/m — inflated by
+    // retail markup and hardware bundles. Installed trade rate for certified pool-safety
+    // aluminium perforated fencing runs $180–250/m. We set $185/m: a 20% premium over
+    // aluminium blade ($155) reflecting the AS1926.1 pool-compliance spec and thicker
+    // extruded frame system, without anchoring to retail kit pricing.
+    label: 'Aluminium Perforated Panel',
+    basePerMeter: 185
   }
 };
 
@@ -56,7 +66,8 @@ export const MATERIAL_MAX_SPAN: Record<FenceMaterial, number> = {
   slat_fencing: 2.4,    // AS-2423 standard 2400mm panel
   post_and_rail: 2.4,   // AS-2423 standard 2400mm panel
   aluminium_blade: 2.364, // CAD-derived: 2364mm max structural blade panel span
-  colorbond_solid_panel: 2.4  // 2400mm standard panel kit width
+  colorbond_solid_panel: 2.4,  // 2400mm standard panel kit width
+  aluminium_perforated: 2.0   // 2000mm framed panel kit width
 };
 
 export const POST_UPGRADE_COSTS = {
@@ -109,6 +120,7 @@ export function estimateFencingCosts(
     ? (material === 'slat_fencing' ? customPricing.slatMaterialCost
       : material === 'aluminium_blade' ? customPricing.bladeMaterialCost
       : material === 'colorbond_solid_panel' ? customPricing.colorbondPanelMaterialCost
+      : material === 'aluminium_perforated' ? customPricing.perforatedMaterialCost
       : customPricing.postRailMaterialCost)
     : (materialDetails?.basePerMeter || 100);
 
@@ -150,6 +162,7 @@ export function estimateFencingCosts(
     ? (material === 'slat_fencing' ? customPricing.slatLaborCost
       : material === 'aluminium_blade' ? customPricing.bladeLaborCost
       : material === 'colorbond_solid_panel' ? customPricing.colorbondPanelLaborCost
+      : material === 'aluminium_perforated' ? customPricing.perforatedLaborCost
       : customPricing.postRailLaborCost)
     : defaultLaborRate;
 

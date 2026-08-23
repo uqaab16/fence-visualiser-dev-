@@ -20,6 +20,8 @@ function rowToPricing(row: Record<string, any>): DynamicPricing {
     doubleGateCost: row.double_gate_cost,
     colorbondPanelMaterialCost: row.colorbond_panel_material_cost ?? 130,
     colorbondPanelLaborCost: row.colorbond_panel_labor_cost ?? 85,
+    perforatedMaterialCost: row.perforated_material_cost ?? 185,
+    perforatedLaborCost: row.perforated_labor_cost ?? 85,
   };
 }
 
@@ -60,6 +62,8 @@ export async function savePricing(companyId: string, pricing: DynamicPricing): P
         double_gate_cost: pricing.doubleGateCost,
         colorbond_panel_material_cost: pricing.colorbondPanelMaterialCost,
         colorbond_panel_labor_cost: pricing.colorbondPanelLaborCost,
+        perforated_material_cost: pricing.perforatedMaterialCost,
+        perforated_labor_cost: pricing.perforatedLaborCost,
       },
       { onConflict: 'company_id' }
     );

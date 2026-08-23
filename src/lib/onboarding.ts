@@ -21,6 +21,8 @@ const DEFAULT_PRICING: DynamicPricing = {
   doubleGateCost: 750,
   colorbondPanelMaterialCost: 130,
   colorbondPanelLaborCost: 85,
+  perforatedMaterialCost: 185,
+  perforatedLaborCost: 85,
 };
 
 // Derive a friendly company name from the user's email domain, e.g.

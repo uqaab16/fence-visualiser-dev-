@@ -120,6 +120,13 @@ export default function SidebarControls({
       subtitle: 'Sawtooth or Trimline steel sheet',
       desc: 'Genuine BlueScope Colorbond steel infill sheet panels (2400mm wide kit). Full privacy boundary fence available in Sawtooth or Trimline profile.',
       visual: '#C5C2AA'
+    },
+    {
+      id: 'aluminium_perforated' as FenceMaterial,
+      title: 'Aluminium Perforated Panel',
+      subtitle: 'Pool-compliant punched round-hole panel',
+      desc: 'Framed aluminium panel with uniform 9mm punched round holes. Semi-transparent, contemporary pool-safety fencing. Tested and compliant to AS1926.1.',
+      visual: 'repeating-radial-gradient(circle at 6px 6px, #888 2.5px, #C9CACC 2.5px, #C9CACC 6px)'
     }
   ];
 
@@ -468,6 +475,8 @@ export default function SidebarControls({
               {COLORS_PALETTE.filter((pal) => {
                 if (material === 'post_and_rail') {
                   return ['Natural Tan', 'Reddish-Brown'].includes(pal.name);
+                } else if (material === 'aluminium_perforated') {
+                  return ['Black', 'Silver Pearl Satin'].includes(pal.name);
                 } else {
                   return pal.isColorbond;
                 }
@@ -870,7 +879,9 @@ export default function SidebarControls({
                       singleGateCost: 350,
                       doubleGateCost: 750,
                       colorbondPanelMaterialCost: 130,
-                      colorbondPanelLaborCost: 85
+                      colorbondPanelLaborCost: 85,
+                      perforatedMaterialCost: 185,
+                      perforatedLaborCost: 85
                     };
                     setPricing(defaultRates);
                     if (companyId) savePricing(companyId, defaultRates);
@@ -889,7 +900,7 @@ export default function SidebarControls({
                 {/* Section A: Panels */}
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">
-                    {material === 'slat_fencing' ? 'Slat Panels (m)' : material === 'aluminium_blade' ? 'Blade Panels (m)' : material === 'colorbond_solid_panel' ? 'Colorbond Panels (m)' : 'Post & Rail Panels (m)'}
+                    {material === 'slat_fencing' ? 'Slat Panels (m)' : material === 'aluminium_blade' ? 'Blade Panels (m)' : material === 'colorbond_solid_panel' ? 'Colorbond Panels (m)' : material === 'aluminium_perforated' ? 'Perforated Panels (m)' : 'Post & Rail Panels (m)'}
                   </span>
                   <div className="grid grid-cols-1 gap-2">
                     {material === 'slat_fencing' ? (
@@ -932,6 +943,21 @@ export default function SidebarControls({
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, colorbondPanelMaterialCost: val }));
                             if (companyId) savePricing(companyId, { ...pricing, colorbondPanelMaterialCost: val });
+                          }}
+                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+                          min="0"
+                        />
+                      </div>
+                    ) : material === 'aluminium_perforated' ? (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Perforated Panel Material ($ / meter)</label>
+                        <input
+                          type="number"
+                          value={pricing.perforatedMaterialCost}
+                          onChange={(e) => {
+                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                            setPricing(prev => ({ ...prev, perforatedMaterialCost: val }));
+                            if (companyId) savePricing(companyId, { ...pricing, perforatedMaterialCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
@@ -1000,6 +1026,21 @@ export default function SidebarControls({
                             const val = Math.max(0, parseInt(e.target.value, 10) || 0);
                             setPricing(prev => ({ ...prev, colorbondPanelLaborCost: val }));
                             if (companyId) savePricing(companyId, { ...pricing, colorbondPanelLaborCost: val });
+                          }}
+                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+                          min="0"
+                        />
+                      </div>
+                    ) : material === 'aluminium_perforated' ? (
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Perforated Panel Labour ($ / meter)</label>
+                        <input
+                          type="number"
+                          value={pricing.perforatedLaborCost}
+                          onChange={(e) => {
+                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                            setPricing(prev => ({ ...prev, perforatedLaborCost: val }));
+                            if (companyId) savePricing(companyId, { ...pricing, perforatedLaborCost: val });
                           }}
                           className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
                           min="0"
