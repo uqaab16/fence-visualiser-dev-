@@ -202,6 +202,9 @@ export default function FenceCanvas({
     y: number;
     valid: boolean;   // false = too close to endpoint (red cursor)
   } | null>(null);
+  // Ref kept in sync with insertPostHover so click handlers always read the current value
+  // regardless of React 18 batched/deferred state updates (stale closure fix).
+  const insertPostHoverRef = useRef<typeof insertPostHover>(null);
 
   // Perspective scaling disabled: inferring depth from Y-position in a flat 2D photo
   // is camera-angle-dependent and unreliable across arbitrary user photos. Constant 1.0
@@ -542,7 +545,7 @@ export default function FenceCanvas({
     if (isInsertPostMode) {
       console.log('[InsertPost] handlePointerDownBackground fired in insert mode — cancelling (click missed segment)');
       setIsInsertPostMode(false);
-      setInsertPostHover(null);
+      insertPostHoverRef.current = null; setInsertPostHover(null);
       return;
     }
 
@@ -566,25 +569,18 @@ export default function FenceCanvas({
     e.stopPropagation();
 
     if (isInsertPostMode) {
-      console.log('[InsertPost] handlePointerDownSegment fired', {
-        segId,
-        isInsertPostMode,
-        insertPostHover,
-        hoverSegmentId: insertPostHover?.segmentId,
-        segmentIdMatch: insertPostHover?.segmentId === segId,
-        hoverValid: insertPostHover?.valid,
-      });
-      if (insertPostHover && insertPostHover.valid && insertPostHover.segmentId === segId) {
+      // Read from ref — always reflects the latest hover value, avoids stale closure from
+      // React 18 batched state updates (insertPostHover state was null at click time).
+      const hover = insertPostHoverRef.current;
+      console.log('[InsertPost] click — ref hover:', hover, 'segId:', segId);
+      if (hover && hover.valid && hover.segmentId === segId) {
         const seg = segments.find(s => s.id === segId);
-        console.log('[InsertPost] guard passed, seg found:', !!seg, 't:', insertPostHover.t);
         if (seg) {
-          console.log('[InsertPost] calling handleSegmentClick');
-          handleSegmentClick(seg, insertPostHover.t);
+          console.log('[InsertPost] inserting at t:', hover.t);
+          handleSegmentClick(seg, hover.t);
           setIsInsertPostMode(false);
-          setInsertPostHover(null);
+          insertPostHoverRef.current = null; setInsertPostHover(null);
         }
-      } else {
-        console.log('[InsertPost] guard FAILED — insertPostHover:', insertPostHover, 'segId:', segId);
       }
       return;
     }
@@ -698,6 +694,7 @@ export default function FenceCanvas({
       }
 
       if (best !== null) console.log('[InsertPost] hover set:', best.segmentId, 't:', best.t.toFixed(3), 'valid:', best.valid);
+      insertPostHoverRef.current = best;
       setInsertPostHover(best);
       return;
     }
@@ -1267,7 +1264,7 @@ export default function FenceCanvas({
           <button
             onClick={() => {
               setIsInsertPostMode(prev => !prev);
-              setInsertPostHover(null);
+              insertPostHoverRef.current = null; setInsertPostHover(null);
               setSelectedPostId(null);
               setSelectedSegmentId(null);
               setPanMode(false);
