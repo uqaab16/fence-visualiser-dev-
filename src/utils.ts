@@ -90,8 +90,8 @@ export function estimateFencingCosts(
   installIncluded: boolean = true,
   customPricing?: DynamicPricing
 ) {
-  // Guard clause: if there are no posts on canvas, the total meters and total cost must remain exactly 0
-  if (!postsList || postsList.length === 0) {
+  // Guard: no measurement = nothing to quote
+  if (!propertyFrontageMeters || propertyFrontageMeters <= 0) {
     return {
       totalMeters: 0,
       ratePerMeter: 0,
@@ -109,6 +109,12 @@ export function estimateFencingCosts(
 
   // Billing length is the locked map measurement, not the on-canvas drawing geometry
   const totalMeters = parseFloat(propertyFrontageMeters.toFixed(1));
+
+  // When no canvas posts exist, assume two standard endpoint posts for a straight run.
+  // Canvas posts (with type upgrades) are used when present.
+  const effectivePosts = postsList && postsList.length > 0
+    ? postsList
+    : [{ type: 'standard' }, { type: 'standard' }];
 
   // Material-specific max structural span drives intermediate post count
   const maxSpanLength = MATERIAL_MAX_SPAN[material];
@@ -129,7 +135,7 @@ export function estimateFencingCosts(
   
   // Post costs
   let totalPostsCost = 0;
-  postsList.forEach(p => {
+  effectivePosts.forEach(p => {
     if (customPricing) {
       if (p.type === 'standard') totalPostsCost += customPricing.standardPostCost;
       else if (p.type === 'corner') totalPostsCost += customPricing.cornerPostCost;
@@ -168,8 +174,8 @@ export function estimateFencingCosts(
 
   const laborCost = installIncluded ? totalMeters * laborRatePerMeter : 0;
   
-  // Total structural post count = drawn corner/end posts + mandatory intermediate line posts
-  const totalPostCount = postsList.length + intermediatePostCount;
+  // Total structural post count = endpoint posts + mandatory intermediate line posts
+  const totalPostCount = effectivePosts.length + intermediatePostCount;
 
   // Concrete bags and brackets estimate
   const concreteBagsCount = totalPostCount * 2; // ~2 bags per post

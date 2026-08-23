@@ -21,12 +21,20 @@ function concreteCost(totalPostCount: number) {
 // ---------------------------------------------------------------------------
 describe('estimateFencingCosts — default pricing', () => {
 
-  it('0 posts → every field is $0', () => {
-    const r = estimateFencingCosts('slat_fencing', 10, [], [], true);
+  it('0 frontage → every field is $0', () => {
+    const r = estimateFencingCosts('slat_fencing', 0, [], [], true);
     expect(r.totalPrice).toBe(0);
     expect(r.materialCost).toBe(0);
     expect(r.laborCost).toBe(0);
     expect(r.totalMeters).toBe(0);
+  });
+
+  it('0 posts but valid frontage → quotes as 2 standard endpoint posts', () => {
+    const r = estimateFencingCosts('slat_fencing', 10, [], [], true);
+    expect(r.totalMeters).toBe(10);
+    expect(r.materialCost).toBeGreaterThan(0);
+    expect(r.postCount).toBeGreaterThan(0);
+    expect(r.totalPrice).toBeGreaterThan(0);
   });
 
   it('10m slat, 2 standard posts, no gates, no install → correct total', () => {
