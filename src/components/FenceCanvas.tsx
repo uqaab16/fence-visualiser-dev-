@@ -1548,9 +1548,9 @@ export default function FenceCanvas({
             <g transform={`translate(${globalOffset.x}, ${globalOffset.y})`} mask="url(#fence-foreground-mask)">
               
               {/* Unified depth-sorted render — far segments first so closer ones always occlude them.
-                  Each segment renders panel infill + gate overlay. Posts are rendered in a separate
-                  second pass, also depth-sorted by their own y, so a shared corner post always
-                  appears at the correct depth regardless of which segment it belongs to. */}
+                  Each segment renders: panel infill → gate overlay → its own end posts.
+                  A shared corner post renders with whichever segment has the highest avgY
+                  (frontmost), so it always sits at the correct depth layer. */}
               {(() => {
                 const sorted = [...segments]
                   .map(seg => {
@@ -1560,6 +1560,20 @@ export default function FenceCanvas({
                     return { seg, pStart, pEnd, avgY };
                   })
                   .sort((a, b) => a.avgY - b.avgY);
+
+                // For each post: find the sorted index of the segment with the highest avgY
+                // (frontmost / closest to viewer) that references this post. That segment
+                // owns the post and will render it at the correct depth layer.
+                const postFrontmostIdx = new Map<string, number>();
+                sorted.forEach(({ pStart, pEnd, avgY }, idx) => {
+                  [pStart, pEnd].forEach(p => {
+                    if (!p) return;
+                    const existingIdx = postFrontmostIdx.get(p.id);
+                    if (existingIdx === undefined || sorted[existingIdx].avgY < avgY) {
+                      postFrontmostIdx.set(p.id, idx);
+                    }
+                  });
+                });
 
                 const renderPost = (post: typeof posts[0]) => {
                   const isSelected = selectedPostId === post.id;
@@ -2830,15 +2844,16 @@ export default function FenceCanvas({
                 );
                 })();
 
-                return <React.Fragment key={sIdx}>{panelEl}{gateEl}</React.Fragment>;
+                // Render end-posts owned by this segment (i.e. this is the frontmost
+                // segment referencing each post). Shared corner posts render exactly once.
+                const postEls = [pStart, pEnd]
+                  .filter((p): p is typeof posts[0] => !!p && postFrontmostIdx.get(p.id) === sIdx)
+                  .map(renderPost);
+
+                return <React.Fragment key={sIdx}>{panelEl}{gateEl}{postEls}</React.Fragment>;
               });
 
-              // ── POSTS: second pass, depth-sorted by post.y so shared corner posts
-              //    always render at their own correct depth, not at the segment's depth.
-              const postsSortedByY = [...posts].sort((a, b) => a.y - b.y);
-              const postEls = postsSortedByY.map(renderPost);
-
-              return <>{panelGateEls}{postEls}</>;
+              return <>{panelGateEls}</>;
               })()}
 
             </g>
