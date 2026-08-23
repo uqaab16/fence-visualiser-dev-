@@ -221,13 +221,11 @@ export default function FenceCanvas({
     return d;
   };
 
-  // Perspective scaling mathematical model
-  const getPerspectiveScale = (yPct: number) => {
-    const baselineY = 65; // Reference fence position (~65% down frame for standing-height camera)
-    const slope = 0.040; // Implies horizon at y=40, realistic for residential exterior photos
-    const scale = 1.0 + (yPct - baselineY) * slope;
-    return Math.min(Math.max(scale, 0.50), 1.60);
-  };
+  // Perspective scaling disabled: inferring depth from Y-position in a flat 2D photo
+  // is camera-angle-dependent and unreliable across arbitrary user photos. Constant 1.0
+  // renders all fence elements at uniform scale, which is always visually correct.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const getPerspectiveScale = (_yPct: number) => 1.0;
 
   // Helper to calculate locked physical gate widths as exact SVG percentages
   const getGateSpanPcts = (seg: Segment, segmentLength: number) => {
