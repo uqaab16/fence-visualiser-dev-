@@ -184,7 +184,7 @@ export default function SidebarControls({
               }`}
             >
               <Columns3 className="w-5 h-5" />
-              <span className="text-[9px] font-bold uppercase tracking-wider text-center font-sans">Posts</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider text-center font-sans">Frontage</span>
             </button>
 
             <button
