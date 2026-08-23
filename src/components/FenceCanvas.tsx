@@ -1548,8 +1548,9 @@ export default function FenceCanvas({
             <g transform={`translate(${globalOffset.x}, ${globalOffset.y})`} mask="url(#fence-foreground-mask)">
               
               {/* Unified depth-sorted render — far segments first so closer ones always occlude them.
-                  Each segment renders: panel infill → gate overlay → its own end posts.
-                  renderedPostIds prevents a shared corner post painting twice. */}
+                  Each segment renders panel infill + gate overlay. Posts are rendered in a separate
+                  second pass, also depth-sorted by their own y, so a shared corner post always
+                  appears at the correct depth regardless of which segment it belongs to. */}
               {(() => {
                 const sorted = [...segments]
                   .map(seg => {
@@ -1559,7 +1560,6 @@ export default function FenceCanvas({
                     return { seg, pStart, pEnd, avgY };
                   })
                   .sort((a, b) => a.avgY - b.avgY);
-                const renderedPostIds = new Set<string>();
 
                 const renderPost = (post: typeof posts[0]) => {
                   const isSelected = selectedPostId === post.id;
@@ -1627,7 +1627,7 @@ export default function FenceCanvas({
                   );
                 };
 
-                return sorted.map(({ seg, pStart, pEnd }, sIdx) => {
+                const panelGateEls = sorted.map(({ seg, pStart, pEnd }, sIdx) => {
                 if (!pStart || !pEnd) return null;
                 if (seg.isStandaloneGate) return null;
 
@@ -1793,7 +1793,6 @@ export default function FenceCanvas({
 
                         let postWidth = vh * 0.055;
                         let postColorHex = postColor.hex;
-                        let capHeight = 0.22 * scale;
 
                         return (
                           <g key={`mid-post-${j}`} className="pointer-events-none">
@@ -1814,19 +1813,6 @@ export default function FenceCanvas({
                               strokeWidth="0.04"
                             />
 
-                            {/* Cap */}
-                            <path
-                              d={`
-                                M ${px - postWidth/2 - 0.06} ${py - vh}
-                                L ${px - postWidth/2 - 0.06} ${py - vh - capHeight}
-                                L ${px + postWidth/2 + 0.06} ${py - vh - capHeight}
-                                L ${px + postWidth/2 + 0.06} ${py - vh}
-                                Z
-                              `}
-                              fill={postColorHex}
-                              stroke="#000"
-                              strokeWidth="0.04"
-                            />
                           </g>
                         );
                       })}
@@ -2144,7 +2130,6 @@ export default function FenceCanvas({
                         const scale = getPerspectiveScale(py);
                         const vh = getVisualFenceHeight() * scale;
                         const postWidth = vh * 0.055;
-                        const capHeight = 0.24 * scale;
 
                         return (
                           <g key={`blade-post-${j}`} className="pointer-events-none">
@@ -2153,12 +2138,6 @@ export default function FenceCanvas({
                               d={`M ${px - postWidth/2} ${py + 0.3} L ${px - postWidth/2} ${py - vh} L ${px + postWidth/2} ${py - vh} L ${px + postWidth/2} ${py + 0.3} Z`}
                               fill={postColor.hex}
                               stroke="#00000088"
-                              strokeWidth="0.04"
-                            />
-                            <path
-                              d={`M ${px - postWidth/2 - 0.06} ${py - vh} L ${px - postWidth/2 - 0.06} ${py - vh - capHeight} L ${px + postWidth/2 + 0.06} ${py - vh - capHeight} L ${px + postWidth/2 + 0.06} ${py - vh} Z`}
-                              fill={postColor.hex}
-                              stroke="#000"
                               strokeWidth="0.04"
                             />
                           </g>
@@ -2324,7 +2303,6 @@ export default function FenceCanvas({
                         const scale = getPerspectiveScale(py);
                         const vh = getVisualFenceHeight() * scale;
                         const postWidth = vh * 0.055;
-                        const capHeight = 0.24 * scale;
 
                         return (
                           <g key={`cppost-${j}`} className="pointer-events-none">
@@ -2333,12 +2311,6 @@ export default function FenceCanvas({
                               d={`M ${px - postWidth/2} ${py + 0.3} L ${px - postWidth/2} ${py - vh} L ${px + postWidth/2} ${py - vh} L ${px + postWidth/2} ${py + 0.3} Z`}
                               fill={postColor.hex}
                               stroke="#00000088"
-                              strokeWidth="0.04"
-                            />
-                            <path
-                              d={`M ${px - postWidth/2 - 0.06} ${py - vh} L ${px - postWidth/2 - 0.06} ${py - vh - capHeight} L ${px + postWidth/2 + 0.06} ${py - vh - capHeight} L ${px + postWidth/2 + 0.06} ${py - vh} Z`}
-                              fill={postColor.hex}
-                              stroke="#000"
                               strokeWidth="0.04"
                             />
                           </g>
@@ -2462,12 +2434,10 @@ export default function FenceCanvas({
                         const sc = getPerspectiveScale(py);
                         const vh = getVisualFenceHeight() * sc;
                         const pw = vh * 0.055;
-                        const capH = 0.22 * sc;
                         return (
                           <g key={`pf-post-${j}`} className="pointer-events-none">
                             <ellipse cx={px} cy={py + 0.2} rx={pw * 0.85} ry="0.16" fill="#000" opacity="0.28" />
                             <path d={`M ${px - pw/2} ${py + 0.3} L ${px - pw/2} ${py - vh} L ${px + pw/2} ${py - vh} L ${px + pw/2} ${py + 0.3} Z`} fill={frameFill} stroke="#00000088" strokeWidth="0.04" />
-                            <path d={`M ${px - pw/2 - 0.06} ${py - vh} L ${px - pw/2 - 0.06} ${py - vh - capH} L ${px + pw/2 + 0.06} ${py - vh - capH} L ${px + pw/2 + 0.06} ${py - vh} Z`} fill={frameFill} stroke="#000" strokeWidth="0.04" />
                           </g>
                         );
                       })}
@@ -2860,16 +2830,15 @@ export default function FenceCanvas({
                 );
                 })();
 
-                // ── END POSTS for this segment (deduped via renderedPostIds) ──────────
-                const postEls = [pStart, pEnd].filter((p): p is typeof posts[0] => {
-                  if (!p || renderedPostIds.has(p.id)) return false;
-                  renderedPostIds.add(p.id);
-                  return true;
-                }).map(renderPost);
-
-                return <React.Fragment key={sIdx}>{panelEl}{gateEl}{postEls}</React.Fragment>;
+                return <React.Fragment key={sIdx}>{panelEl}{gateEl}</React.Fragment>;
               });
 
+              // ── POSTS: second pass, depth-sorted by post.y so shared corner posts
+              //    always render at their own correct depth, not at the segment's depth.
+              const postsSortedByY = [...posts].sort((a, b) => a.y - b.y);
+              const postEls = postsSortedByY.map(renderPost);
+
+              return <>{panelGateEls}{postEls}</>;
               })()}
 
             </g>
