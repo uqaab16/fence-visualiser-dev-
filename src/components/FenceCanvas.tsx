@@ -26,7 +26,7 @@ import {
   Minimize2,
   Hand,
   Compass,
-  Paintbrush,
+  GitCommit,
   Undo,
   Download,
   X
@@ -192,34 +192,16 @@ export default function FenceCanvas({
     endPost: { x: number, y: number };
   } | null>(null);
 
-  // States for Foreground Mask Brush
-  const [isBrushMode, setIsBrushMode] = useState<boolean>(false);
-  const [brushSize, setBrushSize] = useState<number>(3.5); // default visual brush stroke width
-  const [isBrushEraser, setIsBrushEraser] = useState<boolean>(false); // false = paint mask (hide fence / show foreground), true = erase mask (restore fence)
-  const [maskStrokes, setMaskStrokes] = useState<{
-    id: string;
-    points: { x: number; y: number }[];
-    radius: number;
-    isEraser: boolean;
-  }[]>([]);
-  const [isPainting, setIsPainting] = useState<boolean>(false);
-  const [activeStrokeId, setActiveStrokeId] = useState<string | null>(null);
-  const activeMaskPathRef = useRef<SVGPathElement | null>(null);
-  const activeHudPathRef = useRef<SVGPathElement | null>(null);
-  const currentStrokePointsRef = useRef<{ x: number; y: number }[]>([]);
-
-  // Helper to construct a smooth SVG path from stroke coordinates
-  const getStrokeSvgPath = (points: { x: number; y: number }[]) => {
-    if (points.length === 0) return '';
-    if (points.length === 1) {
-      return `M ${points[0].x} ${points[0].y} L ${points[0].x} ${points[0].y}`;
-    }
-    let d = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 1; i < points.length; i++) {
-      d += ` L ${points[i].x} ${points[i].y}`;
-    }
-    return d;
-  };
+  // Insert Post mode: user clicks a segment to split it with a new post
+  const [isInsertPostMode, setIsInsertPostMode] = useState<boolean>(false);
+  // Ghost preview while hovering over a segment in Insert Post mode
+  const [insertPostHover, setInsertPostHover] = useState<{
+    segmentId: string;
+    t: number;        // 0–1 along segment
+    x: number;        // SVG % coords
+    y: number;
+    valid: boolean;   // false = too close to endpoint (red cursor)
+  } | null>(null);
 
   // Perspective scaling disabled: inferring depth from Y-position in a flat 2D photo
   // is camera-angle-dependent and unreliable across arbitrary user photos. Constant 1.0
@@ -557,30 +539,10 @@ export default function FenceCanvas({
   const [bgClickStart, setBgClickStart] = useState<{ x: number, y: number } | null>(null);
 
   const handlePointerDownBackground = (e: React.PointerEvent) => {
-    if (isBrushMode) {
-      e.stopPropagation();
-      try {
-        e.currentTarget.setPointerCapture(e.pointerId);
-      } catch {}
-      const coords = getPercentageCoords(e.clientX, e.clientY);
-      
-      currentStrokePointsRef.current = [coords];
-      setIsPainting(true);
-
-      const dStr = getStrokeSvgPath([coords]);
-      
-      if (activeMaskPathRef.current) {
-        activeMaskPathRef.current.setAttribute('stroke', isBrushEraser ? '#ffffff' : '#000000');
-        activeMaskPathRef.current.setAttribute('stroke-width', brushSize.toString());
-        activeMaskPathRef.current.setAttribute('d', dStr);
-        activeMaskPathRef.current.style.display = 'block';
-      }
-      if (activeHudPathRef.current) {
-        activeHudPathRef.current.setAttribute('stroke', isBrushEraser ? 'rgba(239, 68, 68, 0.45)' : 'rgba(20, 184, 166, 0.35)');
-        activeHudPathRef.current.setAttribute('stroke-width', brushSize.toString());
-        activeHudPathRef.current.setAttribute('d', dStr);
-        activeHudPathRef.current.style.display = 'block';
-      }
+    if (isInsertPostMode) {
+      // Clicking empty canvas in insert-post mode cancels the mode
+      setIsInsertPostMode(false);
+      setInsertPostHover(null);
       return;
     }
 
@@ -601,11 +563,13 @@ export default function FenceCanvas({
 
   // Grab directly on a fence segment to initiate global movement of the select boundary
   const handlePointerDownSegment = (e: React.PointerEvent, segId: string) => {
-    if (isBrushMode) {
-      handlePointerDownBackground(e);
+    e.stopPropagation();
+
+    if (isInsertPostMode) {
+      insertPostOnSegmentClick();
       return;
     }
-    e.stopPropagation();
+
     // Select the segment and expand customizer panel
     setSelectedSegmentId(segId);
     setSelectedPostId(null);
@@ -618,10 +582,6 @@ export default function FenceCanvas({
 
   // Handle dragging nodes/posts
   const handlePointerDownPost = (e: React.PointerEvent, id: string) => {
-    if (isBrushMode) {
-      handlePointerDownBackground(e);
-      return;
-    }
     e.stopPropagation();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -637,10 +597,6 @@ export default function FenceCanvas({
 
   // Handle clicking & dragging on gates
   const handlePointerDownGate = (e: React.PointerEvent, segId: string, type: 'move' | 'resize-left' | 'resize-right') => {
-    if (isBrushMode) {
-      handlePointerDownBackground(e);
-      return;
-    }
     e.stopPropagation();
     setSelectedSegmentId(segId);
     setSelectedPostId(null);
@@ -682,16 +638,47 @@ export default function FenceCanvas({
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (isBrushMode && isPainting) {
+    // Insert Post mode: compute ghost preview position on nearest segment
+    if (isInsertPostMode) {
       const coords = getPercentageCoords(e.clientX, e.clientY);
-      currentStrokePointsRef.current.push(coords);
-      const dStr = getStrokeSvgPath(currentStrokePointsRef.current);
-      if (activeMaskPathRef.current) {
-        activeMaskPathRef.current.setAttribute('d', dStr);
+      const cursorX = coords.x - globalOffset.x;
+      const cursorY = coords.y - globalOffset.y;
+      const MIN_DIST = 5; // % canvas units from endpoint — refuse placement closer than this
+      const HOVER_THRESHOLD = 4; // max % distance from segment line to count as "hovering"
+
+      let best: typeof insertPostHover = null;
+      let bestDist = Infinity;
+
+      for (const seg of segments) {
+        if (seg.isStandaloneGate) continue;
+        const pA = posts.find(p => p.id === seg.startPostId);
+        const pB = posts.find(p => p.id === seg.endPostId);
+        if (!pA || !pB) continue;
+
+        const dx = pB.x - pA.x, dy = pB.y - pA.y;
+        const len2 = dx * dx + dy * dy;
+        if (len2 === 0) continue;
+        const t = Math.max(0, Math.min(1, ((cursorX - pA.x) * dx + (cursorY - pA.y) * dy) / len2));
+        const projX = pA.x + t * dx;
+        const projY = pA.y + t * dy;
+        const dist = Math.hypot(cursorX - projX, cursorY - projY);
+
+        if (dist < HOVER_THRESHOLD && dist < bestDist) {
+          bestDist = dist;
+          const segLen = Math.hypot(dx, dy);
+          const distFromStart = t * segLen;
+          const distFromEnd   = (1 - t) * segLen;
+          best = {
+            segmentId: seg.id,
+            t,
+            x: projX,
+            y: projY,
+            valid: distFromStart >= MIN_DIST && distFromEnd >= MIN_DIST,
+          };
+        }
       }
-      if (activeHudPathRef.current) {
-        activeHudPathRef.current.setAttribute('d', dStr);
-      }
+
+      setInsertPostHover(best);
       return;
     }
 
@@ -823,34 +810,6 @@ export default function FenceCanvas({
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    if (isBrushMode && isPainting) {
-      setIsPainting(false);
-      
-      if (activeMaskPathRef.current) {
-        activeMaskPathRef.current.style.display = 'none';
-        activeMaskPathRef.current.setAttribute('d', '');
-      }
-      if (activeHudPathRef.current) {
-        activeHudPathRef.current.style.display = 'none';
-        activeHudPathRef.current.setAttribute('d', '');
-      }
-
-      if (currentStrokePointsRef.current.length > 0) {
-        const newStroke = {
-          id: `stroke_${Date.now()}`,
-          points: [...currentStrokePointsRef.current],
-          radius: brushSize,
-          isEraser: isBrushEraser
-        };
-        setMaskStrokes(prev => [...prev, newStroke]);
-      }
-
-      try {
-        e.currentTarget.releasePointerCapture(e.pointerId);
-      } catch {}
-      return;
-    }
-
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {}
@@ -879,53 +838,74 @@ export default function FenceCanvas({
     setIsGlobalDragging(false);
   };
 
-  // Split a segment to add an intermediate post / node
-  const handleSegmentClick = (segment: Segment, percent: number) => {
-    pushHistory(); // Capture snapshot of layout before splitting
-    // Percent along segment: locate start and end posts
+  // Split a segment at parameter t (0–1) to insert a new post.
+  // Each sub-segment inherits the original's properties; gate is transferred
+  // to whichever sub-segment contains the gate's centre position.
+  const handleSegmentClick = (segment: Segment, t: number) => {
+    pushHistory();
     const startPost = posts.find(p => p.id === segment.startPostId);
-    const endPost = posts.find(p => p.id === segment.endPostId);
+    const endPost   = posts.find(p => p.id === segment.endPostId);
     if (!startPost || !endPost) return;
 
-    // Calc split coord
-    const px = startPost.x + (endPost.x - startPost.x) * percent;
-    const py = startPost.y + (endPost.y - startPost.y) * percent;
+    const px = startPost.x + (endPost.x - startPost.x) * t;
+    const py = startPost.y + (endPost.y - startPost.y) * t;
     const newPostId = `post_${Date.now()}`;
+    const newPost: Post = { id: newPostId, x: px, y: py, type: 'standard' };
 
-    const newPost: Post = {
-      id: newPostId,
-      x: px,
-      y: py,
-      type: 'standard'
+    // Gate inheritance: determine which sub-segment the gate falls in.
+    // gatePositionPercent is the gate's start offset as a % of the segment.
+    // We compare the gate centre (start + half-width) against t*100.
+    const gateCentre = segment.hasGate
+      ? (segment.gatePositionPercent ?? 40) + (segment.gateWidthPercent ?? 25) / 2
+      : null;
+    const gateInFirstHalf = gateCentre !== null && gateCentre < t * 100;
+
+    // Build sub-segment for [startPost → newPost] (t fraction of original)
+    const seg1: Segment = {
+      id: `seg_${Date.now()}_1`,
+      startPostId: segment.startPostId,
+      endPostId: newPostId,
+      hasGate: segment.hasGate && gateInFirstHalf,
+      ...(segment.hasGate && gateInFirstHalf ? {
+        gateType: segment.gateType,
+        // Rescale position and width to be a % of the sub-segment's length (= t * original)
+        gatePositionPercent: Math.round((segment.gatePositionPercent ?? 40) / t),
+        gateWidthPercent:    Math.round((segment.gateWidthPercent    ?? 25) / t),
+      } : {}),
     };
 
-    const nextPostId = segment.endPostId;
+    // Build sub-segment for [newPost → endPost] ((1-t) fraction of original)
+    const seg2: Segment = {
+      id: `seg_${Date.now()}_2`,
+      startPostId: newPostId,
+      endPostId: segment.endPostId,
+      hasGate: segment.hasGate && !gateInFirstHalf,
+      ...(segment.hasGate && !gateInFirstHalf ? {
+        gateType: segment.gateType,
+        // Gate position relative to original was gPos%; relative to [P→B] starting at t:
+        gatePositionPercent: Math.round(((segment.gatePositionPercent ?? 40) - t * 100) / (1 - t)),
+        gateWidthPercent:    Math.round((segment.gateWidthPercent    ?? 25) / (1 - t)),
+      } : {}),
+    };
 
-    // Add new post
     setPosts(prev => [...prev, newPost]);
-
-    // Split segment into two
-    setSegments(prev => {
-      const filtered = prev.filter(s => s.id !== segment.id);
-      return [
-        ...filtered,
-        {
-          id: `seg_${Date.now()}_1`,
-          startPostId: segment.startPostId,
-          endPostId: newPostId,
-          hasGate: false
-        },
-        {
-          id: `seg_${Date.now()}_2`,
-          startPostId: newPostId,
-          endPostId: nextPostId,
-          hasGate: false
-        }
-      ];
-    });
-
+    setSegments(prev => [
+      ...prev.filter(s => s.id !== segment.id),
+      seg1,
+      seg2,
+    ]);
     setSelectedPostId(newPostId);
     setSelectedSegmentId(null);
+  };
+
+  // Called when user clicks a valid hover point in Insert Post mode
+  const insertPostOnSegmentClick = () => {
+    if (!insertPostHover || !insertPostHover.valid) return;
+    const seg = segments.find(s => s.id === insertPostHover.segmentId);
+    if (!seg) return;
+    handleSegmentClick(seg, insertPostHover.t);
+    setIsInsertPostMode(false);
+    setInsertPostHover(null);
   };
 
   // Add a brand new node, extending straight from the selected post, or leftmost/rightmost endpoints in selected direction
@@ -1029,17 +1009,46 @@ export default function FenceCanvas({
     );
     
     if (segmentsToRem.length === 2) {
-      // Connect neighbors across the gap
-      const startPostId = segmentsToRem[0].startPostId === selectedPostId ? segmentsToRem[0].endPostId : segmentsToRem[0].startPostId;
-      const endPostId = segmentsToRem[1].startPostId === selectedPostId ? segmentsToRem[1].endPostId : segmentsToRem[1].startPostId;
-      
+      // Identify which segment comes before and after the deleted post
+      const segA = segmentsToRem.find(s => s.endPostId === selectedPostId) ?? segmentsToRem[0];
+      const segB = segmentsToRem.find(s => s.startPostId === selectedPostId) ?? segmentsToRem[1];
+      const startPostId = segA.startPostId === selectedPostId ? segA.endPostId : segA.startPostId;
+      const endPostId   = segB.endPostId   === selectedPostId ? segB.startPostId : segB.endPostId;
+
+      // Compute merged gate properties if either sub-segment carried a gate
+      const pA = posts.find(p => p.id === startPostId);
+      const pP = posts.find(p => p.id === selectedPostId);
+      const pB = posts.find(p => p.id === endPostId);
+      const totalLen = pA && pB ? Math.hypot(pB.x - pA.x, pB.y - pA.y) : 0;
+      const splitT   = pA && pP && totalLen > 0
+        ? Math.hypot(pP.x - pA.x, pP.y - pA.y) / totalLen : 0.5;
+
+      let mergedGateProps: Partial<Segment> = { hasGate: false };
+      const gatedSeg = segA.hasGate ? segA : segB.hasGate ? segB : null;
+      if (gatedSeg) {
+        const isInSegA = gatedSeg === segA;
+        const origPos  = gatedSeg.gatePositionPercent ?? 40;
+        const origW    = gatedSeg.gateWidthPercent    ?? 25;
+        // Re-map gate position into the merged segment's 0–100 coordinate space
+        const mergedPos = isInSegA
+          ? origPos * splitT          // segA occupies [0, splitT*100] of merged
+          : splitT * 100 + origPos * (1 - splitT); // segB occupies [splitT*100, 100]
+        const mergedW = isInSegA ? origW * splitT : origW * (1 - splitT);
+        mergedGateProps = {
+          hasGate: true,
+          gateType: gatedSeg.gateType,
+          gatePositionPercent: Math.round(mergedPos),
+          gateWidthPercent:    Math.round(mergedW),
+        };
+      }
+
       setSegments(prev => [
         ...prev.filter(s => s.startPostId !== selectedPostId && s.endPostId !== selectedPostId),
         {
           id: `seg_${Date.now()}`,
           startPostId,
           endPostId,
-          hasGate: false
+          ...mergedGateProps,
         }
       ]);
     } else {
@@ -1231,20 +1240,20 @@ export default function FenceCanvas({
             <span>🛰️ Map Measure</span>
           </button>
 
-          {/* Foreground Layering Brush Tool */}
+          {/* Add Post Tool */}
           <button
             onClick={() => {
-              setIsBrushMode(!isBrushMode);
-              // Deselect other things to prevent distracting helper highlights
+              setIsInsertPostMode(prev => !prev);
+              setInsertPostHover(null);
               setSelectedPostId(null);
               setSelectedSegmentId(null);
-              setPanMode(false); // turn off pan mode if active
+              setPanMode(false);
             }}
-            title="Paint over foreground elements (like mailboxes, trees, or pillars) in the photo to bring them in front of the fence."
-            className={`btn-tool ${isBrushMode ? 'is-active' : ''}`}
+            title="Click on a fence segment to insert a new post at that position."
+            className={`btn-tool ${isInsertPostMode ? 'is-active' : ''}`}
           >
-            <Paintbrush className="w-3.5 h-3.5" />
-            <span>Layering Brush</span>
+            <GitCommit className="w-3.5 h-3.5" />
+            <span>Add Post</span>
           </button>
 
           {/* Undo Action */}
@@ -1508,37 +1517,10 @@ export default function FenceCanvas({
                 </feComponentTransfer>
               </filter>
 
-              {/* Foreground auto-layering mask to dynamically hide parts of the fence behind mailboxes, trees, or pillars */}
-              <mask id="fence-foreground-mask">
-                {/* Default to white so the entire fence is visible */}
-                <rect x="-100" y="-100" width="300" height="300" fill="#ffffff" />
-                
-                {/* Paint/Erase strokes on the mask */}
-                {maskStrokes.map((stroke) => (
-                  <path
-                    key={stroke.id}
-                    d={getStrokeSvgPath(stroke.points)}
-                    fill="none"
-                    stroke={stroke.isEraser ? "#ffffff" : "#000000"}
-                    strokeWidth={stroke.radius}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                ))}
-
-                {/* Direct DOM active stroke representation during drag */}
-                <path
-                  ref={activeMaskPathRef}
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ display: 'none' }}
-                />
-              </mask>
             </defs>
 
-            {/* DRAG-AND-DROP DISPLACEMENT LAYER (Translates whole fence globally with the layering mask applied) */}
-            <g transform={`translate(${globalOffset.x}, ${globalOffset.y})`} mask="url(#fence-foreground-mask)">
+            {/* DRAG-AND-DROP DISPLACEMENT LAYER */}
+            <g transform={`translate(${globalOffset.x}, ${globalOffset.y})`}>
               
               {/* Unified depth-sorted render — far segments first so closer ones always occlude them.
                   Each segment renders: panel infill → gate overlay → its own end posts.
@@ -2849,6 +2831,24 @@ export default function FenceCanvas({
               return <>{panelGateEls}</>;
               })()}
 
+              {/* Ghost post preview in Insert Post mode */}
+              {insertPostHover && (() => {
+                const gh = getVisualFenceHeight();
+                const pw = gh * 0.055;
+                return (
+                  <rect
+                    x={insertPostHover.x - pw / 2}
+                    y={insertPostHover.y - gh}
+                    width={pw}
+                    height={gh}
+                    fill={insertPostHover.valid ? 'rgba(20,184,166,0.55)' : 'rgba(239,68,68,0.55)'}
+                    stroke={insertPostHover.valid ? '#14b8a6' : '#ef4444'}
+                    strokeWidth={0.15}
+                    style={{ pointerEvents: 'none' }}
+                  />
+                );
+              })()}
+
             </g>
           </svg>
 
@@ -2909,110 +2909,16 @@ export default function FenceCanvas({
             );
           })}
 
-          {/* Semi-transparent Mask Overlay for visual help while painting */}
-          {isBrushMode && (
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {maskStrokes.map(stroke => (
-                <path
-                  key={stroke.id}
-                  d={getStrokeSvgPath(stroke.points)}
-                  fill="none"
-                  stroke={stroke.isEraser ? "rgba(239, 68, 68, 0.45)" : "rgba(20, 184, 166, 0.35)"}
-                  strokeWidth={stroke.radius}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              ))}
-
-              {/* Direct DOM active visual stroke help HUD */}
-              <path
-                ref={activeHudPathRef}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ display: 'none' }}
-              />
-            </svg>
-          )}
 
           </div>
         </div>
 
-        {/* 6. Foreground Masking Brush HUD Panel */}
-        {isBrushMode && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/95 border border-[#ff6a1f]/20 p-4 rounded-xl shadow-2xl flex flex-col gap-3 z-40 select-none w-72 backdrop-blur-md">
-            <div className="flex items-center gap-2 border-b border-[#d9d3c5] pb-2">
-              <Paintbrush className="w-4.5 h-4.5 text-[#ff6a1f] shrink-0" />
-              <div className="flex-1">
-                <span className="text-[11px] font-bold text-[#1a1c1e] uppercase tracking-wider block">Foreground Masking</span>
-                <span className="text-[9px] text-[#5f6266] block leading-tight">Paint over mailboxes, bushes, pillars to bring them forward</span>
-              </div>
-            </div>
-
-            {/* Brush Size selector slider */}
-            <div className="flex flex-col gap-1">
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="text-[#5f6266] font-medium">Brush Size</span>
-                <span className="font-mono font-bold text-[#ff6a1f]">{Math.round(brushSize * 4)}px</span>
-              </div>
-              <input
-                type="range"
-                min="0.5"
-                max="8.0"
-                step="0.25"
-                value={brushSize}
-                onChange={(e) => setBrushSize(parseFloat(e.target.value))}
-                className="w-full h-1 bg-[#ece7db] rounded appearance-none cursor-pointer accent-teal-500"
-              />
-            </div>
-
-            {/* Paint / Erase select buttons */}
-            <div className="grid grid-cols-2 gap-1.5">
-              <button
-                onClick={() => setIsBrushEraser(false)}
-                className={`py-1.5 rounded text-center text-[10px] font-bold cursor-pointer transition ${
-                  !isBrushEraser 
-                    ? 'bg-[#ffe3d3]/80 border border-[#ff6a1f]/40 text-[#ff6a1f] font-bold shadow-sm' 
-                    : 'bg-[#ece7db] border border-[#d9d3c5] text-[#5f6266] hover:text-[#1a1c1e]'
-                }`}
-              >
-                ● Brush Mask
-              </button>
-              <button
-                onClick={() => setIsBrushEraser(true)}
-                className={`py-1.5 rounded text-center text-[10px] font-bold cursor-pointer transition ${
-                  isBrushEraser 
-                    ? 'bg-[#fff1e9]/80 border border-[#ff6a1f]/40 text-[#ff6a1f] font-bold shadow-sm' 
-                    : 'bg-[#ece7db] border border-[#d9d3c5] text-[#5f6266] hover:text-[#1a1c1e]'
-                }`}
-              >
-                ○ Erase Mask
-              </button>
-            </div>
-
-            {/* Mask actions row */}
-            <div className="flex items-center gap-1.5 border-t border-[#d9d3c5] pt-2 text-[10px]">
-              <button
-                onClick={() => setMaskStrokes(prev => prev.slice(0, -1))}
-                disabled={maskStrokes.length === 0}
-                className="flex-1 bg-[#ece7db] py-1 hover:bg-[#ece7db] text-[#3c4045] rounded border border-[#d9d3c5] cursor-pointer text-center font-bold disabled:opacity-30 disabled:pointer-events-none transition"
-              >
-                Undo
-              </button>
-              <button
-                onClick={() => setMaskStrokes([])}
-                disabled={maskStrokes.length === 0}
-                className="flex-1 bg-[#fff1e9]/20 border border-[#ffd4bd]/10 py-1 hover:bg-[#fff1e9]/40 text-[#ff6a1f] rounded cursor-pointer text-center font-bold disabled:opacity-30 disabled:pointer-events-none transition"
-              >
-                Clear All
-              </button>
-              <button
-                onClick={() => setIsBrushMode(false)}
-                className="flex-1 bg-[#ff6a1f] hover:bg-[#ff6a1f] py-1 text-white rounded cursor-pointer text-center font-bold tracking-wider uppercase transition text-[9px]"
-              >
-                Done
-              </button>
-            </div>
+        {/* 6. Insert Post mode HUD banner */}
+        {isInsertPostMode && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/95 border border-teal-400/40 px-4 py-2 rounded-xl shadow-xl flex items-center gap-2 z-40 select-none pointer-events-none">
+            <GitCommit className="w-4 h-4 text-teal-500 shrink-0" />
+            <span className="text-[11px] font-bold text-[#1a1c1e] uppercase tracking-wider">Add Post Mode</span>
+            <span className="text-[10px] text-[#5f6266]">— hover a segment and click to insert</span>
           </div>
         )}
 
