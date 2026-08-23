@@ -379,7 +379,7 @@ export default function FenceCanvas({
     const DEFAULT_POSTS: Post[] = [
       { id: 'p1', x: 11, y: 76, type: 'standard' },
       { id: 'p2', x: 50, y: 79, type: 'standard' },
-      { id: 'p3', x: 89, y: 73, type: 'gate' }
+      { id: 'p3', x: 89, y: 73, type: 'standard' }
     ];
 
     const DEFAULT_SEGMENTS: Segment[] = [
