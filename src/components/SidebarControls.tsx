@@ -602,7 +602,7 @@ export default function SidebarControls({
             {/* Dynamic visual slider for physical size in meters of frontage */}
             <div className="bg-[#f3efe6] p-4 rounded-xl border border-[#d9d3c5] flex flex-col gap-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-[#1a1c1e]">Full Property Frontage</span>
+                <span className="text-xs font-bold text-[#1a1c1e]">Property Frontage</span>
                 <span className="text-xs font-mono font-bold text-[#ff6a1f] bg-[#ffe3d3]/20 border border-[#ffd4bd]/30 px-2 py-0.5 rounded">
                   {propertyFrontage} meters
                 </span>
