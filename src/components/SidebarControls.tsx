@@ -131,7 +131,9 @@ export default function SidebarControls({
   ];
 
   // Heights options listing in mm
-  const heightOptions: FenceHeight[] = [900, 1200, 1500, 1800, 2100];
+  const heightOptions: FenceHeight[] = material === 'post_and_rail'
+    ? [900, 1200, 1400, 1500, 1800, 2100]
+    : [900, 1200, 1500, 1800, 2100];
 
   return (
     <div className="w-80 sm:w-96 bg-[#f3efe6] border-r border-[#d9d3c5] flex flex-row shrink-0 h-full">

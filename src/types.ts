@@ -5,7 +5,7 @@
 
 export type FenceMaterial = 'slat_fencing' | 'post_and_rail' | 'aluminium_blade' | 'colorbond_solid_panel' | 'aluminium_perforated';
 
-export type FenceHeight = 900 | 1200 | 1500 | 1800 | 2100;
+export type FenceHeight = 900 | 1200 | 1400 | 1500 | 1800 | 2100;
 
 export interface ColorOption {
   name: string;
