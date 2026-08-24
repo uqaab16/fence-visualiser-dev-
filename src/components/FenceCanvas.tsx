@@ -1661,7 +1661,6 @@ export default function FenceCanvas({
 
                 const panelGateEls = sorted.map(({ seg, pStart, pEnd }, sIdx) => {
                 if (!pStart || !pEnd) return null;
-                if (seg.isStandaloneGate) return null;
 
                 const isSelected = selectedSegmentId === seg.id;
 
@@ -1693,6 +1692,7 @@ export default function FenceCanvas({
 
                 // Rendering materials procedurally inside SVG
                 const panelEl: React.ReactNode = (() => {
+                if (seg.isStandaloneGate) return null; // standalone gates have no fence panel surface
                 if (material === 'slat_fencing') {
                   // DRAW HORIZONTAL SLATS (Modern colorbond or metal slat layout)
                   const isChunky = slatProfile === '90';
