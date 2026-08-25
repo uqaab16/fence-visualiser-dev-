@@ -845,6 +845,117 @@ export default function SidebarControls({
                   </li>
                 </ul>
               </div>
+
+              {/* POST & RAIL GATES */}
+              <div className="flex flex-col gap-3 pt-1">
+                <div className="flex items-center gap-2">
+                  <div className="h-px flex-1 bg-[#d9d3c5]" />
+                  <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest whitespace-nowrap">Post &amp; Rail Gates</span>
+                  <div className="h-px flex-1 bg-[#d9d3c5]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-[#1a1c1e]">Single Leaf</span>
+                  <span className="text-[10px] text-[#ff6a1f] font-mono font-semibold">Strictly locked at 1000mm width</span>
+                </div>
+                {/* 5-button grid — one per style */}
+                <div className="grid grid-cols-5 gap-1.5">
+                  {([
+                    { style: 'pr-1rail',    label: '1 Rail',    icon: (
+                      <svg viewBox="0 0 28 20" className="w-full h-full">
+                        <rect x="2" y="4" width="3" height="12" fill="#a0682e" rx="0.5"/>
+                        <rect x="23" y="4" width="3" height="12" fill="#a0682e" rx="0.5"/>
+                        <rect x="5" y="5.5" width="18" height="2.5" fill="#c4924a" rx="0.4"/>
+                        <line x1="5" y1="15" x2="26" y2="6" stroke="#c4924a" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    )},
+                    { style: 'pr-2rail',    label: '2 Rail',    icon: (
+                      <svg viewBox="0 0 28 20" className="w-full h-full">
+                        <rect x="2" y="2" width="3" height="16" fill="#a0682e" rx="0.5"/>
+                        <rect x="23" y="2" width="3" height="16" fill="#a0682e" rx="0.5"/>
+                        <rect x="5" y="3.5" width="18" height="2.5" fill="#c4924a" rx="0.4"/>
+                        <rect x="5" y="10" width="18" height="2.5" fill="#c4924a" rx="0.4"/>
+                        <line x1="5" y1="17" x2="26" y2="4" stroke="#c4924a" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                    )},
+                    { style: 'pr-3rail',    label: '3 Rail',    icon: (
+                      <svg viewBox="0 0 28 20" className="w-full h-full">
+                        <rect x="2" y="1" width="3" height="18" fill="#a0682e" rx="0.5"/>
+                        <rect x="23" y="1" width="3" height="18" fill="#a0682e" rx="0.5"/>
+                        <rect x="5" y="2" width="18" height="2.2" fill="#c4924a" rx="0.4"/>
+                        <rect x="5" y="8.5" width="18" height="2.2" fill="#c4924a" rx="0.4"/>
+                        <rect x="5" y="15" width="18" height="2.2" fill="#c4924a" rx="0.4"/>
+                        <line x1="5" y1="18" x2="26" y2="3" stroke="#c4924a" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    )},
+                    { style: 'pr-4rail',    label: '4 Rail',    icon: (
+                      <svg viewBox="0 0 28 20" className="w-full h-full">
+                        <rect x="2" y="1" width="3" height="18" fill="#a0682e" rx="0.5"/>
+                        <rect x="23" y="1" width="3" height="18" fill="#a0682e" rx="0.5"/>
+                        <rect x="5" y="2" width="18" height="1.8" fill="#c4924a" rx="0.3"/>
+                        <rect x="5" y="6.5" width="18" height="1.8" fill="#c4924a" rx="0.3"/>
+                        <rect x="5" y="11" width="18" height="1.8" fill="#c4924a" rx="0.3"/>
+                        <rect x="5" y="15.5" width="18" height="1.8" fill="#c4924a" rx="0.3"/>
+                        <line x1="5" y1="18" x2="26" y2="3" stroke="#c4924a" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    )},
+                    { style: 'pr-crossbuck', label: 'X-Buck',  icon: (
+                      <svg viewBox="0 0 28 20" className="w-full h-full">
+                        <rect x="2" y="1" width="3" height="18" fill="#a0682e" rx="0.5"/>
+                        <rect x="23" y="1" width="3" height="18" fill="#a0682e" rx="0.5"/>
+                        <rect x="5" y="2" width="18" height="2.2" fill="#c4924a" rx="0.4"/>
+                        <rect x="5" y="15.5" width="18" height="2.2" fill="#c4924a" rx="0.4"/>
+                        <line x1="5" y1="17" x2="26" y2="4" stroke="#c4924a" strokeWidth="1.8" strokeLinecap="round"/>
+                        <line x1="5" y1="4" x2="26" y2="17" stroke="#c4924a" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    )},
+                  ] as { style: string; label: string; icon: React.ReactNode }[]).map(({ style, label, icon }) => {
+                    const dropPRGate = () => {
+                      const idLeft  = 'post_prg_' + Date.now() + '_l';
+                      const idRight = 'post_prg_' + Date.now() + '_r';
+                      const widthPercent = (1.0 / propertyFrontage) * 100;
+
+                      let centerY = 75;
+                      let centerX = 50;
+                      while (posts.some(p => Math.abs(p.x - centerX) < 2 && Math.abs(p.y - centerY) < 2)) {
+                        centerY += 3;
+                        if (centerY > 85) { centerY = 68; centerX += 5; }
+                      }
+
+                      let leftX  = centerX - widthPercent / 2;
+                      let rightX = centerX + widthPercent / 2;
+                      if (leftX < 2)  { leftX = 2;  rightX = leftX + widthPercent; }
+                      else if (rightX > 98) { rightX = 98; leftX = rightX - widthPercent; }
+
+                      setPosts(prev => [...prev,
+                        { id: idLeft,  x: leftX,  y: centerY, type: 'gate' as const },
+                        { id: idRight, x: rightX, y: centerY, type: 'gate' as const },
+                      ]);
+                      setSegments(prev => [...prev, {
+                        id: 'seg_prg_' + Date.now(),
+                        startPostId: idLeft,
+                        endPostId: idRight,
+                        hasGate: true,
+                        gateType: 'single' as const,
+                        gateWidthPercent: 100,
+                        gatePositionPercent: 0,
+                        isStandaloneGate: true,
+                        gateStyle: style as any,
+                      }]);
+                    };
+                    return (
+                      <button
+                        key={style}
+                        onClick={dropPRGate}
+                        title={`Drop Post & Rail ${label} gate (1000mm)`}
+                        className="flex flex-col items-center gap-1 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] rounded-lg p-1.5 cursor-pointer transition select-none"
+                      >
+                        <div className="w-full aspect-[7/5]">{icon}</div>
+                        <span className="text-[8px] font-bold text-[#1a1c1e] uppercase tracking-wide leading-none text-center">{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}

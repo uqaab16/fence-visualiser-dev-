@@ -24,6 +24,10 @@ export interface Post {
   customHeight?: number; // custom height override
 }
 
+export type PRGateStyle =
+  | 'pr-1rail' | 'pr-2rail' | 'pr-3rail' | 'pr-4rail' | 'pr-crossbuck' | 'pr-mesh'
+  | 'pr-1rail-double' | 'pr-2rail-double' | 'pr-3rail-double' | 'pr-4rail-double' | 'pr-crossbuck-double' | 'pr-mesh-double';
+
 export interface Segment {
   id: string;
   startPostId: string;
@@ -33,6 +37,7 @@ export interface Segment {
   gateWidthPercent?: number; // 10 to 80%
   gatePositionPercent?: number; // offset from start (usually center-ish)
   isStandaloneGate?: boolean;
+  gateStyle?: PRGateStyle; // Post & Rail gate visual variant
 }
 
 export interface DynamicPricing {
