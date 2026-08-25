@@ -349,8 +349,8 @@ export default function FenceCanvas({
     setIsSegmentCustomizerMinimized(false);
   }, [selectedSegmentId]);
 
-  // Default house image from assets
-  const defaultHouseImg = "/src/assets/images/modern_sydney_house_1780306939586.png";
+  // Demo yard backdrop (public/demo yard.jpg uploaded via GitHub)
+  const defaultHouseImg = "/demo yard.jpg";
 
   // Handle custom image uploads
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -374,34 +374,8 @@ export default function FenceCanvas({
   const loadDefaultImage = () => {
     setBackgroundUrl(defaultHouseImg);
     setCustomImageUploaded(false);
-    
-    // Seed default fence positions for the demo house so there is a pre-configured fence layout
-    const DEFAULT_POSTS: Post[] = [
-      { id: 'p1', x: 11, y: 76, type: 'standard' },
-      { id: 'p2', x: 50, y: 79, type: 'standard' },
-      { id: 'p3', x: 89, y: 73, type: 'standard' }
-    ];
-
-    const DEFAULT_SEGMENTS: Segment[] = [
-      { 
-        id: 's1', 
-        startPostId: 'p1', 
-        endPostId: 'p2', 
-        hasGate: false 
-      },
-      { 
-        id: 's2', 
-        startPostId: 'p2', 
-        endPostId: 'p3', 
-        hasGate: true, 
-        gateType: 'single', 
-        gateWidthPercent: 30, 
-        gatePositionPercent: 35 
-      }
-    ];
-
-    setPosts(DEFAULT_POSTS);
-    setSegments(DEFAULT_SEGMENTS);
+    setPosts([]);
+    setSegments([]);
   };
 
   const handleClearCanvas = () => {
