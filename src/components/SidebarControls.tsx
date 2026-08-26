@@ -944,6 +944,42 @@ export default function SidebarControls({
                   </button>
                 </div>
               </div>
+
+              {/* ── Aluminium Perforated Gate ── */}
+              <div className="p-3 rounded-xl border border-[#d9d3c5] bg-[#f3efe6] flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">Aluminium Perforated Gate</span>
+                <button
+                  onClick={() => {
+                    const centerX = 50;
+                    const centerY = 75;
+                    const gateRealMm = 1200;
+                    const containerRealMm = (containerSize.width / containerSize.height) * 15000;
+                    const widthPercent = Math.min(40, (gateRealMm / containerRealMm) * 100);
+                    const idLeft  = 'post_pfg_l_' + Date.now();
+                    const idRight = 'post_pfg_r_' + Date.now();
+                    let leftX = centerX - widthPercent / 2;
+                    let rightX = centerX + widthPercent / 2;
+                    if (leftX < 2) { leftX = 2; rightX = leftX + widthPercent; }
+                    else if (rightX > 98) { rightX = 98; leftX = rightX - widthPercent; }
+                    setPosts(prev => [...prev,
+                      { id: idLeft,  x: leftX,  y: centerY, type: 'gate' as const },
+                      { id: idRight, x: rightX, y: centerY, type: 'gate' as const },
+                    ]);
+                    setSegments(prev => [...prev, {
+                      id: 'seg_pfg_' + Date.now(),
+                      startPostId: idLeft, endPostId: idRight,
+                      hasGate: true, gateType: 'single' as const,
+                      gateWidthPercent: 100, gatePositionPercent: 0,
+                      isStandaloneGate: true,
+                      gateMaterial: 'aluminium_perforated' as const,
+                    }]);
+                  }}
+                  className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
+                >
+                  <DoorClosed className="w-4 h-4 shrink-0" />
+                  <span>Drop Perforated Gate (1200mm)</span>
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -2729,6 +2729,94 @@ export default function FenceCanvas({
                         );
                       }
 
+                      // ── ALUMINIUM PERFORATED GATE ────────────────────────────────────────
+                      if (gateMat === 'aluminium_perforated') {
+                        const frameFill  = shadeHex(color.hex, 0.78);
+                        const holeStep   = ghtStart * 0.018;        // matches fence panel holeStep at gate scale
+                        const metalR     = holeStep * 0.33;
+                        const perfPatId  = `perf-gate-${seg.id}`;
+                        const perfClipId = `perf-gate-clip-${seg.id}`;
+
+                        const gateW  = gx2 - gx1;
+                        const railH  = 0.07;                        // fraction of gate height for top/bottom rail
+                        const stileW = Math.max(0.5, gateW * 0.055); // ~5.5% of gate width in SVG px
+                        const stileT = stileW / Math.max(gateW, 0.01);
+
+                        // Inner rectangle corners (between stiles and rails) for clip + dot grid
+                        const innerL  = px(stileT);
+                        const innerR  = px(1 - stileT);
+                        const innerTop = py(0.5, 1 - railH);     // y-coordinate of inner top edge
+                        const innerBot = py(0.5, railH);          // y-coordinate of inner bottom edge
+
+                        return (
+                          <g>
+                            <defs>
+                              <pattern id={perfPatId} x="0" y="0" width={holeStep} height={holeStep} patternUnits="userSpaceOnUse">
+                                <circle cx={holeStep / 2} cy={holeStep / 2} r={metalR} fill={color.hex} />
+                              </pattern>
+                              <clipPath id={perfClipId}>
+                                <rect x={innerL} y={innerTop} width={innerR - innerL} height={innerBot - innerTop} />
+                              </clipPath>
+                            </defs>
+
+                            {/* Ambient tint over infill area */}
+                            <rect x={innerL} y={innerTop} width={innerR - innerL} height={innerBot - innerTop} fill={color.hex} opacity={0.09} />
+
+                            {/* Dot-grid perforation */}
+                            <rect x={innerL} y={innerTop} width={innerR - innerL} height={innerBot - innerTop}
+                              fill={`url(#${perfPatId})`} clipPath={`url(#${perfClipId})`} />
+
+                            {/* Bottom rail */}
+                            <polygon
+                              points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Top rail */}
+                            <polygon
+                              points={`${px(0)},${py(0, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Left stile (full height, covers rail ends) */}
+                            <polygon
+                              points={`${px(0)},${py(0, 1)} ${px(stileT)},${py(stileT, 1)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Right stile */}
+                            <polygon
+                              points={`${px(1 - stileT)},${py(1 - stileT, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* 3 hinges — left stile, at 20 / 50 / 80% height */}
+                            {[0.20, 0.50, 0.80].map((hf, hi) => (
+                              <rect
+                                key={`perf-hinge-${hi}`}
+                                x={px(0) - 0.1}
+                                y={py(0, hf) - 0.16}
+                                width={stileW + 0.22}
+                                height={0.32}
+                                rx="0.05"
+                                fill="#111111"
+                              />
+                            ))}
+                            {/* Latch box — right stile, centered */}
+                            <rect
+                              x={px(1 - stileT) - 0.04}
+                              y={py(1, 0.54) - 0.04}
+                              width={stileW + 0.08}
+                              height={py(1, 0.43) - py(1, 0.54)}
+                              rx="0.05"
+                              fill="#1a1c1e"
+                              stroke="#000" strokeWidth="0.02"
+                            />
+                            <line
+                              x1={px(1 - stileT * 0.4)} y1={py(1, 0.485)}
+                              x2={px(1 - stileT * 0.4) - 0.30} y2={py(1, 0.485)}
+                              stroke="#0d0e0f" strokeWidth="0.09" strokeLinecap="round"
+                            />
+                          </g>
+                        );
+                      }
+
                       // ── SLAT / OTHER MATERIAL GATES — vertical picket design ─────────────
                       if (seg.gateType === 'double') {
                         const picketTopH = vhStart / ghtStart; // pickets poke above top rail (~1.053)
