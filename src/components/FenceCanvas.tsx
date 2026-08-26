@@ -2537,6 +2537,7 @@ export default function FenceCanvas({
                         const stileW      = faceWidth * 2;
                         const stileT      = stileW / Math.max(gateW, 0.01); // fraction of full gate
                         const railH       = 0.08;
+                        const bladeProtrude = vhStart / ghtStart - 1; // ≈ 0.053
 
                         // Each leaf occupies half the gate width (with a narrow center gap)
                         const leafGapHalf = 0.005; // 0.5% of gate width gap at center
@@ -2574,9 +2575,9 @@ export default function FenceCanvas({
                             {/* Top rail */}
                             <polygon points={`${px(ll.L)},${py(ll.L, 1)} ${px(ll.R)},${py(ll.R, 1)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
                             {/* Outer (left) stile */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, 1)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1)} ${px(ll.L + stileT)},${py(ll.L + stileT, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + bladeProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1 + bladeProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, -bladeProtrude)} ${px(ll.L)},${py(ll.L, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
                             {/* Inner (meeting) stile */}
-                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1)} ${px(ll.R)},${py(ll.R, 1)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R - stileT)},${py(ll.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1 + bladeProtrude)} ${px(ll.R)},${py(ll.R, 1 + bladeProtrude)} ${px(ll.R)},${py(ll.R, -bladeProtrude)} ${px(ll.R - stileT)},${py(ll.R - stileT, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
                             {/* Blades */}
                             {Array.from({ length: llNumBlades }).map((_, i) => renderDblBlade(i, ll.L, ll.R, llNumBlades))}
                             {/* 3 hinges on outer (left) stile */}
@@ -2590,9 +2591,9 @@ export default function FenceCanvas({
                             {/* Top rail */}
                             <polygon points={`${px(rl.L)},${py(rl.L, 1)} ${px(rl.R)},${py(rl.R, 1)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
                             {/* Inner (meeting) stile */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, 1)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1)} ${px(rl.L + stileT)},${py(rl.L + stileT, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + bladeProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1 + bladeProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, -bladeProtrude)} ${px(rl.L)},${py(rl.L, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
                             {/* Outer (right) stile */}
-                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1)} ${px(rl.R)},${py(rl.R, 1)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R - stileT)},${py(rl.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1 + bladeProtrude)} ${px(rl.R)},${py(rl.R, 1 + bladeProtrude)} ${px(rl.R)},${py(rl.R, -bladeProtrude)} ${px(rl.R - stileT)},${py(rl.R - stileT, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
                             {/* Blades */}
                             {Array.from({ length: rlNumBlades }).map((_, i) => renderDblBlade(i, rl.L, rl.R, rlNumBlades))}
                             {/* 3 hinges on outer (right) stile */}
@@ -2635,6 +2636,7 @@ export default function FenceCanvas({
 
                         // Rail depth as fraction of gate height (top rail, bottom rail)
                         const railH = 0.08;
+                        const bladeProtrude = vhStart / ghtStart - 1; // ≈ 0.053
 
                         // Render a single vertical blade at horizontal fraction t_centre (0–1 across gate)
                         const renderBlade = (i: number) => {
@@ -2684,12 +2686,12 @@ export default function FenceCanvas({
                             />
                             {/* Left stile */}
                             <polygon
-                              points={`${px(0)},${py(0, 1)} ${px(stileT)},${py(stileT, 1)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
+                              points={`${px(0)},${py(0, 1 + bladeProtrude)} ${px(stileT)},${py(stileT, 1 + bladeProtrude)} ${px(stileT)},${py(stileT, -bladeProtrude)} ${px(0)},${py(0, -bladeProtrude)}`}
                               fill={frameFill} stroke="#00000055" strokeWidth="0.04"
                             />
                             {/* Right stile */}
                             <polygon
-                              points={`${px(1 - stileT)},${py(1 - stileT, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
+                              points={`${px(1 - stileT)},${py(1 - stileT, 1 + bladeProtrude)} ${px(1)},${py(1, 1 + bladeProtrude)} ${px(1)},${py(1, -bladeProtrude)} ${px(1 - stileT)},${py(1 - stileT, -bladeProtrude)}`}
                               fill={frameFill} stroke="#00000055" strokeWidth="0.04"
                             />
                             {/* Vertical blades */}
