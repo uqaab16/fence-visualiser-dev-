@@ -887,6 +887,7 @@ export default function SidebarControls({
                         hasGate: true, gateType: 'single' as const,
                         gateWidthPercent: 100, gatePositionPercent: 0,
                         isStandaloneGate: true,
+                        gateMaterial: 'aluminium_blade' as const,
                       }]);
                     }}
                     className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
@@ -932,6 +933,7 @@ export default function SidebarControls({
                         hasGate: true, gateType: 'double' as const,
                         gateWidthPercent: 100, gatePositionPercent: 0,
                         isStandaloneGate: true,
+                        gateMaterial: 'aluminium_blade' as const,
                       }]);
                     }}
                     className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
