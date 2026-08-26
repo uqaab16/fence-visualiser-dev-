@@ -33,6 +33,7 @@ export interface Segment {
   gateWidthPercent?: number; // 10 to 80%
   gatePositionPercent?: number; // offset from start (usually center-ish)
   isStandaloneGate?: boolean;
+  gateMaterial?: FenceMaterial;
 }
 
 export interface DynamicPricing {
