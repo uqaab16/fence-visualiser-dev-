@@ -2522,11 +2522,9 @@ export default function FenceCanvas({
                         const currentGht = ghtStart + t * (ghtEnd - ghtStart);
                         return currentBaseY - h_ratio * currentGht;
                       };
-                      // Standalone gates carry their own material; fall back to the canvas material for embedded gates
-                      const gateMat = seg.gateMaterial ?? material;
 
                       // ── ALUMINIUM BLADE GATE ─────────────────────────────────────────────
-                      if (gateMat === 'aluminium_blade' && seg.gateType === 'double') {
+                      if (material === 'aluminium_blade' && seg.gateType === 'double') {
                         const faceFill  = color.hex;
                         const sideFill  = shadeHex(color.hex, 0.55);
                         const topFill   = shadeHex(color.hex, 1.25);
@@ -2616,7 +2614,7 @@ export default function FenceCanvas({
                         );
                       }
 
-                      if (gateMat === 'aluminium_blade') {
+                      if (material === 'aluminium_blade') {
                         // Reuse blade panel shading tokens
                         const faceFill = color.hex;
                         const sideFill = shadeHex(color.hex, 0.55);
