@@ -845,6 +845,57 @@ export default function SidebarControls({
                   </li>
                 </ul>
               </div>
+
+              {/* ── ALUMINIUM BLADE GATES ── */}
+              <div className="border-t border-[#d9d3c5] pt-4 flex flex-col gap-3">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#ff6a1f]">Aluminium Blade Gate</h4>
+                  <p className="text-xs text-[#5f6266] mt-1">Vertical blade-picket gate matching the Aluminium Blade fence panel style.</p>
+                </div>
+                <div className="bg-[#f3efe6] p-3.5 rounded-xl border border-[#d9d3c5] flex flex-col gap-2.5">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-[#1a1c1e]">Single Pedestrian Gate</span>
+                    <span className="text-[10px] text-[#ff6a1f] font-mono font-semibold">Strictly locked at 1200mm width</span>
+                  </div>
+                  <button
+                    id="add_blade_single_gate"
+                    onClick={() => {
+                      const idLeft = 'post_bg_' + Date.now() + '_l';
+                      const idRight = 'post_bg_' + Date.now() + '_r';
+                      const widthPercent = (1.2 / propertyFrontage) * 100;
+
+                      let centerY = 75;
+                      let centerX = 50;
+
+                      while (posts.some(p => Math.abs(p.x - centerX) < 2 && Math.abs(p.y - centerY) < 2)) {
+                        centerY += 3;
+                        if (centerY > 85) { centerY = 68; centerX += 5; }
+                      }
+
+                      let leftX = centerX - widthPercent / 2;
+                      let rightX = centerX + widthPercent / 2;
+                      if (leftX < 2) { leftX = 2; rightX = leftX + widthPercent; }
+                      else if (rightX > 98) { rightX = 98; leftX = rightX - widthPercent; }
+
+                      setPosts(prev => [...prev,
+                        { id: idLeft,  x: leftX,  y: centerY, type: 'gate' as const },
+                        { id: idRight, x: rightX, y: centerY, type: 'gate' as const },
+                      ]);
+                      setSegments(prev => [...prev, {
+                        id: 'seg_bg_' + Date.now(),
+                        startPostId: idLeft, endPostId: idRight,
+                        hasGate: true, gateType: 'single' as const,
+                        gateWidthPercent: 100, gatePositionPercent: 0,
+                        isStandaloneGate: true,
+                      }]);
+                    }}
+                    className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
+                  >
+                    <DoorClosed className="w-4 h-4 shrink-0" />
+                    <span>Drop Blade Gate (1200mm)</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

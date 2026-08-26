@@ -2514,17 +2514,129 @@ export default function FenceCanvas({
                     {/* Shadow underneath gate frame */}
                     <line x1={gx1} y1={gy1} x2={gx2} y2={gy2} stroke="#000" strokeWidth="0.4" opacity="0.15" />
 
-                    {/* Highly detailed procedural SVG elements for Single and Double Gates */}
+                    {/* Material-specific gate leaf rendering */}
                     {(() => {
-                      const px = (t: number, h_ratio: number = 0) => {
-                        return gx1 + t * (gx2 - gx1);
-                      };
+                      const px = (t: number) => gx1 + t * (gx2 - gx1);
                       const py = (t: number, h_ratio: number = 0) => {
                         const currentBaseY = gy1 + t * (gy2 - gy1);
                         const currentGht = ghtStart + t * (ghtEnd - ghtStart);
                         return currentBaseY - h_ratio * currentGht;
                       };
 
+                      // ── ALUMINIUM BLADE GATE (single leaf only) ──────────────────────────
+                      if (material === 'aluminium_blade') {
+                        // Reuse blade panel shading tokens
+                        const faceFill = color.hex;
+                        const sideFill = shadeHex(color.hex, 0.55);
+                        const topFill  = shadeHex(color.hex, 1.25);
+                        const frameFill = shadeHex(color.hex, 0.80);
+
+                        // Gate width in SVG units
+                        const gateW = gx2 - gx1;
+
+                        // Blade density: same pitch formula as panel renderer, but for gate width
+                        const bladePitchSVG = Math.max(0.85, 1100 / containerSize.width);
+                        const numBlades = Math.max(2, Math.round(gateW / bladePitchSVG));
+                        const faceWidth = bladePitchSVG * (16 / 85);
+                        const depthWidth = faceWidth * 0.85;
+
+                        // Stile width = faceWidth * 2 (chunky structural member)
+                        const stileW = faceWidth * 2;
+                        const stileT = stileW / Math.max(gateW, 0.01); // as fraction of gate width
+
+                        // Rail depth as fraction of gate height (top rail, bottom rail)
+                        const railH = 0.08;
+
+                        // Render a single vertical blade at horizontal fraction t_centre (0–1 across gate)
+                        const renderBlade = (i: number) => {
+                          // Place blades evenly between the two stiles
+                          const innerStart = stileT;
+                          const innerEnd   = 1 - stileT;
+                          const innerW = innerEnd - innerStart;
+                          const step = innerW / numBlades;
+                          const tc = innerStart + (i + 0.5) * step;
+
+                          const bx = px(tc);
+                          const topY  = py(tc, 1 - railH);   // blade top: just below top rail
+                          const botY  = py(tc, railH);        // blade bottom: just above bottom rail
+                          const bladeH = botY - topY;         // positive downward in SVG
+                          const fw = faceWidth;
+                          const dw = depthWidth;
+
+                          return (
+                            <g key={`bg-blade-${i}`}>
+                              {/* Side depth face */}
+                              <polygon
+                                points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`}
+                                fill={sideFill}
+                              />
+                              {/* Front face */}
+                              <rect x={bx - fw/2} y={topY} width={fw} height={bladeH} fill={faceFill} />
+                              {/* Lit top cap */}
+                              <polygon
+                                points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`}
+                                fill={topFill}
+                              />
+                            </g>
+                          );
+                        };
+
+                        return (
+                          <g>
+                            {/* Bottom rail */}
+                            <polygon
+                              points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Top rail */}
+                            <polygon
+                              points={`${px(0)},${py(0, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Left stile */}
+                            <polygon
+                              points={`${px(0)},${py(0, 1)} ${px(stileT)},${py(stileT, 1)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Right stile */}
+                            <polygon
+                              points={`${px(1 - stileT)},${py(1 - stileT, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Vertical blades */}
+                            {Array.from({ length: numBlades }).map((_, i) => renderBlade(i))}
+                            {/* Hinge brackets — left stile, at ~25% and ~75% height */}
+                            {[0.25, 0.75].map((hf, hi) => (
+                              <rect
+                                key={`hinge-${hi}`}
+                                x={px(0) - 0.1}
+                                y={py(0, hf) - 0.18}
+                                width={stileW + 0.25}
+                                height={0.36}
+                                rx="0.06"
+                                fill="#111111"
+                              />
+                            ))}
+                            {/* Lock box — right stile, mid-height */}
+                            <rect
+                              x={px(1 - stileT) - 0.05}
+                              y={py(1, 0.54) - 0.05}
+                              width={stileW + 0.1}
+                              height={py(1, 0.43) - py(1, 0.54)}
+                              rx="0.05"
+                              fill="#1a1c1e"
+                              stroke="#000" strokeWidth="0.02"
+                            />
+                            <line
+                              x1={px(1 - stileT * 0.4)} y1={py(1, 0.485)}
+                              x2={px(1 - stileT * 0.4) - 0.35} y2={py(1, 0.485)}
+                              stroke="#0d0e0f" strokeWidth="0.10" strokeLinecap="round"
+                            />
+                          </g>
+                        );
+                      }
+
+                      // ── SLAT / OTHER MATERIAL GATES (existing logic) ─────────────────────
                       if (seg.gateType === 'double') {
                         return (
                           <g>
