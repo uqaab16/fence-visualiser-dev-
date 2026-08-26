@@ -2868,7 +2868,23 @@ export default function FenceCanvas({
                       }
                     })()}
 
-                    {/* Left and Right heavy structural posts / pillars supporting the gate leaf */}
+                    {/* Delete button for standalone gates (no label text) */}
+                    {seg.isStandaloneGate && isSelected && (
+                      <g
+                        transform={`translate(${(gx1 + gx2) / 2}, ${(gy1 + gy2) / 2 - (ghtStart + ghtEnd) / 4 - 2.2})`}
+                        className="cursor-pointer pointer-events-auto hover:opacity-80"
+                        onPointerDown={(e) => {
+                          e.stopPropagation();
+                          deleteSelectedSegment();
+                        }}
+                      >
+                        <circle r="0.6" fill="#ef4444" />
+                        <line x1="-0.22" y1="-0.22" x2="0.22" y2="0.22" stroke="#ffffff" strokeWidth="0.12" strokeLinecap="round" />
+                        <line x1="0.22" y1="-0.22" x2="-0.22" y2="0.22" stroke="#ffffff" strokeWidth="0.12" strokeLinecap="round" />
+                      </g>
+                    )}
+
+                    {/* Left and Right heavy structural posts / pillars — rendered last to sit on top of gate leaf */}
                     <line x1={gx1} y1={gy1 + 0.4} x2={gx1} y2={gy1 - vhStart} stroke={postColor.hex} strokeWidth={0.88 * scaleG1} strokeLinecap="square" />
                     <line x1={gx2} y1={gy2 + 0.4} x2={gx2} y2={gy2 - vhEnd} stroke={postColor.hex} strokeWidth={0.88 * scaleG2} strokeLinecap="square" opacity="0.95" />
 
@@ -2877,30 +2893,6 @@ export default function FenceCanvas({
                     <circle cx={gx1} cy={gy1 - ghtStart * 0.2} r={0.16 * scaleG1} fill="#111" />
                     <circle cx={gx2} cy={gy2 - ghtEnd * 0.8} r={0.16 * scaleG2} fill="#111" />
                     <circle cx={gx2} cy={gy2 - ghtEnd * 0.2} r={0.16 * scaleG2} fill="#111" />
-
-                    {/* Gate Label Bubble */}
-                    <g transform={`translate(${(gx1 + gx2) / 2}, ${(gy1 + gy2) / 2 - (ghtStart + ghtEnd) / 4 - 2.2})`}>
-                      <rect x="-4.5" y="-1.1" width="9" height="2.2" rx="0.6" fill="#1f2125" stroke={isSelected ? '#14b8a6' : '#444'} strokeWidth="0.12" />
-                      <text x={seg.isStandaloneGate && isSelected ? -1.0 : 0} y={0.35} fill="#ffffff" fontSize="0.92" fontFamily="sans-serif" fontWeight="bold" textAnchor="middle">
-                        {seg.gateType === 'double' ? 'Double Gate' : 'Single Gate'}
-                      </text>
-                      
-                      {seg.isStandaloneGate && isSelected && (
-                        <g 
-                          transform="translate(2.7, 0)" 
-                          className="cursor-pointer pointer-events-auto hover:opacity-80"
-                          onPointerDown={(e) => {
-                            e.stopPropagation();
-                            deleteSelectedSegment();
-                          }}
-                        >
-                          <circle r="0.6" fill="#ef4444" />
-                          {/* Draw a tiny white X */}
-                          <line x1="-0.22" y1="-0.22" x2="0.22" y2="0.22" stroke="#ffffff" strokeWidth="0.12" strokeLinecap="round" />
-                          <line x1="0.22" y1="-0.22" x2="-0.22" y2="0.22" stroke="#ffffff" strokeWidth="0.12" strokeLinecap="round" />
-                        </g>
-                      )}
-                    </g>
                     
                     {/* Active drag handles when selected */}
                     {isSelected && !seg.isStandaloneGate && (
