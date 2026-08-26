@@ -2817,6 +2817,90 @@ export default function FenceCanvas({
                         );
                       }
 
+                      // ── COLORBOND SOLID PANEL DOUBLE GATE ────────────────────────────────
+                      if (gateMat === 'colorbond_solid_panel' && seg.gateType === 'double') {
+                        const panelFill  = color.hex;
+                        const ribShadow  = shadeHex(color.hex, 0.76);
+                        const ribLight   = shadeHex(color.hex, 1.14);
+                        const frameFill  = shadeHex(color.hex, 0.80);
+                        const isSawtooth = solidPanelProfile === 'sawtooth';
+
+                        const gateW      = gx2 - gx1;
+                        const stileW     = Math.max(0.5, gateW * 0.055);
+                        const stileT     = stileW / Math.max(gateW, 0.01);
+                        const railH      = 0.07;
+                        const cbProtrude = vhStart / ghtStart - 1;
+                        const ribStrokeW = Math.max(0.35, gateW / 280);
+                        const sawSW      = Math.max(0.5, (gateW / 4) * 0.45);
+
+                        const leafGapHalf = 0.005;
+                        const ll = { L: 0,                  R: 0.5 - leafGapHalf };
+                        const rl = { L: 0.5 + leafGapHalf, R: 1.0 };
+
+                        // Render 4 ribs evenly across a leaf's inner zone (between stiles)
+                        const renderLeafRibs = (leafL: number, leafR: number) =>
+                          [1, 2, 3, 4].map((ri) => {
+                            const innerL = leafL + stileT;
+                            const innerW = (leafR - stileT) - innerL;
+                            const tc = innerL + (ri / 5) * innerW;
+                            return (
+                              <line key={`cbdrib-${leafL}-${ri}`}
+                                x1={px(tc)} y1={py(tc, 0)}
+                                x2={px(tc)} y2={py(tc, 1 + cbProtrude)}
+                                stroke={isSawtooth ? (ri % 2 === 0 ? ribLight : ribShadow) : ribShadow}
+                                strokeWidth={isSawtooth ? sawSW : ribStrokeW}
+                                strokeOpacity={isSawtooth ? "0.72" : "0.48"}
+                              />
+                            );
+                          });
+
+                        return (
+                          <g>
+                            {/* ── LEFT LEAF ── */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, 0)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.L)},${py(ll.L, 1 + cbProtrude)}`} fill={panelFill} />
+                            {renderLeafRibs(ll.L, ll.R)}
+                            {/* Bottom rail */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, railH)} ${px(ll.R)},${py(ll.R, railH)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Top rail */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Outer (left) stile */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + cbProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1 + cbProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Inner (meeting) stile */}
+                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R - stileT)},${py(ll.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* 2 hinges on outer (left) stile */}
+                            {[0.25, 0.75].map((hf, hi) => (
+                              <rect key={`ll-hinge-${hi}`} x={px(ll.L) - 0.1} y={py(ll.L, hf) - 0.16} width={stileW + 0.22} height={0.32} rx="0.05" fill="#111111" />
+                            ))}
+
+                            {/* ── RIGHT LEAF ── */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, 0)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.L)},${py(rl.L, 1 + cbProtrude)}`} fill={panelFill} />
+                            {renderLeafRibs(rl.L, rl.R)}
+                            {/* Bottom rail */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, railH)} ${px(rl.R)},${py(rl.R, railH)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Top rail */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Inner (meeting) stile */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + cbProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1 + cbProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Outer (right) stile */}
+                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R - stileT)},${py(rl.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* 2 hinges on outer (right) stile */}
+                            {[0.25, 0.75].map((hf, hi) => (
+                              <rect key={`rl-hinge-${hi}`} x={px(rl.R) - stileW - 0.12} y={py(rl.R, hf) - 0.16} width={stileW + 0.22} height={0.32} rx="0.05" fill="#111111" />
+                            ))}
+
+                            {/* Center latch box at meeting stiles */}
+                            <rect
+                              x={px(ll.R) - stileW * 0.6}
+                              y={py(0.5, 0.57)}
+                              width={stileW * 1.2}
+                              height={py(0.5, 0.42) - py(0.5, 0.57)}
+                              rx="0.05"
+                              fill="#1a1c1e" stroke="#000" strokeWidth="0.02"
+                            />
+                          </g>
+                        );
+                      }
+
                       // ── COLORBOND SOLID PANEL GATE ───────────────────────────────────────
                       if (gateMat === 'colorbond_solid_panel') {
                         const panelFill  = color.hex;

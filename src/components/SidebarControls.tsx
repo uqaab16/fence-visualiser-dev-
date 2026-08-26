@@ -837,6 +837,14 @@ export default function SidebarControls({
                   <DoorClosed className="w-4 h-4 shrink-0" />
                   <span>Drop Colorbond Gate (1200mm)</span>
                 </button>
+                <button
+                  onClick={() => dropStandaloneGate('colorbond_solid_panel', 'double', 4.0, 'cbdg')}
+                  className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
+                >
+                  <DoorClosed className="w-4 h-4 shrink-0" />
+                  <DoorClosed className="w-4 h-4 shrink-0 -ml-1" />
+                  <span>Drop Double Colorbond Gate (4000mm)</span>
+                </button>
               </div>
             </div>
           </div>
