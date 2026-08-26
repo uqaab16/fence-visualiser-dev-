@@ -2669,13 +2669,13 @@ export default function FenceCanvas({
                                 />
                               );
                             })}
-                            {/* LEFT LEAF — Bottom rail (covers picket bottoms) */}
+                            {/* LEFT LEAF — Bottom rail (h=0.09→0.18, within blade zone) */}
                             <polygon
-                              points={`${px(0, 0.09)},${py(0, 0.09)} ${px(0.495, 0.09)},${py(0.495, 0.09)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              points={`${px(0, 0.18)},${py(0, 0.18)} ${px(0.495, 0.18)},${py(0.495, 0.18)} ${px(0.495, 0.09)},${py(0.495, 0.09)} ${px(0, 0.09)},${py(0, 0.09)}`}
                               fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
                             <polygon
-                              points={`${px(0, 0.024)},${py(0, 0.024)} ${px(0.495, 0.024)},${py(0.495, 0.024)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              points={`${px(0, 0.114)},${py(0, 0.114)} ${px(0.495, 0.114)},${py(0.495, 0.114)} ${px(0.495, 0.09)},${py(0.495, 0.09)} ${px(0, 0.09)},${py(0, 0.09)}`}
                               fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
                             {/* LEFT LEAF — Top rail (covers pickets h=0.91→1.0; pickets above 1.0 remain visible) */}
@@ -2711,13 +2711,13 @@ export default function FenceCanvas({
                                 />
                               );
                             })}
-                            {/* RIGHT LEAF — Bottom rail */}
+                            {/* RIGHT LEAF — Bottom rail (h=0.09→0.18) */}
                             <polygon
-                              points={`${px(0.505, 0.09)},${py(0.505, 0.09)} ${px(1, 0.09)},${py(1, 0.09)} ${px(1, 0)},${py(1, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
+                              points={`${px(0.505, 0.18)},${py(0.505, 0.18)} ${px(1, 0.18)},${py(1, 0.18)} ${px(1, 0.09)},${py(1, 0.09)} ${px(0.505, 0.09)},${py(0.505, 0.09)}`}
                               fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
                             <polygon
-                              points={`${px(0.505, 0.024)},${py(0.505, 0.024)} ${px(1, 0.024)},${py(1, 0.024)} ${px(1, 0)},${py(1, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
+                              points={`${px(0.505, 0.114)},${py(0.505, 0.114)} ${px(1, 0.114)},${py(1, 0.114)} ${px(1, 0.09)},${py(1, 0.09)} ${px(0.505, 0.09)},${py(0.505, 0.09)}`}
                               fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
                             {/* RIGHT LEAF — Top rail */}
@@ -2788,13 +2788,13 @@ export default function FenceCanvas({
                                 />
                               );
                             })}
-                            {/* Bottom rail — covers picket bottoms */}
+                            {/* Bottom rail — h=0.09→0.18, within blade zone */}
                             <polygon
-                              points={`${px(0, 0.09)},${py(0, 0.09)} ${px(1, 0.09)},${py(1, 0.09)} ${px(1, 0)},${py(1, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              points={`${px(0, 0.18)},${py(0, 0.18)} ${px(1, 0.18)},${py(1, 0.18)} ${px(1, 0.09)},${py(1, 0.09)} ${px(0, 0.09)},${py(0, 0.09)}`}
                               fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
                             <polygon
-                              points={`${px(0, 0.024)},${py(0, 0.024)} ${px(1, 0.024)},${py(1, 0.024)} ${px(1, 0)},${py(1, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              points={`${px(0, 0.114)},${py(0, 0.114)} ${px(1, 0.114)},${py(1, 0.114)} ${px(1, 0.09)},${py(1, 0.09)} ${px(0, 0.09)},${py(0, 0.09)}`}
                               fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
                             {/* Top rail — covers pickets h=0.91→1.0; pickets above 1.0 poke above rail */}
