@@ -2827,47 +2827,32 @@ export default function FenceCanvas({
                         const gateW  = gx2 - gx1;
                         const stileW = Math.max(0.5, gateW * 0.055);
                         const stileT = stileW / Math.max(gateW, 0.01);
-                        const railH  = 0.07;
-
-                        // Vertical ribs: ~8 across a 1200mm gate, matching fence rib density
-                        const numRibs    = Math.max(4, Math.round(gateW / Math.max(0.5, gateW / 8)));
-                        const ribStrokeW = Math.max(0.25, gateW / 280);
+                        const railH      = 0.07;
+                        const cbProtrude = vhStart / ghtStart - 1; // extends gate top to full fence height
                         const isSawtooth = solidPanelProfile === 'sawtooth';
-
-                        // Inner rectangle (clipped between stiles and rails) for base fill
-                        const innerL   = px(stileT);
-                        const innerR   = px(1 - stileT);
-                        const innerTop = py(0.5, 1 - railH);
-                        const innerBot = py(0.5, railH);
-                        const innerW   = innerR - innerL;
-                        const innerH   = innerBot - innerTop;
+                        const ribStrokeW = Math.max(0.35, gateW / 280);
+                        const sawSW      = Math.max(0.5, (gateW / 4) * 0.45);
 
                         return (
                           <g>
-                            {/* Base panel fill */}
-                            <rect x={innerL} y={innerTop} width={innerW} height={innerH} fill={panelFill} />
+                            {/* Base panel fill — full gate height */}
+                            <polygon
+                              points={`${px(0)},${py(0, 0)} ${px(1)},${py(1, 0)} ${px(1)},${py(1, 1 + cbProtrude)} ${px(0)},${py(0, 1 + cbProtrude)}`}
+                              fill={panelFill}
+                            />
 
-                            {/* Vertical rib texture */}
-                            {Array.from({ length: numRibs + 1 }).map((_, ri) => {
-                              const ribX = innerL + (ri / numRibs) * innerW;
-                              if (isSawtooth) {
-                                const sw = Math.max(0.4, (innerW / numRibs) * 0.45);
-                                return (
-                                  <line key={`cbrib-${ri}`}
-                                    x1={ribX} y1={innerTop} x2={ribX} y2={innerBot}
-                                    stroke={ri % 2 === 0 ? ribLight : ribShadow}
-                                    strokeWidth={sw} strokeOpacity="0.72"
-                                  />
-                                );
-                              } else {
-                                return (
-                                  <line key={`cbrib-${ri}`}
-                                    x1={ribX} y1={innerTop} x2={ribX} y2={innerBot}
-                                    stroke={ribShadow}
-                                    strokeWidth={ribStrokeW} strokeOpacity="0.48"
-                                  />
-                                );
-                              }
+                            {/* 4 vertical ribs drawn before frame so stiles overlap them */}
+                            {[1, 2, 3, 4].map((ri) => {
+                              const tc = ri / 5;
+                              return (
+                                <line key={`cbrib-${ri}`}
+                                  x1={px(tc)} y1={py(tc, 0)}
+                                  x2={px(tc)} y2={py(tc, 1 + cbProtrude)}
+                                  stroke={isSawtooth ? (ri % 2 === 0 ? ribLight : ribShadow) : ribShadow}
+                                  strokeWidth={isSawtooth ? sawSW : ribStrokeW}
+                                  strokeOpacity={isSawtooth ? "0.72" : "0.48"}
+                                />
+                              );
                             })}
 
                             {/* Bottom rail */}
@@ -2875,19 +2860,19 @@ export default function FenceCanvas({
                               points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
                               fill={frameFill} stroke="#00000055" strokeWidth="0.04"
                             />
-                            {/* Top rail */}
+                            {/* Top rail — extends to full fence height */}
                             <polygon
-                              points={`${px(0)},${py(0, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
+                              points={`${px(0)},${py(0, 1 + cbProtrude)} ${px(1)},${py(1, 1 + cbProtrude)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
                               fill={frameFill} stroke="#00000055" strokeWidth="0.04"
                             />
-                            {/* Left stile (overlaps rail ends) */}
+                            {/* Left stile — full fence height */}
                             <polygon
-                              points={`${px(0)},${py(0, 1)} ${px(stileT)},${py(stileT, 1)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
+                              points={`${px(0)},${py(0, 1 + cbProtrude)} ${px(stileT)},${py(stileT, 1 + cbProtrude)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
                               fill={frameFill} stroke="#00000055" strokeWidth="0.04"
                             />
-                            {/* Right stile */}
+                            {/* Right stile — full fence height */}
                             <polygon
-                              points={`${px(1 - stileT)},${py(1 - stileT, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
+                              points={`${px(1 - stileT)},${py(1 - stileT, 1 + cbProtrude)} ${px(1)},${py(1, 1 + cbProtrude)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
                               fill={frameFill} stroke="#00000055" strokeWidth="0.04"
                             />
                             {/* 2 hinges — left stile at 25% and 75% height */}
