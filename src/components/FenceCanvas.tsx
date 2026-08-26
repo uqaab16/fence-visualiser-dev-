@@ -2523,7 +2523,96 @@ export default function FenceCanvas({
                         return currentBaseY - h_ratio * currentGht;
                       };
 
-                      // ── ALUMINIUM BLADE GATE (single leaf only) ──────────────────────────
+                      // ── ALUMINIUM BLADE GATE ─────────────────────────────────────────────
+                      if (material === 'aluminium_blade' && seg.gateType === 'double') {
+                        const faceFill  = color.hex;
+                        const sideFill  = shadeHex(color.hex, 0.55);
+                        const topFill   = shadeHex(color.hex, 1.25);
+                        const frameFill = shadeHex(color.hex, 0.80);
+
+                        const gateW       = gx2 - gx1;
+                        const bladePitchSVG = Math.max(0.85, 1100 / containerSize.width);
+                        const faceWidth   = bladePitchSVG * (16 / 85);
+                        const depthWidth  = faceWidth * 0.85;
+                        const stileW      = faceWidth * 2;
+                        const stileT      = stileW / Math.max(gateW, 0.01); // fraction of full gate
+                        const railH       = 0.08;
+
+                        // Each leaf occupies half the gate width (with a narrow center gap)
+                        const leafGapHalf = 0.005; // 0.5% of gate width gap at center
+                        const ll = { L: 0,                   R: 0.5 - leafGapHalf }; // left leaf t-range
+                        const rl = { L: 0.5 + leafGapHalf,  R: 1.0 };                // right leaf t-range
+
+                        // Helper: render one blade within a leaf's t-range
+                        const renderDblBlade = (i: number, leafL: number, leafR: number, nBlades: number) => {
+                          const innerL = leafL + stileT;
+                          const innerR = leafR - stileT;
+                          const step   = (innerR - innerL) / nBlades;
+                          const tc     = innerL + (i + 0.5) * step;
+                          const bx     = px(tc);
+                          const topY   = py(tc, 1 - railH);
+                          const botY   = py(tc, railH);
+                          const bladeH = botY - topY;
+                          const fw = faceWidth, dw = depthWidth;
+                          return (
+                            <g key={`dbl-blade-${leafL}-${i}`}>
+                              <polygon points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`} fill={sideFill} />
+                              <rect x={bx - fw/2} y={topY} width={fw} height={bladeH} fill={faceFill} />
+                              <polygon points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`} fill={topFill} />
+                            </g>
+                          );
+                        };
+
+                        const llNumBlades = Math.max(2, Math.round((gateW * (ll.R - ll.L) - 2 * stileW) / bladePitchSVG));
+                        const rlNumBlades = Math.max(2, Math.round((gateW * (rl.R - rl.L) - 2 * stileW) / bladePitchSVG));
+
+                        return (
+                          <g>
+                            {/* ── LEFT LEAF ── */}
+                            {/* Bottom rail */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, railH)} ${px(ll.R)},${py(ll.R, railH)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Top rail */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1)} ${px(ll.R)},${py(ll.R, 1)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Outer (left) stile */}
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1)} ${px(ll.L + stileT)},${py(ll.L + stileT, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Inner (meeting) stile */}
+                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1)} ${px(ll.R)},${py(ll.R, 1)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R - stileT)},${py(ll.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Blades */}
+                            {Array.from({ length: llNumBlades }).map((_, i) => renderDblBlade(i, ll.L, ll.R, llNumBlades))}
+                            {/* 3 hinges on outer (left) stile */}
+                            {[0.2, 0.5, 0.8].map((hf, hi) => (
+                              <rect key={`ll-hinge-${hi}`} x={px(ll.L) - 0.1} y={py(ll.L, hf) - 0.18} width={stileW + 0.25} height={0.36} rx="0.06" fill="#111111" />
+                            ))}
+
+                            {/* ── RIGHT LEAF ── */}
+                            {/* Bottom rail */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, railH)} ${px(rl.R)},${py(rl.R, railH)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Top rail */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1)} ${px(rl.R)},${py(rl.R, 1)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Inner (meeting) stile */}
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1)} ${px(rl.L + stileT)},${py(rl.L + stileT, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Outer (right) stile */}
+                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1)} ${px(rl.R)},${py(rl.R, 1)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R - stileT)},${py(rl.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Blades */}
+                            {Array.from({ length: rlNumBlades }).map((_, i) => renderDblBlade(i, rl.L, rl.R, rlNumBlades))}
+                            {/* 3 hinges on outer (right) stile */}
+                            {[0.2, 0.5, 0.8].map((hf, hi) => (
+                              <rect key={`rl-hinge-${hi}`} x={px(rl.R) - stileW - 0.15} y={py(rl.R, hf) - 0.18} width={stileW + 0.25} height={0.36} rx="0.06" fill="#111111" />
+                            ))}
+
+                            {/* Center latch box at meeting stiles */}
+                            <rect
+                              x={px(ll.R) - stileW * 0.6}
+                              y={py(0.5, 0.57)}
+                              width={stileW * 1.2}
+                              height={py(0.5, 0.42) - py(0.5, 0.57)}
+                              rx="0.05"
+                              fill="#1a1c1e" stroke="#000" strokeWidth="0.02"
+                            />
+                          </g>
+                        );
+                      }
+
                       if (material === 'aluminium_blade') {
                         // Reuse blade panel shading tokens
                         const faceFill = color.hex;

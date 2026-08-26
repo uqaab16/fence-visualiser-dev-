@@ -895,6 +895,52 @@ export default function SidebarControls({
                     <span>Drop Blade Gate (1200mm)</span>
                   </button>
                 </div>
+
+                {/* Double Blade Gate */}
+                <div className="bg-[#f3efe6] p-3.5 rounded-xl border border-[#d9d3c5] flex flex-col gap-2.5">
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-[#1a1c1e]">Double Driveway Swing Gate</span>
+                    <span className="text-[10px] text-[#ff6a1f] font-mono font-semibold">Strictly locked at 4000mm width</span>
+                  </div>
+                  <button
+                    id="add_blade_double_gate"
+                    onClick={() => {
+                      const idLeft = 'post_bdg_' + Date.now() + '_l';
+                      const idRight = 'post_bdg_' + Date.now() + '_r';
+                      const widthPercent = (4.0 / propertyFrontage) * 100;
+
+                      let centerY = 75;
+                      let centerX = 50;
+
+                      while (posts.some(p => Math.abs(p.x - centerX) < 2 && Math.abs(p.y - centerY) < 2)) {
+                        centerY += 3;
+                        if (centerY > 85) { centerY = 68; centerX += 5; }
+                      }
+
+                      let leftX = centerX - widthPercent / 2;
+                      let rightX = centerX + widthPercent / 2;
+                      if (leftX < 2) { leftX = 2; rightX = leftX + widthPercent; }
+                      else if (rightX > 98) { rightX = 98; leftX = rightX - widthPercent; }
+
+                      setPosts(prev => [...prev,
+                        { id: idLeft,  x: leftX,  y: centerY, type: 'gate' as const },
+                        { id: idRight, x: rightX, y: centerY, type: 'gate' as const },
+                      ]);
+                      setSegments(prev => [...prev, {
+                        id: 'seg_bdg_' + Date.now(),
+                        startPostId: idLeft, endPostId: idRight,
+                        hasGate: true, gateType: 'double' as const,
+                        gateWidthPercent: 100, gatePositionPercent: 0,
+                        isStandaloneGate: true,
+                      }]);
+                    }}
+                    className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
+                  >
+                    <DoorClosed className="w-4 h-4 shrink-0" />
+                    <DoorClosed className="w-4 h-4 shrink-0 -ml-1" />
+                    <span>Drop Double Blade Gate (4000mm)</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
