@@ -2636,63 +2636,58 @@ export default function FenceCanvas({
                         );
                       }
 
-                      // ── SLAT / OTHER MATERIAL GATES (existing logic) ─────────────────────
+                      // ── SLAT / OTHER MATERIAL GATES — vertical picket design ─────────────
                       if (seg.gateType === 'double') {
+                        const picketTopH = vhStart / ghtStart; // pickets poke above top rail (~1.053)
+                        // Left leaf inner zone: t 0.04 → 0.455
+                        const llInnerL = 0.04, llInnerR = 0.455;
+                        const llInnerW = llInnerR - llInnerL;
+                        const llNumPickets = Math.max(3, Math.round(llInnerW / 0.065));
+                        const llSlotW = llInnerW / llNumPickets;
+                        const llPW = llSlotW * 0.58;
+                        const llGapH = llSlotW * 0.21;
+                        // Right leaf inner zone: t 0.545 → 0.96
+                        const rlInnerL = 0.545, rlInnerR = 0.96;
+                        const rlInnerW = rlInnerR - rlInnerL;
+                        const rlNumPickets = Math.max(3, Math.round(rlInnerW / 0.065));
+                        const rlSlotW = rlInnerW / rlNumPickets;
+                        const rlPW = rlSlotW * 0.58;
+                        const rlGapH = rlSlotW * 0.21;
                         return (
                           <g>
-                            {/* LEFT GATE LEAF */}
-                            {/* 1. Heavy Top bar */}
-                            <polygon
-                              points={`${px(0, 1)},${py(0, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0.91)},${py(0.495, 0.91)} ${px(0, 0.91)},${py(0, 0.91)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
-                            />
-                            <polygon
-                              points={`${px(0, 1)},${py(0, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0.976)},${py(0.495, 0.976)} ${px(0, 0.976)},${py(0, 0.976)}`}
-                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
-                            />
-                            {/* 2. Heavy Bottom bar */}
+                            {/* LEFT LEAF — pickets first (behind rails) */}
+                            {Array.from({ length: llNumPickets }).map((_, i) => {
+                              const tc = llInnerL + i * llSlotW + llGapH;
+                              const tc2 = tc + llPW;
+                              return (
+                                <polygon
+                                  key={`ll-p-${i}`}
+                                  points={`${px(tc)},${py(tc, picketTopH)} ${px(tc2)},${py(tc2, picketTopH)} ${px(tc2)},${py(tc2, 0)} ${px(tc)},${py(tc, 0)}`}
+                                  fill={color.hex}
+                                  stroke="#111"
+                                  strokeWidth="0.025"
+                                />
+                              );
+                            })}
+                            {/* LEFT LEAF — Bottom rail (covers picket bottoms) */}
                             <polygon
                               points={`${px(0, 0.09)},${py(0, 0.09)} ${px(0.495, 0.09)},${py(0.495, 0.09)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0, 0)},${py(0, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
                             <polygon
                               points={`${px(0, 0.024)},${py(0, 0.024)} ${px(0.495, 0.024)},${py(0.495, 0.024)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0, 0)},${py(0, 0)}`}
                               fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
-                            {/* 5. Left leaf inner slats */}
-                            {(() => {
-                              const isChunky = slatProfile === '90';
-                              const innerSlatCount = isChunky ? 8 : 12;
-                              const slatSpan = 0.82; // from 0.09 to 0.91 height ratio
-                              const slatStep = slatSpan / innerSlatCount;
-                              const slatRatio = isChunky ? 0.84 : 0.76;
-
-                              return Array.from({ length: innerSlatCount }).map((_, sIdx) => {
-                                const hStart = 0.09 + sIdx * slatStep + (slatStep * (1 - slatRatio) / 2);
-                                const hEnd = hStart + slatStep * slatRatio;
-
-                                return (
-                                  <polygon
-                                    key={`l-slat-${sIdx}`}
-                                    points={`
-                                      ${px(0.04, hStart)},${py(0.04, hStart)}
-                                      ${px(0.455, hStart)},${py(0.455, hStart)}
-                                      ${px(0.455, hEnd)},${py(0.455, hEnd)}
-                                      ${px(0.04, hEnd)},${py(0.04, hEnd)}
-                                    `}
-                                    fill={color.hex}
-                                    stroke="#111"
-                                    strokeWidth="0.03"
-                                  />
-                                );
-                              });
-                            })()}
-
-                            {/* Left leaf borders — drawn after slats */}
+                            {/* LEFT LEAF — Top rail (covers pickets h=0.91→1.0; pickets above 1.0 remain visible) */}
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0.91)},${py(0.495, 0.91)} ${px(0, 0.91)},${py(0, 0.91)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0.976)},${py(0.495, 0.976)} ${px(0, 0.976)},${py(0, 0.976)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
+                            />
+                            {/* LEFT LEAF — Stile borders last */}
                             <polygon
                               points={`${px(0, 1)},${py(0, 1)} ${px(0.04, 1)},${py(0.04, 1)} ${px(0.04, 0)},${py(0.04, 0)} ${px(0, 0)},${py(0, 0)}`}
                               fill={color.hex} stroke="#000000" strokeWidth="0.05"
@@ -2702,59 +2697,39 @@ export default function FenceCanvas({
                               fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
 
-                            {/* RIGHT GATE LEAF */}
-                            {/* 1. Heavy Top bar */}
-                            <polygon
-                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.91)},${py(1, 0.91)} ${px(0.505, 0.91)},${py(0.505, 0.91)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
-                            />
-                            <polygon
-                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.976)},${py(1, 0.976)} ${px(0.505, 0.976)},${py(0.505, 0.976)}`}
-                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
-                            />
-                            {/* 2. Heavy Bottom bar */}
+                            {/* RIGHT LEAF — pickets first (behind rails) */}
+                            {Array.from({ length: rlNumPickets }).map((_, i) => {
+                              const tc = rlInnerL + i * rlSlotW + rlGapH;
+                              const tc2 = tc + rlPW;
+                              return (
+                                <polygon
+                                  key={`rl-p-${i}`}
+                                  points={`${px(tc)},${py(tc, picketTopH)} ${px(tc2)},${py(tc2, picketTopH)} ${px(tc2)},${py(tc2, 0)} ${px(tc)},${py(tc, 0)}`}
+                                  fill={color.hex}
+                                  stroke="#111"
+                                  strokeWidth="0.025"
+                                />
+                              );
+                            })}
+                            {/* RIGHT LEAF — Bottom rail */}
                             <polygon
                               points={`${px(0.505, 0.09)},${py(0.505, 0.09)} ${px(1, 0.09)},${py(1, 0.09)} ${px(1, 0)},${py(1, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
                             <polygon
                               points={`${px(0.505, 0.024)},${py(0.505, 0.024)} ${px(1, 0.024)},${py(1, 0.024)} ${px(1, 0)},${py(1, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
                               fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
-                            {/* 5. Right leaf inner slats */}
-                            {(() => {
-                              const isChunky = slatProfile === '90';
-                              const innerSlatCount = isChunky ? 8 : 12;
-                              const slatSpan = 0.82;
-                              const slatStep = slatSpan / innerSlatCount;
-                              const slatRatio = isChunky ? 0.84 : 0.76;
-
-                              return Array.from({ length: innerSlatCount }).map((_, sIdx) => {
-                                const hStart = 0.09 + sIdx * slatStep + (slatStep * (1 - slatRatio) / 2);
-                                const hEnd = hStart + slatStep * slatRatio;
-
-                                return (
-                                  <polygon
-                                    key={`r-slat-${sIdx}`}
-                                    points={`
-                                      ${px(0.545, hStart)},${py(0.545, hStart)}
-                                      ${px(0.96, hStart)},${py(0.96, hStart)}
-                                      ${px(0.96, hEnd)},${py(0.96, hEnd)}
-                                      ${px(0.545, hEnd)},${py(0.545, hEnd)}
-                                    `}
-                                    fill={color.hex}
-                                    stroke="#111"
-                                    strokeWidth="0.03"
-                                  />
-                                );
-                              });
-                            })()}
-
-                            {/* Right leaf borders — drawn after slats */}
+                            {/* RIGHT LEAF — Top rail */}
+                            <polygon
+                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.91)},${py(1, 0.91)} ${px(0.505, 0.91)},${py(0.505, 0.91)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
+                            <polygon
+                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.976)},${py(1, 0.976)} ${px(0.505, 0.976)},${py(0.505, 0.976)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
+                            />
+                            {/* RIGHT LEAF — Stile borders last */}
                             <polygon
                               points={`${px(0.505, 1)},${py(0.505, 1)} ${px(0.545, 1)},${py(0.545, 1)} ${px(0.545, 0)},${py(0.545, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
                               fill={color.hex} stroke="#000000" strokeWidth="0.05"
@@ -2789,79 +2764,58 @@ export default function FenceCanvas({
                           </g>
                         );
                       } else {
-                        // SINGLE PEDESTRIAN GATE
+                        // SINGLE PEDESTRIAN GATE — vertical pickets
+                        const picketTopH = vhStart / ghtStart; // pickets poke above top rail (~1.053)
+                        const innerL = 0.06, innerR = 0.94;
+                        const innerW = innerR - innerL;
+                        const numPickets = Math.max(4, Math.round(innerW / 0.065));
+                        const slotW = innerW / numPickets;
+                        const pw = slotW * 0.58;
+                        const gapH = slotW * 0.21;
                         return (
                           <g>
-                            {/* 1. Heavy Top bar */}
-                            <polygon
-                              points={`${px(0, 1)},${py(0, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.91)},${py(1, 0.91)} ${px(0, 0.91)},${py(0, 0.91)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
-                            />
-                            {/* Top rail lit surface — thin lighter strip at top edge */}
-                            <polygon
-                              points={`${px(0, 1)},${py(0, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.976)},${py(1, 0.976)} ${px(0, 0.976)},${py(0, 0.976)}`}
-                              fill={shadeHex(color.hex, 1.38)}
-                              opacity="0.7"
-                            />
-                            {/* 2. Heavy Bottom bar */}
+                            {/* Vertical pickets — rendered first, behind rails */}
+                            {Array.from({ length: numPickets }).map((_, i) => {
+                              const tc = innerL + i * slotW + gapH;
+                              const tc2 = tc + pw;
+                              return (
+                                <polygon
+                                  key={`sg-p-${i}`}
+                                  points={`${px(tc)},${py(tc, picketTopH)} ${px(tc2)},${py(tc2, picketTopH)} ${px(tc2)},${py(tc2, 0)} ${px(tc)},${py(tc, 0)}`}
+                                  fill={color.hex}
+                                  stroke="#111"
+                                  strokeWidth="0.025"
+                                />
+                              );
+                            })}
+                            {/* Bottom rail — covers picket bottoms */}
                             <polygon
                               points={`${px(0, 0.09)},${py(0, 0.09)} ${px(1, 0.09)},${py(1, 0.09)} ${px(1, 0)},${py(1, 0)} ${px(0, 0)},${py(0, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
-                            {/* Bottom rail lit surface — mirror of top, thin lighter strip at bottom edge */}
                             <polygon
                               points={`${px(0, 0.024)},${py(0, 0.024)} ${px(1, 0.024)},${py(1, 0.024)} ${px(1, 0)},${py(1, 0)} ${px(0, 0)},${py(0, 0)}`}
-                              fill={shadeHex(color.hex, 1.38)}
-                              opacity="0.7"
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
-                            {/* 5. Pedestrian inner slats */}
-                            {(() => {
-                              const isChunky = slatProfile === '90';
-                              const innerSlatCount = isChunky ? 8 : 12;
-                              const slatSpan = 0.82; // from 0.09 to 0.91 height ratio
-                              const slatStep = slatSpan / innerSlatCount;
-                              const slatRatio = isChunky ? 0.84 : 0.76;
-
-                              return Array.from({ length: innerSlatCount }).map((_, sIdx) => {
-                                const hStart = 0.09 + sIdx * slatStep + (slatStep * (1 - slatRatio) / 2);
-                                const hEnd = hStart + slatStep * slatRatio;
-
-                                return (
-                                  <polygon
-                                    key={`s-slat-${sIdx}`}
-                                    points={`
-                                      ${px(0.06, hStart)},${py(0.06, hStart)}
-                                      ${px(0.94, hStart)},${py(0.94, hStart)}
-                                      ${px(0.94, hEnd)},${py(0.94, hEnd)}
-                                      ${px(0.06, hEnd)},${py(0.06, hEnd)}
-                                    `}
-                                    fill={color.hex}
-                                    stroke="#111"
-                                    strokeWidth="0.03"
-                                  />
-                                );
-                              });
-                            })()}
-
-                            {/* Left vertical border — drawn after slats so it sits in front of rail strokes at corners */}
+                            {/* Top rail — covers pickets h=0.91→1.0; pickets above 1.0 poke above rail */}
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.91)},${py(1, 0.91)} ${px(0, 0.91)},${py(0, 0.91)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.976)},${py(1, 0.976)} ${px(0, 0.976)},${py(0, 0.976)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
+                            />
+                            {/* Stile borders — drawn last */}
                             <polygon
                               points={`${px(0, 1)},${py(0, 1)} ${px(0.06, 1)},${py(0.06, 1)} ${px(0.06, 0)},${py(0.06, 0)} ${px(0, 0)},${py(0, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
-                            {/* Right vertical border — drawn after slats */}
                             <polygon
                               points={`${px(0.94, 1)},${py(0.94, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0)},${py(1, 0)} ${px(0.94, 0)},${py(0.94, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
                             />
-                            {/* Pedestrian Lock-box and handle lever */}
+                            {/* Lock-box and handle lever */}
                             <polygon
                               points={`
                                 ${px(0.91, 0.54)},${py(0.91, 0.54)}
