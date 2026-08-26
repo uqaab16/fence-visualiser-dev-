@@ -96,50 +96,53 @@ describe('estimateFencingCosts — default pricing', () => {
 // ---------------------------------------------------------------------------
 // CUSTOM PRICING
 // ---------------------------------------------------------------------------
+const BASE_MAT = {
+  standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+  singleGateCost: 350, doubleGateCost: 750,
+};
+
 const BASE_CUSTOM: DynamicPricing = {
-  slatMaterialCost: 135,
-  postRailMaterialCost: 105,
-  bladeMaterialCost: 155,
-  slatLaborCost: 85,
-  postRailLaborCost: 75,
-  bladeLaborCost: 85,
-  standardPostCost: 0,
-  cornerPostCost: 65,
-  hPostCost: 95,
-  gatePostCost: 85,
-  decorativePostCost: 145,
-  singleGateCost: 350,
-  doubleGateCost: 750,
-  colorbondPanelMaterialCost: 130,
-  colorbondPanelLaborCost: 85,
-  perforatedMaterialCost: 185,
-  perforatedLaborCost: 85,
+  slat_fencing: { materialCostPerMeter: 135, laborCostPerMeter: 85, ...BASE_MAT, surcharge65mm: 0, surcharge90mm: 18 },
+  post_and_rail: { materialCostPerMeter: 105, laborCostPerMeter: 75, ...BASE_MAT, surcharge2rail: 0, surcharge3rail: 15, surcharge4rail: 30, surchargeChainwire: 12 },
+  aluminium_blade: { materialCostPerMeter: 155, laborCostPerMeter: 85, ...BASE_MAT },
+  colorbond_solid_panel: { materialCostPerMeter: 130, laborCostPerMeter: 85, ...BASE_MAT },
+  aluminium_perforated: { materialCostPerMeter: 185, laborCostPerMeter: 85, ...BASE_MAT },
 };
 
 describe('estimateFencingCosts — custom pricing overrides', () => {
 
   it('custom material rate $200/m overrides default $135/m for slat', () => {
-    const custom: DynamicPricing = { ...BASE_CUSTOM, slatMaterialCost: 200 };
+    const custom: DynamicPricing = { ...BASE_CUSTOM, slat_fencing: { ...BASE_CUSTOM.slat_fencing, materialCostPerMeter: 200 } };
     const r = estimateFencingCosts('slat_fencing', 10, TWO_POSTS, [], false, custom);
     expect(r.materialCost).toBe(10 * 200);
   });
 
   it('custom labour rate $100/m overrides default $85/m for slat', () => {
-    const custom: DynamicPricing = { ...BASE_CUSTOM, slatLaborCost: 100 };
+    const custom: DynamicPricing = { ...BASE_CUSTOM, slat_fencing: { ...BASE_CUSTOM.slat_fencing, laborCostPerMeter: 100 } };
     const r = estimateFencingCosts('slat_fencing', 10, TWO_POSTS, [], true, custom);
     expect(r.laborCost).toBeCloseTo(10 * 100, 2);
   });
 
   it('custom single gate cost $500 overrides default $350', () => {
-    const custom: DynamicPricing = { ...BASE_CUSTOM, singleGateCost: 500 };
+    const custom: DynamicPricing = { ...BASE_CUSTOM, slat_fencing: { ...BASE_CUSTOM.slat_fencing, singleGateCost: 500 } };
     const r = estimateFencingCosts('slat_fencing', 10, TWO_POSTS, [{ type: 'single' }], false, custom);
     expect(r.gatesCost).toBe(500);
   });
 
   it('custom corner post cost $100 overrides default $65', () => {
-    const custom: DynamicPricing = { ...BASE_CUSTOM, cornerPostCost: 100 };
+    const custom: DynamicPricing = { ...BASE_CUSTOM, slat_fencing: { ...BASE_CUSTOM.slat_fencing, cornerPostCost: 100 } };
     const r = estimateFencingCosts('slat_fencing', 10, ONE_CORNER_POST, [], false, custom);
     expect(r.postsCost).toBe(100);
+  });
+
+  it('slat 90mm surcharge adds $18/m on top of base rate', () => {
+    const r = estimateFencingCosts('slat_fencing', 10, TWO_POSTS, [], false, BASE_CUSTOM, { slatProfile: '90' });
+    expect(r.materialCost).toBeCloseTo(10 * (135 + 18), 2);
+  });
+
+  it('post_and_rail 3-rail surcharge adds $15/m', () => {
+    const r = estimateFencingCosts('post_and_rail', 10, TWO_POSTS, [], false, BASE_CUSTOM, { railCount: 3 });
+    expect(r.materialCost).toBeCloseTo(10 * (105 + 15), 2);
   });
 
 });

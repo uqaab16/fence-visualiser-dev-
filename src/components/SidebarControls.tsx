@@ -58,6 +58,254 @@ interface SidebarControlsProps {
   setSolidPanelProfile: (profile: 'sawtooth' | 'trimline') => void;
 }
 
+// ---------------------------------------------------------------------------
+// SettingsPanel — collapsible per-material pricing sections with search
+// ---------------------------------------------------------------------------
+
+const MATERIAL_LABELS: Record<string, string> = {
+  slat_fencing: 'Modern Slat Fencing',
+  post_and_rail: 'Post & Rail + Chainwire',
+  aluminium_blade: 'Aluminium Blade Fencing',
+  colorbond_solid_panel: 'Colorbond Solid Panel',
+  aluminium_perforated: 'Aluminium Perforated Panel',
+};
+
+const MATERIALS_ORDER = ['slat_fencing', 'post_and_rail', 'aluminium_blade', 'colorbond_solid_panel', 'aluminium_perforated'] as const;
+
+const DEFAULT_RATES: DynamicPricing = {
+  slat_fencing: {
+    materialCostPerMeter: 135, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750, surcharge65mm: 0, surcharge90mm: 18,
+  },
+  post_and_rail: {
+    materialCostPerMeter: 105, laborCostPerMeter: 75,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+    surcharge2rail: 0, surcharge3rail: 15, surcharge4rail: 30, surchargeChainwire: 12,
+  },
+  aluminium_blade: {
+    materialCostPerMeter: 155, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+  },
+  colorbond_solid_panel: {
+    materialCostPerMeter: 130, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+  },
+  aluminium_perforated: {
+    materialCostPerMeter: 185, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+  },
+};
+
+interface SettingsPanelProps {
+  pricing: DynamicPricing;
+  setPricing: React.Dispatch<React.SetStateAction<DynamicPricing>>;
+  companyId: string | null;
+  activeMaterial: string;
+}
+
+function PriceInput({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">{label}</label>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => onChange(Math.max(0, parseInt(e.target.value, 10) || 0))}
+        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+        min="0"
+      />
+    </div>
+  );
+}
+
+function SettingsPanel({ pricing, setPricing, companyId, activeMaterial }: SettingsPanelProps) {
+  const [openSections, setOpenSections] = React.useState<Set<string>>(() => new Set([activeMaterial]));
+  const [search, setSearch] = React.useState('');
+
+  const toggleSection = (mat: string) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(mat)) next.delete(mat); else next.add(mat);
+      return next;
+    });
+  };
+
+  const update = <M extends keyof DynamicPricing>(mat: M, key: keyof DynamicPricing[M], val: number) => {
+    const updated: DynamicPricing = { ...pricing, [mat]: { ...pricing[mat], [key]: val } };
+    setPricing(updated);
+    if (companyId) savePricing(companyId, updated);
+  };
+
+  const q = search.toLowerCase();
+  const fieldMatches = (labels: string[]) => !q || labels.some(l => l.toLowerCase().includes(q));
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <h4 className="text-xs font-bold uppercase tracking-wider text-[#ff6a1f]">Settings & Estimator Rates</h4>
+        <p className="text-xs text-[#5f6266] mt-1">Per-material pricing — all values in AUD ($).</p>
+      </div>
+
+      {/* Search + Standardise row */}
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          placeholder="Search pricing fields..."
+          value={search}
+          onChange={e => {
+            const q2 = e.target.value;
+            setSearch(q2);
+            if (q2.trim()) setOpenSections(new Set(MATERIALS_ORDER));
+          }}
+          className="flex-1 text-xs rounded-lg border border-[#d9d3c5] bg-white text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+        />
+        <button
+          onClick={() => {
+            setPricing(DEFAULT_RATES);
+            if (companyId) savePricing(companyId, DEFAULT_RATES);
+          }}
+          className="flex items-center gap-1 text-[9px] font-bold text-[#ff6a1f] bg-[#ffe3d3]/20 px-2 py-1.5 border border-[#ffd4bd]/30 rounded-lg transition cursor-pointer select-none font-mono whitespace-nowrap"
+          title="Reset all rates to corporate defaults"
+        >
+          <RefreshCw className="w-3 h-3" />
+          <span>Standardise</span>
+        </button>
+      </div>
+
+      {/* Collapsible material sections */}
+      <div className="flex flex-col gap-2 max-h-[520px] overflow-y-auto pr-1">
+        {MATERIALS_ORDER.map(mat => {
+          const mp = pricing[mat] as unknown as Record<string, number>;
+          const isOpen = openSections.has(mat);
+          const isActive = mat === activeMaterial;
+          const isSlatFencing = mat === 'slat_fencing';
+          const isPostRail = mat === 'post_and_rail';
+
+          // Determine if any field in this section matches search — if not, hide it
+          const sectionFieldLabels = [
+            'Material', 'Labour', 'Standard Post', 'Corner Post', 'H-Post', 'Gate Post', 'Decorative',
+            'Single Gate', 'Double Gate',
+            ...(isSlatFencing ? ['65mm', '90mm', 'Profile', 'Surcharge'] : []),
+            ...(isPostRail ? ['2-rail', '3-rail', '4-rail', 'Chainwire', 'Rail', 'Surcharge'] : []),
+          ];
+          if (q && !fieldMatches([MATERIAL_LABELS[mat], ...sectionFieldLabels])) return null;
+
+          return (
+            <div key={mat} className="rounded-xl border border-[#d9d3c5] overflow-hidden">
+              {/* Section header */}
+              <button
+                onClick={() => toggleSection(mat)}
+                className={`w-full flex justify-between items-center px-3 py-2.5 text-left transition cursor-pointer select-none ${
+                  isActive ? 'bg-[#ff6a1f]/10 border-b border-[#d9d3c5]' : 'bg-[#f3efe6]'
+                } ${isOpen ? 'border-b border-[#d9d3c5]' : ''}`}
+              >
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-[#1a1c1e] uppercase tracking-wider">{MATERIAL_LABELS[mat]}</span>
+                  {isActive && <span className="text-[8px] text-[#ff6a1f] font-semibold">Active material</span>}
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-[#5f6266] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Section body */}
+              {isOpen && (
+                <div className="bg-[#f9f7f3] p-3 flex flex-col gap-3">
+                  {/* Panel & Labour */}
+                  {fieldMatches(['Material', 'Labour']) && (
+                    <div>
+                      <span className="text-[9px] font-bold text-[#ff6a1f] uppercase tracking-widest">Panel & Labour ($/m)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        {fieldMatches(['Material']) && (
+                          <PriceInput label="Material ($/m)" value={mp.materialCostPerMeter} onChange={v => update(mat, 'materialCostPerMeter' as any, v)} />
+                        )}
+                        {fieldMatches(['Labour']) && (
+                          <PriceInput label="Labour ($/m)" value={mp.laborCostPerMeter} onChange={v => update(mat, 'laborCostPerMeter' as any, v)} />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Slat profile surcharges */}
+                  {isSlatFencing && fieldMatches(['65mm', '90mm', 'Profile', 'Surcharge']) && (
+                    <div>
+                      <span className="text-[9px] font-bold text-[#ff6a1f] uppercase tracking-widest">Profile Surcharges ($/m additive)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        <PriceInput label="65mm slat (+ $/m)" value={(pricing.slat_fencing as any).surcharge65mm} onChange={v => update('slat_fencing', 'surcharge65mm' as any, v)} />
+                        <PriceInput label="90mm slat (+ $/m)" value={(pricing.slat_fencing as any).surcharge90mm} onChange={v => update('slat_fencing', 'surcharge90mm' as any, v)} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Post & Rail surcharges */}
+                  {isPostRail && fieldMatches(['2-rail', '3-rail', '4-rail', 'Chainwire', 'Rail', 'Surcharge']) && (
+                    <div>
+                      <span className="text-[9px] font-bold text-[#ff6a1f] uppercase tracking-widest">Rail Count & Chainwire Surcharges ($/m)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        <PriceInput label="2-rail (base + $/m)" value={(pricing.post_and_rail as any).surcharge2rail} onChange={v => update('post_and_rail', 'surcharge2rail' as any, v)} />
+                        <PriceInput label="3-rail (+ $/m)" value={(pricing.post_and_rail as any).surcharge3rail} onChange={v => update('post_and_rail', 'surcharge3rail' as any, v)} />
+                        <PriceInput label="4-rail (+ $/m)" value={(pricing.post_and_rail as any).surcharge4rail} onChange={v => update('post_and_rail', 'surcharge4rail' as any, v)} />
+                        <PriceInput label="Chainwire (+ $/m)" value={(pricing.post_and_rail as any).surchargeChainwire} onChange={v => update('post_and_rail', 'surchargeChainwire' as any, v)} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Post upgrades */}
+                  {fieldMatches(['Corner Post', 'H-Post', 'Gate Post', 'Decorative', 'Standard Post']) && (
+                    <div>
+                      <span className="text-[9px] font-bold text-[#ff6a1f] uppercase tracking-widest">Post Upgrades ($)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        {fieldMatches(['Standard Post']) && (
+                          <PriceInput label="Standard ($)" value={mp.standardPostCost} onChange={v => update(mat, 'standardPostCost' as any, v)} />
+                        )}
+                        {fieldMatches(['Corner Post']) && (
+                          <PriceInput label="Corner ($)" value={mp.cornerPostCost} onChange={v => update(mat, 'cornerPostCost' as any, v)} />
+                        )}
+                        {fieldMatches(['H-Post']) && (
+                          <PriceInput label="H-Post ($)" value={mp.hPostCost} onChange={v => update(mat, 'hPostCost' as any, v)} />
+                        )}
+                        {fieldMatches(['Gate Post']) && (
+                          <PriceInput label="Gate Post ($)" value={mp.gatePostCost} onChange={v => update(mat, 'gatePostCost' as any, v)} />
+                        )}
+                        {fieldMatches(['Decorative']) && (
+                          <PriceInput label="Decorative ($)" value={mp.decorativePostCost} onChange={v => update(mat, 'decorativePostCost' as any, v)} />
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gate costs */}
+                  {fieldMatches(['Single Gate', 'Double Gate']) && (
+                    <div>
+                      <span className="text-[9px] font-bold text-[#ff6a1f] uppercase tracking-widest">Gates ($)</span>
+                      <div className="grid grid-cols-2 gap-2 mt-1.5">
+                        {fieldMatches(['Single Gate']) && (
+                          <PriceInput label="Single ($)" value={mp.singleGateCost} onChange={v => update(mat, 'singleGateCost' as any, v)} />
+                        )}
+                        {fieldMatches(['Double Gate']) && (
+                          <PriceInput label="Double ($)" value={mp.doubleGateCost} onChange={v => update(mat, 'doubleGateCost' as any, v)} />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-[9px] text-[#5f6266] leading-normal gap-1 flex items-start">
+        <Info className="w-3 h-3 text-[#5f6266] shrink-0 mt-0.5" />
+        Changes instantly modify active estimates. Each material has independent post upgrade and gate costs.
+      </p>
+    </div>
+  );
+}
+
 export default function SidebarControls({
   activeTab,
   setActiveTab,
@@ -852,327 +1100,7 @@ export default function SidebarControls({
 
         {/* TAB 4: STUDIO SETTINGS (Dynamic boundary cost parameters) */}
         {activeTab === 'settings' && (
-          <div className="flex flex-col gap-5">
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#ff6a1f]">Settings & Estimator Rates</h4>
-              <p className="text-xs text-[#5f6266] mt-1">Configure custom rate estimation parameters below.</p>
-            </div>
-
-            {/* Boundary Rates Adjustment panel */}
-            <div className="p-4 rounded-xl border flex flex-col gap-4.5 bg-[#f3efe6] border-[#d9d3c5]">
-              <div className="flex justify-between items-center border-b border-[#d9d3c5] pb-2">
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-[#1a1c1e] uppercase tracking-wider">Dynamic Estimator Rates</span>
-                  <span className="text-[9px] text-[#5f6266]">All prices calculated in Australian Dollars ($)</span>
-                </div>
-                <button
-                  onClick={() => {
-                    const defaultRates: DynamicPricing = {
-                      slatMaterialCost: 135,
-                      postRailMaterialCost: 105,
-                      bladeMaterialCost: 155,
-                      slatLaborCost: 85,
-                      postRailLaborCost: 75,
-                      bladeLaborCost: 85,
-                      standardPostCost: 0,
-                      cornerPostCost: 65,
-                      hPostCost: 95,
-                      gatePostCost: 85,
-                      decorativePostCost: 145,
-                      singleGateCost: 350,
-                      doubleGateCost: 750,
-                      colorbondPanelMaterialCost: 130,
-                      colorbondPanelLaborCost: 85,
-                      perforatedMaterialCost: 185,
-                      perforatedLaborCost: 85
-                    };
-                    setPricing(defaultRates);
-                    if (companyId) savePricing(companyId, defaultRates);
-                  }}
-                  className="flex items-center gap-1 text-[9px] font-bold text-[#ff6a1f] hover:text-[#ff6a1f] bg-[#ffe3d3]/20 px-2 py-1 border border-[#ffd4bd]/30 rounded transition cursor-pointer select-none font-mono"
-                  title="Reset base rates to corporate default standards"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                  <span>Standardise</span>
-                </button>
-              </div>
-
-              {/* Editable cost breakdown settings */}
-              <div className="flex flex-col gap-3.5 max-h-[360px] overflow-y-auto pr-1">
-                
-                {/* Section A: Panels */}
-                <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">
-                    {material === 'slat_fencing' ? 'Slat Panels (m)' : material === 'aluminium_blade' ? 'Blade Panels (m)' : material === 'colorbond_solid_panel' ? 'Colorbond Panels (m)' : material === 'aluminium_perforated' ? 'Perforated Panels (m)' : 'Post & Rail Panels (m)'}
-                  </span>
-                  <div className="grid grid-cols-1 gap-2">
-                    {material === 'slat_fencing' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Slat Material ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.slatMaterialCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, slatMaterialCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, slatMaterialCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : material === 'aluminium_blade' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Blade Material ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.bladeMaterialCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, bladeMaterialCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, bladeMaterialCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : material === 'colorbond_solid_panel' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Colorbond Panel Material ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.colorbondPanelMaterialCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, colorbondPanelMaterialCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, colorbondPanelMaterialCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : material === 'aluminium_perforated' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Perforated Panel Material ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.perforatedMaterialCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, perforatedMaterialCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, perforatedMaterialCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Post & Rail Material ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.postRailMaterialCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, postRailMaterialCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, postRailMaterialCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Section B: Labor rates */}
-                <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">Assembly & Labour (m)</span>
-                  <div className="grid grid-cols-1 gap-2">
-                    {material === 'slat_fencing' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Slat Labour ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.slatLaborCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, slatLaborCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, slatLaborCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : material === 'aluminium_blade' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Blade Labour ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.bladeLaborCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, bladeLaborCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, bladeLaborCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : material === 'colorbond_solid_panel' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Colorbond Panel Labour ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.colorbondPanelLaborCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, colorbondPanelLaborCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, colorbondPanelLaborCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : material === 'aluminium_perforated' ? (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Perforated Panel Labour ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.perforatedLaborCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, perforatedLaborCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, perforatedLaborCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Post & Rail Labour ($ / meter)</label>
-                        <input
-                          type="number"
-                          value={pricing.postRailLaborCost}
-                          onChange={(e) => {
-                            const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                            setPricing(prev => ({ ...prev, postRailLaborCost: val }));
-                            if (companyId) savePricing(companyId, { ...pricing, postRailLaborCost: val });
-                          }}
-                          className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                          min="0"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Section C: Post Pillars upgrade */}
-                <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">Post Upgrades (Pillar)</span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Corner Post ($)</label>
-                      <input
-                        type="number"
-                        value={pricing.cornerPostCost}
-                        onChange={(e) => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setPricing(prev => ({ ...prev, cornerPostCost: val }));
-                          if (companyId) savePricing(companyId, { ...pricing, cornerPostCost: val });
-                        }}
-                        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                        min="0"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">H-Post ($)</label>
-                      <input
-                        type="number"
-                        value={pricing.hPostCost}
-                        onChange={(e) => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setPricing(prev => ({ ...prev, hPostCost: val }));
-                          if (companyId) savePricing(companyId, { ...pricing, hPostCost: val });
-                        }}
-                        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                        min="0"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Gate Post ($)</label>
-                      <input
-                        type="number"
-                        value={pricing.gatePostCost}
-                        onChange={(e) => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setPricing(prev => ({ ...prev, gatePostCost: val }));
-                          if (companyId) savePricing(companyId, { ...pricing, gatePostCost: val });
-                        }}
-                        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                        min="0"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Decorative ($)</label>
-                      <input
-                        type="number"
-                        value={pricing.decorativePostCost}
-                        onChange={(e) => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setPricing(prev => ({ ...prev, decorativePostCost: val }));
-                          if (companyId) savePricing(companyId, { ...pricing, decorativePostCost: val });
-                        }}
-                        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                        min="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section D: Gates */}
-                <div className="flex flex-col gap-2">
-                  <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">Gates (Single/Double)</span>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Single Pedestrian ($)</label>
-                      <input
-                        type="number"
-                        value={pricing.singleGateCost}
-                        onChange={(e) => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setPricing(prev => ({ ...prev, singleGateCost: val }));
-                          if (companyId) savePricing(companyId, { ...pricing, singleGateCost: val });
-                        }}
-                        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                        min="0"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-[#5f6266] font-semibold leading-none">Double Swing ($)</label>
-                      <input
-                        type="number"
-                        value={pricing.doubleGateCost}
-                        onChange={(e) => {
-                          const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                          setPricing(prev => ({ ...prev, doubleGateCost: val }));
-                          if (companyId) savePricing(companyId, { ...pricing, doubleGateCost: val });
-                        }}
-                        className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-[#f3efe6] text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
-                        min="0"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-              <p className="text-[9px] text-[#5f6266] leading-normal gap-1 flex items-start">
-                <Info className="w-3 h-3 text-[#5f6266] shrink-0 mt-0.5" />
-                These parameters link directly to live fencer client estimates. Changes instantly modify active and compiled PDF/Quote invoices.
-              </p>
-            </div>
-          </div>
+          <SettingsPanel pricing={pricing} setPricing={setPricing} companyId={companyId} activeMaterial={material} />
         )}
 
       </div>

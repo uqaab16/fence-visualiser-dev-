@@ -36,13 +36,9 @@ export interface Segment {
   gateMaterial?: FenceMaterial;
 }
 
-export interface DynamicPricing {
-  slatMaterialCost: number;
-  postRailMaterialCost: number;
-  bladeMaterialCost: number;
-  slatLaborCost: number;
-  postRailLaborCost: number;
-  bladeLaborCost: number;
+export interface MaterialPricing {
+  materialCostPerMeter: number;
+  laborCostPerMeter: number;
   standardPostCost: number;
   cornerPostCost: number;
   hPostCost: number;
@@ -50,10 +46,22 @@ export interface DynamicPricing {
   decorativePostCost: number;
   singleGateCost: number;
   doubleGateCost: number;
-  colorbondPanelMaterialCost: number;
-  colorbondPanelLaborCost: number;
-  perforatedMaterialCost: number;
-  perforatedLaborCost: number;
+}
+
+export interface DynamicPricing {
+  slat_fencing: MaterialPricing & {
+    surcharge65mm: number;
+    surcharge90mm: number;
+  };
+  post_and_rail: MaterialPricing & {
+    surcharge2rail: number;
+    surcharge3rail: number;
+    surcharge4rail: number;
+    surchargeChainwire: number;
+  };
+  aluminium_blade: MaterialPricing;
+  colorbond_solid_panel: MaterialPricing;
+  aluminium_perforated: MaterialPricing;
 }
 
 export interface FencingPlan {

@@ -41,23 +41,33 @@ const DEFAULT_POSTS: Post[] = [
 // Corporate default estimator rates — used until the company's saved rates
 // load from Supabase, and seeded as the first row for new companies.
 const DEFAULT_PRICING: DynamicPricing = {
-  slatMaterialCost: 135,
-  postRailMaterialCost: 105,
-  bladeMaterialCost: 155,
-  slatLaborCost: 85,
-  postRailLaborCost: 75,
-  bladeLaborCost: 85,
-  standardPostCost: 0,
-  cornerPostCost: 65,
-  hPostCost: 95,
-  gatePostCost: 85,
-  decorativePostCost: 145,
-  singleGateCost: 350,
-  doubleGateCost: 750,
-  colorbondPanelMaterialCost: 130,
-  colorbondPanelLaborCost: 85,
-  perforatedMaterialCost: 185,
-  perforatedLaborCost: 85
+  slat_fencing: {
+    materialCostPerMeter: 135, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+    surcharge65mm: 0, surcharge90mm: 18,
+  },
+  post_and_rail: {
+    materialCostPerMeter: 105, laborCostPerMeter: 75,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+    surcharge2rail: 0, surcharge3rail: 15, surcharge4rail: 30, surchargeChainwire: 12,
+  },
+  aluminium_blade: {
+    materialCostPerMeter: 155, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+  },
+  colorbond_solid_panel: {
+    materialCostPerMeter: 130, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+  },
+  aluminium_perforated: {
+    materialCostPerMeter: 185, laborCostPerMeter: 85,
+    standardPostCost: 0, cornerPostCost: 65, hPostCost: 95, gatePostCost: 85, decorativePostCost: 145,
+    singleGateCost: 350, doubleGateCost: 750,
+  },
 };
 
 const DEFAULT_SEGMENTS: Segment[] = [

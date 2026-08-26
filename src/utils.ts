@@ -88,7 +88,8 @@ export function estimateFencingCosts(
   postsList: { type: string }[],
   gatesList: { type?: 'single' | 'double' }[],
   installIncluded: boolean = true,
-  customPricing?: DynamicPricing
+  customPricing?: DynamicPricing,
+  subVariants?: { slatProfile?: '65' | '90'; railCount?: 2 | 3 | 4; includeChainwire?: boolean }
 ) {
   // Guard: no measurement = nothing to quote
   if (!propertyFrontageMeters || propertyFrontageMeters <= 0) {
@@ -120,57 +121,60 @@ export function estimateFencingCosts(
   const maxSpanLength = MATERIAL_MAX_SPAN[material];
   const intermediatePostCount = Math.max(0, Math.ceil(totalMeters / maxSpanLength) - 1);
 
-  // Base Price
+  // Per-material pricing block (nested structure)
+  const mp = customPricing?.[material];
   const materialDetails = FENCE_PRICES[material];
-  const baseRate = customPricing
-    ? (material === 'slat_fencing' ? customPricing.slatMaterialCost
-      : material === 'aluminium_blade' ? customPricing.bladeMaterialCost
-      : material === 'colorbond_solid_panel' ? customPricing.colorbondPanelMaterialCost
-      : material === 'aluminium_perforated' ? customPricing.perforatedMaterialCost
-      : customPricing.postRailMaterialCost)
-    : (materialDetails?.basePerMeter || 100);
+
+  // Base material rate + additive sub-variant surcharges
+  let baseRate = mp?.materialCostPerMeter ?? materialDetails?.basePerMeter ?? 100;
+  if (material === 'slat_fencing' && mp) {
+    const slatMp = mp as typeof customPricing.slat_fencing;
+    if (subVariants?.slatProfile === '90') baseRate += slatMp.surcharge90mm ?? 18;
+    else if (subVariants?.slatProfile === '65') baseRate += slatMp.surcharge65mm ?? 0;
+  }
+  if (material === 'post_and_rail' && mp) {
+    const prMp = mp as typeof customPricing.post_and_rail;
+    const rc = subVariants?.railCount;
+    if (rc === 3) baseRate += prMp.surcharge3rail ?? 15;
+    else if (rc === 4) baseRate += prMp.surcharge4rail ?? 30;
+    if (subVariants?.includeChainwire) baseRate += prMp.surchargeChainwire ?? 12;
+  }
 
   const ratePerMeter = baseRate;
   const rawMaterialCost = totalMeters * ratePerMeter;
-  
-  // Post costs
+
+  // Post costs — per-material, falling back to static defaults
   let totalPostsCost = 0;
   effectivePosts.forEach(p => {
-    if (customPricing) {
-      if (p.type === 'standard') totalPostsCost += customPricing.standardPostCost;
-      else if (p.type === 'corner') totalPostsCost += customPricing.cornerPostCost;
-      else if (p.type === 'H-post') totalPostsCost += customPricing.hPostCost;
-      else if (p.type === 'gate') totalPostsCost += customPricing.gatePostCost;
-      else if (p.type === 'decorative') totalPostsCost += customPricing.decorativePostCost;
+    if (mp) {
+      if (p.type === 'standard') totalPostsCost += mp.standardPostCost;
+      else if (p.type === 'corner') totalPostsCost += mp.cornerPostCost;
+      else if (p.type === 'H-post') totalPostsCost += mp.hPostCost;
+      else if (p.type === 'gate') totalPostsCost += mp.gatePostCost;
+      else if (p.type === 'decorative') totalPostsCost += mp.decorativePostCost;
     } else {
       totalPostsCost += POST_UPGRADE_COSTS[p.type as keyof typeof POST_UPGRADE_COSTS] || 0;
     }
   });
 
   // Mandatory intermediate line posts are billed as standard structural posts
-  totalPostsCost += intermediatePostCount * (customPricing ? customPricing.standardPostCost : POST_UPGRADE_COSTS.standard);
+  totalPostsCost += intermediatePostCount * (mp ? mp.standardPostCost : POST_UPGRADE_COSTS.standard);
 
-  // Gate costs
+  // Gate costs — per-material
   let totalGatesCost = 0;
   gatesList.forEach(g => {
     if (g.type === 'double') {
-      totalGatesCost += customPricing ? customPricing.doubleGateCost : 750; // Double swing gate
+      totalGatesCost += mp ? mp.doubleGateCost : 750;
     } else {
-      totalGatesCost += customPricing ? customPricing.singleGateCost : 350; // Single pedestrian gate
+      totalGatesCost += mp ? mp.singleGateCost : 350;
     }
   });
 
   const materialsSubtotal = rawMaterialCost + totalPostsCost + totalGatesCost;
-  
+
   // Labor installation estimate (Sydney average: $55 to $85 per meter depending on material)
   const defaultLaborRate = material === 'post_and_rail' ? 75 : 85;
-  const laborRatePerMeter = customPricing
-    ? (material === 'slat_fencing' ? customPricing.slatLaborCost
-      : material === 'aluminium_blade' ? customPricing.bladeLaborCost
-      : material === 'colorbond_solid_panel' ? customPricing.colorbondPanelLaborCost
-      : material === 'aluminium_perforated' ? customPricing.perforatedLaborCost
-      : customPricing.postRailLaborCost)
-    : defaultLaborRate;
+  const laborRatePerMeter = mp?.laborCostPerMeter ?? defaultLaborRate;
 
   const laborCost = installIncluded ? totalMeters * laborRatePerMeter : 0;
   
