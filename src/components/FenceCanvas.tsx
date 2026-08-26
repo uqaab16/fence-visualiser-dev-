@@ -2648,6 +2648,10 @@ export default function FenceCanvas({
                               stroke="#000000"
                               strokeWidth="0.05"
                             />
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0.976)},${py(0.495, 0.976)} ${px(0, 0.976)},${py(0, 0.976)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
+                            />
                             {/* 2. Heavy Bottom bar */}
                             <polygon
                               points={`${px(0, 0.09)},${py(0, 0.09)} ${px(0.495, 0.09)},${py(0.495, 0.09)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0, 0)},${py(0, 0)}`}
@@ -2655,19 +2659,9 @@ export default function FenceCanvas({
                               stroke="#000000"
                               strokeWidth="0.05"
                             />
-                            {/* 3. Left vertical border */}
                             <polygon
-                              points={`${px(0, 1)},${py(0, 1)} ${px(0.04, 1)},${py(0.04, 1)} ${px(0.04, 0)},${py(0.04, 0)} ${px(0, 0)},${py(0, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
-                            />
-                            {/* 4. Right vertical border */}
-                            <polygon
-                              points={`${px(0.455, 1)},${py(0.455, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0.455, 0)},${py(0.455, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              points={`${px(0, 0.024)},${py(0, 0.024)} ${px(0.495, 0.024)},${py(0.495, 0.024)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
                             {/* 5. Left leaf inner slats */}
                             {(() => {
@@ -2698,6 +2692,16 @@ export default function FenceCanvas({
                               });
                             })()}
 
+                            {/* Left leaf borders — drawn after slats */}
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(0.04, 1)},${py(0.04, 1)} ${px(0.04, 0)},${py(0.04, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
+                            <polygon
+                              points={`${px(0.455, 1)},${py(0.455, 1)} ${px(0.495, 1)},${py(0.495, 1)} ${px(0.495, 0)},${py(0.495, 0)} ${px(0.455, 0)},${py(0.455, 0)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
+
                             {/* RIGHT GATE LEAF */}
                             {/* 1. Heavy Top bar */}
                             <polygon
@@ -2706,6 +2710,10 @@ export default function FenceCanvas({
                               stroke="#000000"
                               strokeWidth="0.05"
                             />
+                            <polygon
+                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.976)},${py(1, 0.976)} ${px(0.505, 0.976)},${py(0.505, 0.976)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
+                            />
                             {/* 2. Heavy Bottom bar */}
                             <polygon
                               points={`${px(0.505, 0.09)},${py(0.505, 0.09)} ${px(1, 0.09)},${py(1, 0.09)} ${px(1, 0)},${py(1, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
@@ -2713,19 +2721,9 @@ export default function FenceCanvas({
                               stroke="#000000"
                               strokeWidth="0.05"
                             />
-                            {/* 3. Left vertical border */}
                             <polygon
-                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(0.545, 1)},${py(0.545, 1)} ${px(0.545, 0)},${py(0.545, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
-                            />
-                            {/* 4. Right vertical border */}
-                            <polygon
-                              points={`${px(0.96, 1)},${py(0.96, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0)},${py(1, 0)} ${px(0.96, 0)},${py(0.96, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              points={`${px(0.505, 0.024)},${py(0.505, 0.024)} ${px(1, 0.024)},${py(1, 0.024)} ${px(1, 0)},${py(1, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
+                              fill={shadeHex(color.hex, 1.38)} opacity="0.7"
                             />
                             {/* 5. Right leaf inner slats */}
                             {(() => {
@@ -2755,6 +2753,16 @@ export default function FenceCanvas({
                                 );
                               });
                             })()}
+
+                            {/* Right leaf borders — drawn after slats */}
+                            <polygon
+                              points={`${px(0.505, 1)},${py(0.505, 1)} ${px(0.545, 1)},${py(0.545, 1)} ${px(0.545, 0)},${py(0.545, 0)} ${px(0.505, 0)},${py(0.505, 0)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
+                            <polygon
+                              points={`${px(0.96, 1)},${py(0.96, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0)},${py(1, 0)} ${px(0.96, 0)},${py(0.96, 0)}`}
+                              fill={color.hex} stroke="#000000" strokeWidth="0.05"
+                            />
 
                             {/* Center meeting lock-box and black lever handle */}
                             <polygon
@@ -2791,6 +2799,12 @@ export default function FenceCanvas({
                               stroke="#000000"
                               strokeWidth="0.05"
                             />
+                            {/* Top rail lit surface — thin lighter strip at top edge */}
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0.976)},${py(1, 0.976)} ${px(0, 0.976)},${py(0, 0.976)}`}
+                              fill={shadeHex(color.hex, 1.38)}
+                              opacity="0.7"
+                            />
                             {/* 2. Heavy Bottom bar */}
                             <polygon
                               points={`${px(0, 0.09)},${py(0, 0.09)} ${px(1, 0.09)},${py(1, 0.09)} ${px(1, 0)},${py(1, 0)} ${px(0, 0)},${py(0, 0)}`}
@@ -2798,19 +2812,11 @@ export default function FenceCanvas({
                               stroke="#000000"
                               strokeWidth="0.05"
                             />
-                            {/* 3. Left vertical border */}
+                            {/* Bottom rail lit surface — mirror of top, thin lighter strip at bottom edge */}
                             <polygon
-                              points={`${px(0, 1)},${py(0, 1)} ${px(0.06, 1)},${py(0.06, 1)} ${px(0.06, 0)},${py(0.06, 0)} ${px(0, 0)},${py(0, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
-                            />
-                            {/* 4. Right vertical border */}
-                            <polygon
-                              points={`${px(0.94, 1)},${py(0.94, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0)},${py(1, 0)} ${px(0.94, 0)},${py(0.94, 0)}`}
-                              fill={color.hex}
-                              stroke="#000000"
-                              strokeWidth="0.05"
+                              points={`${px(0, 0.024)},${py(0, 0.024)} ${px(1, 0.024)},${py(1, 0.024)} ${px(1, 0)},${py(1, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              fill={shadeHex(color.hex, 1.38)}
+                              opacity="0.7"
                             />
                             {/* 5. Pedestrian inner slats */}
                             {(() => {
@@ -2841,6 +2847,20 @@ export default function FenceCanvas({
                               });
                             })()}
 
+                            {/* Left vertical border — drawn after slats so it sits in front of rail strokes at corners */}
+                            <polygon
+                              points={`${px(0, 1)},${py(0, 1)} ${px(0.06, 1)},${py(0.06, 1)} ${px(0.06, 0)},${py(0.06, 0)} ${px(0, 0)},${py(0, 0)}`}
+                              fill={color.hex}
+                              stroke="#000000"
+                              strokeWidth="0.05"
+                            />
+                            {/* Right vertical border — drawn after slats */}
+                            <polygon
+                              points={`${px(0.94, 1)},${py(0.94, 1)} ${px(1, 1)},${py(1, 1)} ${px(1, 0)},${py(1, 0)} ${px(0.94, 0)},${py(0.94, 0)}`}
+                              fill={color.hex}
+                              stroke="#000000"
+                              strokeWidth="0.05"
+                            />
                             {/* Pedestrian Lock-box and handle lever */}
                             <polygon
                               points={`
@@ -2884,9 +2904,9 @@ export default function FenceCanvas({
                       </g>
                     )}
 
-                    {/* Left and Right heavy structural posts / pillars — rendered last to sit on top of gate leaf */}
-                    <line x1={gx1} y1={gy1 + 0.4} x2={gx1} y2={gy1 - vhStart} stroke={postColor.hex} strokeWidth={0.88 * scaleG1} strokeLinecap="square" />
-                    <line x1={gx2} y1={gy2 + 0.4} x2={gx2} y2={gy2 - vhEnd} stroke={postColor.hex} strokeWidth={0.88 * scaleG2} strokeLinecap="square" opacity="0.95" />
+                    {/* Left and Right heavy structural posts — stop at ground level so stiles don't extend below bottom rail */}
+                    <line x1={gx1} y1={gy1} x2={gx1} y2={gy1 - vhStart} stroke={postColor.hex} strokeWidth={0.88 * scaleG1} strokeLinecap="square" />
+                    <line x1={gx2} y1={gy2} x2={gx2} y2={gy2 - vhEnd} stroke={postColor.hex} strokeWidth={0.88 * scaleG2} strokeLinecap="square" opacity="0.95" />
 
                     {/* Heavy duty black metal hinge mounts attaching to side posts */}
                     <circle cx={gx1} cy={gy1 - ghtStart * 0.8} r={0.16 * scaleG1} fill="#111" />
