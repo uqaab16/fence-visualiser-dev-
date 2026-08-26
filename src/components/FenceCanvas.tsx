@@ -2817,6 +2817,110 @@ export default function FenceCanvas({
                         );
                       }
 
+                      // ── COLORBOND SOLID PANEL GATE ───────────────────────────────────────
+                      if (gateMat === 'colorbond_solid_panel') {
+                        const panelFill  = color.hex;
+                        const ribShadow  = shadeHex(color.hex, 0.76);
+                        const ribLight   = shadeHex(color.hex, 1.14);
+                        const frameFill  = shadeHex(color.hex, 0.80);
+
+                        const gateW  = gx2 - gx1;
+                        const stileW = Math.max(0.5, gateW * 0.055);
+                        const stileT = stileW / Math.max(gateW, 0.01);
+                        const railH  = 0.07;
+
+                        // Vertical ribs: ~8 across a 1200mm gate, matching fence rib density
+                        const numRibs    = Math.max(4, Math.round(gateW / Math.max(0.5, gateW / 8)));
+                        const ribStrokeW = Math.max(0.25, gateW / 280);
+                        const isSawtooth = solidPanelProfile === 'sawtooth';
+
+                        // Inner rectangle (clipped between stiles and rails) for base fill
+                        const innerL   = px(stileT);
+                        const innerR   = px(1 - stileT);
+                        const innerTop = py(0.5, 1 - railH);
+                        const innerBot = py(0.5, railH);
+                        const innerW   = innerR - innerL;
+                        const innerH   = innerBot - innerTop;
+
+                        return (
+                          <g>
+                            {/* Base panel fill */}
+                            <rect x={innerL} y={innerTop} width={innerW} height={innerH} fill={panelFill} />
+
+                            {/* Vertical rib texture */}
+                            {Array.from({ length: numRibs + 1 }).map((_, ri) => {
+                              const ribX = innerL + (ri / numRibs) * innerW;
+                              if (isSawtooth) {
+                                const sw = Math.max(0.4, (innerW / numRibs) * 0.45);
+                                return (
+                                  <line key={`cbrib-${ri}`}
+                                    x1={ribX} y1={innerTop} x2={ribX} y2={innerBot}
+                                    stroke={ri % 2 === 0 ? ribLight : ribShadow}
+                                    strokeWidth={sw} strokeOpacity="0.72"
+                                  />
+                                );
+                              } else {
+                                return (
+                                  <line key={`cbrib-${ri}`}
+                                    x1={ribX} y1={innerTop} x2={ribX} y2={innerBot}
+                                    stroke={ribShadow}
+                                    strokeWidth={ribStrokeW} strokeOpacity="0.48"
+                                  />
+                                );
+                              }
+                            })}
+
+                            {/* Bottom rail */}
+                            <polygon
+                              points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Top rail */}
+                            <polygon
+                              points={`${px(0)},${py(0, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Left stile (overlaps rail ends) */}
+                            <polygon
+                              points={`${px(0)},${py(0, 1)} ${px(stileT)},${py(stileT, 1)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* Right stile */}
+                            <polygon
+                              points={`${px(1 - stileT)},${py(1 - stileT, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
+                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                            />
+                            {/* 2 hinges — left stile at 25% and 75% height */}
+                            {[0.25, 0.75].map((hf, hi) => (
+                              <rect
+                                key={`cb-hinge-${hi}`}
+                                x={px(0) - 0.1}
+                                y={py(0, hf) - 0.16}
+                                width={stileW + 0.22}
+                                height={0.32}
+                                rx="0.05"
+                                fill="#111111"
+                              />
+                            ))}
+                            {/* Latch box — right stile, mid-height */}
+                            <rect
+                              x={px(1 - stileT) - 0.04}
+                              y={py(1, 0.54) - 0.04}
+                              width={stileW + 0.08}
+                              height={py(1, 0.43) - py(1, 0.54)}
+                              rx="0.05"
+                              fill="#1a1c1e"
+                              stroke="#000" strokeWidth="0.02"
+                            />
+                            <line
+                              x1={px(1 - stileT * 0.4)} y1={py(1, 0.485)}
+                              x2={px(1 - stileT * 0.4) - 0.30} y2={py(1, 0.485)}
+                              stroke="#0d0e0f" strokeWidth="0.09" strokeLinecap="round"
+                            />
+                          </g>
+                        );
+                      }
+
                       // ── SLAT / OTHER MATERIAL GATES — vertical picket design ─────────────
                       if (seg.gateType === 'double') {
                         const picketTopH = vhStart / ghtStart; // pickets poke above top rail (~1.053)

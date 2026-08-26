@@ -826,6 +826,18 @@ export default function SidebarControls({
                   <span>Drop Perforated Gate (1200mm)</span>
                 </button>
               </div>
+
+              {/* ── Colorbond Solid Panel Gate ── */}
+              <div className="p-3 rounded-xl border border-[#d9d3c5] bg-[#f3efe6] flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-[#ff6a1f] uppercase tracking-widest leading-none">Colorbond Solid Panel Gate</span>
+                <button
+                  onClick={() => dropStandaloneGate('colorbond_solid_panel', 'single', 1.2, 'cbg')}
+                  className="w-full bg-[#ff6a1f] hover:bg-[#ff6a1f] text-white font-bold py-2 rounded-lg text-xs leading-none transition select-none flex items-center justify-center gap-2 cursor-pointer shadow"
+                >
+                  <DoorClosed className="w-4 h-4 shrink-0" />
+                  <span>Drop Colorbond Gate (1200mm)</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
