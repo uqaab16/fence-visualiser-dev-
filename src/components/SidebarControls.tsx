@@ -131,12 +131,11 @@ function SettingsPanel({ pricing, setPricing, companyId, activeMaterial }: Setti
   const handleExplicitSave = async () => {
     if (!companyId) return;
     setSaveState('saving');
-    try {
-      await savePricing(companyId, pricing);
+    const ok = await savePricing(companyId, pricing);
+    if (ok) {
       setSaveState('saved');
       setTimeout(() => setSaveState('idle'), 2500);
-    } catch (err) {
-      console.error('Explicit save failed', err);
+    } else {
       setSaveState('error');
       setTimeout(() => setSaveState('idle'), 4000);
     }

@@ -131,13 +131,17 @@ export default function App() {
         return;
       }
       setCompanyId(resolvedCompanyId);
-      const saved = await loadPricing(resolvedCompanyId);
-      if (cancelled) return;
-      if (saved) {
-        setPricing(saved);
-      } else {
-        // No pricing row yet for this company: seed it with the defaults
-        await savePricing(resolvedCompanyId, DEFAULT_PRICING);
+      try {
+        const saved = await loadPricing(resolvedCompanyId);
+        if (cancelled) return;
+        if (saved) {
+          setPricing(saved);
+        } else {
+          // No pricing row yet for this company: seed it with the defaults
+          await savePricing(resolvedCompanyId, DEFAULT_PRICING);
+        }
+      } catch (err) {
+        console.error('Pricing load/seed failed — using defaults', err);
       }
       setPricingLoading(false);
     })();

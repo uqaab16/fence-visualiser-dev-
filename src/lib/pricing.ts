@@ -86,7 +86,7 @@ export async function loadPricing(companyId: string): Promise<DynamicPricing | n
   return rowToPricing(data);
 }
 
-export async function savePricing(companyId: string, pricing: DynamicPricing): Promise<void> {
+export async function savePricing(companyId: string, pricing: DynamicPricing): Promise<boolean> {
   const s = pricing.slat_fencing;
   const p = pricing.post_and_rail;
   const b = pricing.aluminium_blade;
@@ -164,6 +164,7 @@ export async function savePricing(companyId: string, pricing: DynamicPricing): P
 
   if (error) {
     console.error('Failed to save custom pricing to Supabase', error);
-    throw error;
+    return false;
   }
+  return true;
 }
