@@ -25,7 +25,10 @@ import {
   History,
   FileSpreadsheet,
   Download,
-  Share2
+  Share2,
+  Plus,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 
 interface EstimateSummaryProps {
@@ -77,6 +80,12 @@ export default function EstimateSummary({
   // Stable quote number captured at save time, used on the success screen.
   const [savedQuoteNumber, setSavedQuoteNumber] = useState('');
 
+  // Custom line items added by the contractor (per-quote, not persisted as rate-card settings)
+  const [customLineItems, setCustomLineItems] = useState<{ id: string; description: string; amount: number }[]>([]);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null); // null = not editing, 'new' = adding
+  const [draftDescription, setDraftDescription] = useState('');
+  const [draftAmount, setDraftAmount] = useState('');
+
   // Load inquiries from Supabase when companyId is available.
   useEffect(() => {
     if (!companyId) return;
@@ -115,8 +124,13 @@ export default function EstimateSummary({
     if (includeInstall) {
       items.push({ label: 'Certified Installation Crew', amount: estimate.laborCost });
     }
+    // Append contractor-added custom items so they appear in PDFs and saved records
+    customLineItems.forEach(item => items.push({ label: item.description, amount: item.amount }));
     return items;
   };
+
+  const customTotal = customLineItems.reduce((sum, item) => sum + item.amount, 0);
+  const grandTotal = estimate.totalPrice + customTotal;
 
   // PDF generation for the estimate panel buttons.
   // Both Download and Share require a saved quote — if none exists yet, open
@@ -296,7 +310,7 @@ export default function EstimateSummary({
       phone,
       address,
       fenceLength: estimate.totalMeters,
-      totalCost: estimate.totalPrice,
+      totalCost: grandTotal,
       // Persist the same itemised rows currently displayed in the estimate
       // panel so future PDFs of this record show a full cost table. This only
       // captures already-computed values — nothing is recalculated here.
@@ -443,11 +457,110 @@ export default function EstimateSummary({
           </div>
         )}
 
+        {/* Custom line items added by the contractor */}
+        {customLineItems.map(item => (
+          editingItemId === item.id ? (
+            // Inline edit form for this item
+            <div key={item.id} className="flex items-center gap-1.5 mt-0.5">
+              <input
+                type="text"
+                value={draftDescription}
+                onChange={e => setDraftDescription(e.target.value)}
+                placeholder="Item name"
+                className="flex-1 text-xs border border-[#d9d3c5] rounded px-2 py-1 bg-white text-[#1a1c1e] focus:outline-none focus:border-[#ff6a1f]"
+              />
+              <input
+                type="number"
+                value={draftAmount}
+                onChange={e => setDraftAmount(e.target.value)}
+                placeholder="$0"
+                className="w-20 text-xs border border-[#d9d3c5] rounded px-2 py-1 bg-white text-[#1a1c1e] font-mono focus:outline-none focus:border-[#ff6a1f]"
+              />
+              <button
+                onClick={() => {
+                  const amt = parseFloat(draftAmount);
+                  if (!draftDescription.trim() || isNaN(amt)) return;
+                  setCustomLineItems(prev => prev.map(i => i.id === item.id ? { ...i, description: draftDescription.trim(), amount: amt } : i));
+                  setEditingItemId(null);
+                }}
+                className="text-xs bg-[#ff6a1f] text-white px-2 py-1 rounded hover:bg-[#e55a10] transition"
+              >OK</button>
+              <button
+                onClick={() => setEditingItemId(null)}
+                className="text-xs text-[#5f6266] hover:text-[#1a1c1e] transition"
+              ><X className="w-3.5 h-3.5" /></button>
+            </div>
+          ) : (
+            <div key={item.id} className="flex justify-between items-center text-xs text-[#5f6266] group">
+              <span className="flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5 text-[#5f6266]" />
+                {item.description}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="font-mono text-[#1a1c1e]">${item.amount.toLocaleString()}</span>
+                <button
+                  onClick={() => { setEditingItemId(item.id); setDraftDescription(item.description); setDraftAmount(String(item.amount)); }}
+                  className="opacity-0 group-hover:opacity-100 text-[#5f6266] hover:text-[#ff6a1f] transition"
+                  title="Edit"
+                ><Pencil className="w-3 h-3" /></button>
+                <button
+                  onClick={() => setCustomLineItems(prev => prev.filter(i => i.id !== item.id))}
+                  className="opacity-0 group-hover:opacity-100 text-[#5f6266] hover:text-red-500 transition"
+                  title="Remove"
+                ><Trash2 className="w-3 h-3" /></button>
+              </span>
+            </div>
+          )
+        ))}
+
+        {/* Add custom item — inline form or "+" button */}
+        {editingItemId === 'new' ? (
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <input
+              type="text"
+              value={draftDescription}
+              onChange={e => setDraftDescription(e.target.value)}
+              placeholder="Item name (e.g. Site access fee)"
+              className="flex-1 text-xs border border-[#d9d3c5] rounded px-2 py-1 bg-white text-[#1a1c1e] focus:outline-none focus:border-[#ff6a1f]"
+              autoFocus
+            />
+            <input
+              type="number"
+              value={draftAmount}
+              onChange={e => setDraftAmount(e.target.value)}
+              placeholder="$0"
+              className="w-20 text-xs border border-[#d9d3c5] rounded px-2 py-1 bg-white text-[#1a1c1e] font-mono focus:outline-none focus:border-[#ff6a1f]"
+            />
+            <button
+              onClick={() => {
+                const amt = parseFloat(draftAmount);
+                if (!draftDescription.trim() || isNaN(amt)) return;
+                setCustomLineItems(prev => [...prev, { id: `custom_${Date.now()}`, description: draftDescription.trim(), amount: amt }]);
+                setDraftDescription('');
+                setDraftAmount('');
+                setEditingItemId(null);
+              }}
+              className="text-xs bg-[#ff6a1f] text-white px-2 py-1 rounded hover:bg-[#e55a10] transition"
+            >OK</button>
+            <button
+              onClick={() => { setEditingItemId(null); setDraftDescription(''); setDraftAmount(''); }}
+              className="text-xs text-[#5f6266] hover:text-[#1a1c1e] transition"
+            ><X className="w-3.5 h-3.5" /></button>
+          </div>
+        ) : (
+          <button
+            onClick={() => { setEditingItemId('new'); setDraftDescription(''); setDraftAmount(''); }}
+            className="flex items-center gap-1 text-xs text-[#5f6266] hover:text-[#ff6a1f] transition mt-0.5 self-start"
+          >
+            <Plus className="w-3.5 h-3.5" /> Add custom item
+          </button>
+        )}
+
         {/* Grand Total visual strip */}
         <div className="bg-white p-4 rounded-xl border border-[#d9d3c5] w-full text-left mt-3 relative overflow-hidden">
           <div className="flex justify-between items-center text-xs font-bold text-[#1a1c1e]">
             <span>Calculated Bid Proposal:</span>
-            <span className="text-[#ff6a1f] font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
+            <span className="text-[#ff6a1f] font-mono text-sm">${grandTotal.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -701,7 +814,7 @@ export default function EstimateSummary({
                     </ul>
                     <div className="border-t border-[#d9d3c5]/60 pt-2.5 mt-1.5 flex justify-between items-center text-xs font-bold text-[#1a1c1e]">
                       <span>{CLIENT_CONFIG.companyName} Level Bid Proposal:</span>
-                      <span className="text-[#ff6a1f] font-mono text-sm">${estimate.totalPrice.toLocaleString()}</span>
+                      <span className="text-[#ff6a1f] font-mono text-sm">${grandTotal.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -825,7 +938,7 @@ export default function EstimateSummary({
                       <span className="font-mono text-[#ff6a1f] text-right font-bold">#{savedQuoteNumber}</span>
 
                       <span>Project Estimate:</span>
-                      <span className="font-mono text-[#ff6a1f] text-right font-bold font-sans">${estimate.totalPrice.toLocaleString()}</span>
+                      <span className="font-mono text-[#ff6a1f] text-right font-bold font-sans">${grandTotal.toLocaleString()}</span>
                     </div>
                   </div>
 
