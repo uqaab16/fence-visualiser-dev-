@@ -1689,7 +1689,8 @@ export default function FenceCanvas({
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
-                      
+                      {/* Invisible hit area covering the full fence trapezoid so any click within the footprint selects the segment */}
+                      <polygon points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`} fill="transparent" stroke="none" />
                       {/* Horizontal metal/wood slats with perspective sloping */}
                       {(() => {
                         const slatPercent = slatRatio / slatTotal;
@@ -1917,7 +1918,8 @@ export default function FenceCanvas({
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
-
+                      {/* Invisible hit area covering the full fence trapezoid so any click within the footprint selects the segment */}
+                      <polygon points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`} fill="transparent" stroke="none" />
                       {/* Optional chainwire mesh — behind the rails, low opacity so it reads as thin wire */}
                       {includeChainwire && (
                         <polygon
@@ -2090,7 +2092,8 @@ export default function FenceCanvas({
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
-
+                      {/* Invisible hit area covering the full fence trapezoid so any click within the footprint selects the segment */}
+                      <polygon points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`} fill="transparent" stroke="none" />
                       {/* ── BACKGROUND LAYER: horizontal backing rails drawn FIRST ── */}
                       {/* Backing rail — bottom (40×40mm at 150mm from base) */}
                       {(() => {
@@ -2210,7 +2213,8 @@ export default function FenceCanvas({
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
-
+                      {/* Invisible hit area covering the full fence trapezoid so any click within the footprint selects the segment */}
+                      <polygon points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`} fill="transparent" stroke="none" />
                       {/* 1. Base panel fill — solid quadrilateral(s) */}
                       {fillSpans.map(([tA, tB], i) => (
                         <path key={`cpfill-${i}`} d={panelPath(tA, tB)} fill={panelFill} />
@@ -2377,6 +2381,8 @@ export default function FenceCanvas({
 
                   return (
                     <g key={seg.id} className="pointer-events-auto cursor-pointer" onPointerDown={(e) => handlePointerDownSegment(e, seg.id)}>
+                      {/* Invisible hit area covering the full fence trapezoid so any click within the footprint selects the segment */}
+                      <polygon points={`${pStart.x},${pStart.y} ${pEnd.x},${pEnd.y} ${pEnd.x},${pEnd.y - vhEnd} ${pStart.x},${pStart.y - vhStart}`} fill="transparent" stroke="none" />
                       <defs>
                         {/* Fine-mesh pattern: transparent background (= hole) + colored circle (= metal land).
                             Background photo shows through the ~66% open area between circles. */}
