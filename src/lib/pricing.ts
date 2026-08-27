@@ -164,5 +164,6 @@ export async function savePricing(companyId: string, pricing: DynamicPricing): P
 
   if (error) {
     console.error('Failed to save custom pricing to Supabase', error);
+    throw error;
   }
 }

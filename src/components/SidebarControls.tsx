@@ -126,6 +126,21 @@ function PriceInput({ label, value, onChange }: { label: string; value: number; 
 function SettingsPanel({ pricing, setPricing, companyId, activeMaterial }: SettingsPanelProps) {
   const [openSections, setOpenSections] = React.useState<Set<string>>(() => new Set([activeMaterial]));
   const [search, setSearch] = React.useState('');
+  const [saveState, setSaveState] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const handleExplicitSave = async () => {
+    if (!companyId) return;
+    setSaveState('saving');
+    try {
+      await savePricing(companyId, pricing);
+      setSaveState('saved');
+      setTimeout(() => setSaveState('idle'), 2500);
+    } catch (err) {
+      console.error('Explicit save failed', err);
+      setSaveState('error');
+      setTimeout(() => setSaveState('idle'), 4000);
+    }
+  };
 
   const toggleSection = (mat: string) => {
     setOpenSections(prev => {
@@ -302,6 +317,32 @@ function SettingsPanel({ pricing, setPricing, companyId, activeMaterial }: Setti
         <Info className="w-3 h-3 text-[#5f6266] shrink-0 mt-0.5" />
         Changes instantly modify active estimates. Each material has independent post upgrade and gate costs.
       </p>
+
+      {/* Explicit save button */}
+      <div className="flex flex-col gap-1.5">
+        <button
+          onClick={handleExplicitSave}
+          disabled={!companyId || saveState === 'saving'}
+          className={`w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition select-none cursor-pointer flex items-center justify-center gap-2 ${
+            saveState === 'saved'
+              ? 'bg-green-600 text-white'
+              : saveState === 'error'
+              ? 'bg-red-600 text-white'
+              : saveState === 'saving'
+              ? 'bg-[#ff6a1f]/50 text-white cursor-not-allowed'
+              : 'bg-[#ff6a1f] hover:bg-[#e85e18] text-white shadow'
+          }`}
+        >
+          {saveState === 'saving' && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+          {saveState === 'saved' && <Check className="w-3.5 h-3.5" />}
+          {saveState === 'saving' ? 'Saving...' : saveState === 'saved' ? 'Saved!' : saveState === 'error' ? 'Save failed — try again' : 'Save Pricing'}
+        </button>
+        {saveState === 'error' && (
+          <p className="text-[9px] text-red-600 font-semibold text-center">
+            Pricing was not saved to the database. Check your connection and try again.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
