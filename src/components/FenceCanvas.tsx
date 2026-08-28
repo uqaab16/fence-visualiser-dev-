@@ -3780,37 +3780,52 @@ export default function FenceCanvas({
                 {segments.find(s => s.id === selectedSegmentId)?.hasGate && (
                   <div className="flex flex-col gap-1.5 mt-0.5 pt-1 pb-0.5 bg-[#f3efe6] px-1.5 rounded border border-[#d9d3c5]">
                     {/* Gate Type Selector */}
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[8px] text-[#5f6266] uppercase tracking-wider mb-0.5">Gate Type:</span>
-                      <div className="grid grid-cols-2 gap-1 bg-[#f3efe6] p-0.5 rounded border border-[#d9d3c5]">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSegments(prev => prev.map(s => s.id === selectedSegmentId ? { ...s, gateType: 'single' } : s));
-                          }}
-                          className={`py-0.5 rounded text-[8.5px] font-medium transition cursor-pointer text-center ${
-                            (segments.find(s => s.id === selectedSegmentId)?.gateType !== 'double')
-                              ? 'bg-[#ff6a1f]/40 text-[#ff6a1f] border border-[#ffd4bd]/30'
-                              : 'text-[#5f6266] hover:text-[#1a1c1e] border border-transparent'
-                          }`}
-                        >
-                          Single (1.2m)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSegments(prev => prev.map(s => s.id === selectedSegmentId ? { ...s, gateType: 'double' } : s));
-                          }}
-                          className={`py-0.5 rounded text-[8.5px] font-medium transition cursor-pointer text-center ${
-                            (segments.find(s => s.id === selectedSegmentId)?.gateType === 'double')
-                              ? 'bg-[#ff6a1f]/40 text-[#ff6a1f] border border-[#ffd4bd]/30'
-                              : 'text-[#5f6266] hover:text-[#1a1c1e] border border-transparent'
-                          }`}
-                        >
-                          Double (4.0m)
-                        </button>
-                      </div>
-                    </div>
+                    {(() => {
+                      const selSeg = segments.find(s => s.id === selectedSegmentId);
+                      const gateMat = selSeg?.gateMaterial ?? material;
+                      // Materials with a dedicated single-gate design:
+                      const singleAvailable = gateMat !== 'post_and_rail';
+                      // Materials with a dedicated double-gate design:
+                      const doubleAvailable = gateMat === 'aluminium_blade' || gateMat === 'colorbond_solid_panel' || gateMat === 'slat_fencing';
+                      const unavailableTitle = 'Not available for this material';
+
+                      const btnBase = 'py-0.5 rounded text-[8.5px] font-medium transition text-center';
+                      const btnActive = 'bg-[#ff6a1f]/40 text-[#ff6a1f] border border-[#ffd4bd]/30';
+                      const btnIdle = 'text-[#5f6266] hover:text-[#1a1c1e] border border-transparent';
+                      const btnDisabled = 'text-[#c0bbb2] border border-transparent cursor-not-allowed line-through';
+
+                      return (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[8px] text-[#5f6266] uppercase tracking-wider mb-0.5">Gate Type:</span>
+                          <div className="grid grid-cols-2 gap-1 bg-[#f3efe6] p-0.5 rounded border border-[#d9d3c5]">
+                            <button
+                              type="button"
+                              disabled={!singleAvailable}
+                              title={!singleAvailable ? unavailableTitle : undefined}
+                              onClick={() => {
+                                if (!singleAvailable) return;
+                                setSegments(prev => prev.map(s => s.id === selectedSegmentId ? { ...s, gateType: 'single' } : s));
+                              }}
+                              className={`${btnBase} ${!singleAvailable ? btnDisabled : selSeg?.gateType !== 'double' ? btnActive : btnIdle}`}
+                            >
+                              Single (1.2m)
+                            </button>
+                            <button
+                              type="button"
+                              disabled={!doubleAvailable}
+                              title={!doubleAvailable ? unavailableTitle : undefined}
+                              onClick={() => {
+                                if (!doubleAvailable) return;
+                                setSegments(prev => prev.map(s => s.id === selectedSegmentId ? { ...s, gateType: 'double' } : s));
+                              }}
+                              className={`${btnBase} ${!doubleAvailable ? btnDisabled : selSeg?.gateType === 'double' ? btnActive : btnIdle}`}
+                            >
+                              Double (4.0m)
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Gate Width Display */}
                     <div className="flex flex-col gap-0.5">
