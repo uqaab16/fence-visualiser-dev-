@@ -35,11 +35,28 @@ const DEFAULT_PRICING: DynamicPricing = {
   },
 };
 
+// Common personal/consumer email providers — domains whose first segment
+// would produce a meaningless company name like "Gmail" or "Hotmail".
+const PERSONAL_EMAIL_DOMAINS = new Set([
+  'gmail.com', 'googlemail.com',
+  'yahoo.com', 'yahoo.com.au', 'yahoo.co.uk', 'yahoo.co.in',
+  'hotmail.com', 'hotmail.com.au', 'hotmail.co.uk',
+  'outlook.com', 'outlook.com.au',
+  'live.com', 'live.com.au',
+  'icloud.com', 'me.com', 'mac.com',
+  'aol.com', 'protonmail.com', 'proton.me',
+  'zoho.com', 'yandex.com', 'mail.com',
+  'msn.com', 'bigpond.com', 'bigpond.net.au',
+  'optusnet.com.au', 'tpg.com.au',
+]);
+
 // Derive a friendly company name from the user's email domain, e.g.
-// "jack@acmefences.com.au" -> "Acmefences". Falls back to "My Company".
+// "jack@acmefences.com.au" -> "Acmefences". Falls back to "My Company"
+// for personal/consumer email providers so contractors can rename it themselves.
 function companyNameFromEmail(email: string | undefined): string {
   if (!email || !email.includes('@')) return 'My Company';
-  const domain = email.split('@')[1] || '';
+  const domain = (email.split('@')[1] || '').toLowerCase();
+  if (!domain || PERSONAL_EMAIL_DOMAINS.has(domain)) return 'My Company';
   const label = domain.split('.')[0] || '';
   if (!label) return 'My Company';
   return label.charAt(0).toUpperCase() + label.slice(1);
