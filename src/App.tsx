@@ -445,6 +445,13 @@ export default function App() {
               material={material}
               setMaterial={(mat) => {
                 setMaterial(mat);
+                // Auto-downgrade any double gates if the new material doesn't support them
+                const doubleSupported = mat === 'aluminium_blade' || mat === 'colorbond_solid_panel' || mat === 'slat_fencing';
+                if (!doubleSupported) {
+                  setSegments(prev => prev.map(s =>
+                    s.hasGate && s.gateType === 'double' ? { ...s, gateType: 'single' } : s
+                  ));
+                }
                 // Default logical colors when selecting corresponding materials to match looks!
                 if (mat === 'post_and_rail') {
                   const woodOpt = COLORS_PALETTE.find(c => c.name === 'Natural Tan') || COLORS_PALETTE[3];

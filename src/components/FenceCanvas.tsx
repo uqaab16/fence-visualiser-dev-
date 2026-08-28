@@ -1056,7 +1056,6 @@ export default function FenceCanvas({
         mergedGateProps = {
           hasGate: true,
           gateType: gatedSeg.gateType,
-          gateMaterial: gatedSeg.gateMaterial,
           gatePositionPercent: Math.round(mergedPos),
           gateWidthPercent:    Math.round(mergedW),
         };
@@ -2530,7 +2529,9 @@ export default function FenceCanvas({
                         return currentBaseY - h_ratio * currentGht;
                       };
 
-                      const gateMat = seg.gateMaterial ?? material;
+                      // Standalone gates (dropped from sidebar) keep their specific material;
+                      // fence-segment gate overlays always follow the global material prop.
+                      const gateMat = seg.isStandaloneGate ? (seg.gateMaterial ?? material) : material;
 
                       // ── ALUMINIUM BLADE GATE ─────────────────────────────────────────────
                       if (gateMat === 'aluminium_blade' && seg.gateType === 'double') {
@@ -2756,7 +2757,7 @@ export default function FenceCanvas({
                         const innerBot = py(0.5, railH);          // y-coordinate of inner bottom edge
 
                         return (
-                          <g>
+                          <g key={`perf-gate-${seg.id}-${color.hex}`}>
                             <defs>
                               <pattern id={perfPatId} x="0" y="0" width={holeStep} height={holeStep} patternUnits="userSpaceOnUse">
                                 <circle cx={holeStep / 2} cy={holeStep / 2} r={metalR} fill={color.hex} />
@@ -3769,11 +3770,6 @@ export default function FenceCanvas({
                       setSegments(prev => prev.map(s => s.id === selectedSegmentId ? {
                         ...s,
                         hasGate: isChecked,
-                        // Pin the gate's material to the currently active fence material so that
-                        // switching the global material later doesn't silently re-render this gate
-                        // in a different design — which can cause solid-black rendering for some
-                        // materials (blade, colorbond, perforated) whose fills leave no transparency.
-                        gateMaterial: isChecked ? material : undefined,
                         gateType: isChecked ? 'single' : undefined,
                         gateWidthPercent: isChecked ? 25 : undefined,
                         gatePositionPercent: isChecked ? 38 : undefined
@@ -3788,11 +3784,10 @@ export default function FenceCanvas({
                     {/* Gate Type Selector */}
                     {(() => {
                       const selSeg = segments.find(s => s.id === selectedSegmentId);
-                      const gateMat = selSeg?.gateMaterial ?? material;
                       // Materials with a dedicated single-gate design:
-                      const singleAvailable = gateMat !== 'post_and_rail';
+                      const singleAvailable = material !== 'post_and_rail';
                       // Materials with a dedicated double-gate design:
-                      const doubleAvailable = gateMat === 'aluminium_blade' || gateMat === 'colorbond_solid_panel' || gateMat === 'slat_fencing';
+                      const doubleAvailable = material === 'aluminium_blade' || material === 'colorbond_solid_panel' || material === 'slat_fencing';
                       const unavailableTitle = 'Not available for this material';
 
                       const btnBase = 'py-0.5 rounded text-[8.5px] font-medium transition text-center';
