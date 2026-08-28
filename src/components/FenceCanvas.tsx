@@ -1056,6 +1056,7 @@ export default function FenceCanvas({
         mergedGateProps = {
           hasGate: true,
           gateType: gatedSeg.gateType,
+          gateMaterial: gatedSeg.gateMaterial,
           gatePositionPercent: Math.round(mergedPos),
           gateWidthPercent:    Math.round(mergedW),
         };
@@ -3765,12 +3766,17 @@ export default function FenceCanvas({
                     checked={segments.find(s => s.id === selectedSegmentId)?.hasGate || false}
                     onChange={(e) => {
                       const isChecked = e.target.checked;
-                      setSegments(prev => prev.map(s => s.id === selectedSegmentId ? { 
-                        ...s, 
-                        hasGate: isChecked, 
+                      setSegments(prev => prev.map(s => s.id === selectedSegmentId ? {
+                        ...s,
+                        hasGate: isChecked,
+                        // Pin the gate's material to the currently active fence material so that
+                        // switching the global material later doesn't silently re-render this gate
+                        // in a different design — which can cause solid-black rendering for some
+                        // materials (blade, colorbond, perforated) whose fills leave no transparency.
+                        gateMaterial: isChecked ? material : undefined,
                         gateType: isChecked ? 'single' : undefined,
                         gateWidthPercent: isChecked ? 25 : undefined,
-                        gatePositionPercent: isChecked ? 38 : undefined 
+                        gatePositionPercent: isChecked ? 38 : undefined
                       } : s));
                     }}
                     className="w-3.5 h-3.5 cursor-pointer text-[#ff6a1f] accent-emerald-500"
