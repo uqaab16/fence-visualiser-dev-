@@ -445,12 +445,20 @@ export default function App() {
               material={material}
               setMaterial={(mat) => {
                 setMaterial(mat);
-                // Auto-downgrade any double gates if the new material doesn't support them
-                const doubleSupported = mat === 'aluminium_blade' || mat === 'colorbond_solid_panel' || mat === 'slat_fencing';
-                if (!doubleSupported) {
+                // Materials with zero gate designs — clear all gates entirely
+                const noGateForMaterial = mat === 'post_and_rail';
+                if (noGateForMaterial) {
                   setSegments(prev => prev.map(s =>
-                    s.hasGate && s.gateType === 'double' ? { ...s, gateType: 'single' } : s
+                    s.hasGate ? { ...s, hasGate: false, gateType: undefined, gateWidthPercent: undefined, gatePositionPercent: undefined } : s
                   ));
+                } else {
+                  // Materials with no double gate — downgrade double → single
+                  const doubleSupported = mat === 'aluminium_blade' || mat === 'colorbond_solid_panel' || mat === 'slat_fencing';
+                  if (!doubleSupported) {
+                    setSegments(prev => prev.map(s =>
+                      s.hasGate && s.gateType === 'double' ? { ...s, gateType: 'single' } : s
+                    ));
+                  }
                 }
                 // Default logical colors when selecting corresponding materials to match looks!
                 if (mat === 'post_and_rail') {

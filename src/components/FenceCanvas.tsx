@@ -2567,9 +2567,11 @@ export default function FenceCanvas({
                           const fw = faceWidth, dw = depthWidth;
                           return (
                             <g key={`dbl-blade-${leafL}-${i}`}>
-                              <polygon points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`} fill={sideFill} />
+                              <polygon points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`} fill={color.hex} />
+                              <polygon points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`} fill="rgba(0,0,0,0.35)" />
                               <rect x={bx - fw/2} y={topY} width={fw} height={bladeH} fill={faceFill} />
-                              <polygon points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`} fill={topFill} />
+                              <polygon points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`} fill={color.hex} />
+                              <polygon points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`} fill="rgba(255,255,255,0.20)" />
                             </g>
                           );
                         };
@@ -2581,13 +2583,13 @@ export default function FenceCanvas({
                           <g>
                             {/* ── LEFT LEAF ── */}
                             {/* Bottom rail */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, railH)} ${px(ll.R)},${py(ll.R, railH)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, railH)} ${px(ll.R)},${py(ll.R, railH)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Top rail */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, 1)} ${px(ll.R)},${py(ll.R, 1)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1)} ${px(ll.R)},${py(ll.R, 1)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Outer (left) stile */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + bladeProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1 + bladeProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, -bladeProtrude)} ${px(ll.L)},${py(ll.L, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + bladeProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1 + bladeProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, -bladeProtrude)} ${px(ll.L)},${py(ll.L, -bladeProtrude)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Inner (meeting) stile */}
-                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1 + bladeProtrude)} ${px(ll.R)},${py(ll.R, 1 + bladeProtrude)} ${px(ll.R)},${py(ll.R, -bladeProtrude)} ${px(ll.R - stileT)},${py(ll.R - stileT, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1 + bladeProtrude)} ${px(ll.R)},${py(ll.R, 1 + bladeProtrude)} ${px(ll.R)},${py(ll.R, -bladeProtrude)} ${px(ll.R - stileT)},${py(ll.R - stileT, -bladeProtrude)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Blades */}
                             {Array.from({ length: llNumBlades }).map((_, i) => renderDblBlade(i, ll.L, ll.R, llNumBlades))}
                             {/* 3 hinges on outer (left) stile */}
@@ -2597,13 +2599,13 @@ export default function FenceCanvas({
 
                             {/* ── RIGHT LEAF ── */}
                             {/* Bottom rail */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, railH)} ${px(rl.R)},${py(rl.R, railH)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, railH)} ${px(rl.R)},${py(rl.R, railH)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Top rail */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, 1)} ${px(rl.R)},${py(rl.R, 1)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1)} ${px(rl.R)},${py(rl.R, 1)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Inner (meeting) stile */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + bladeProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1 + bladeProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, -bladeProtrude)} ${px(rl.L)},${py(rl.L, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + bladeProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1 + bladeProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, -bladeProtrude)} ${px(rl.L)},${py(rl.L, -bladeProtrude)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Outer (right) stile */}
-                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1 + bladeProtrude)} ${px(rl.R)},${py(rl.R, 1 + bladeProtrude)} ${px(rl.R)},${py(rl.R, -bladeProtrude)} ${px(rl.R - stileT)},${py(rl.R - stileT, -bladeProtrude)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1 + bladeProtrude)} ${px(rl.R)},${py(rl.R, 1 + bladeProtrude)} ${px(rl.R)},${py(rl.R, -bladeProtrude)} ${px(rl.R - stileT)},${py(rl.R - stileT, -bladeProtrude)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Blades */}
                             {Array.from({ length: rlNumBlades }).map((_, i) => renderDblBlade(i, rl.L, rl.R, rlNumBlades))}
                             {/* 3 hinges on outer (right) stile */}
@@ -2666,17 +2668,25 @@ export default function FenceCanvas({
 
                           return (
                             <g key={`bg-blade-${i}`}>
-                              {/* Side depth face */}
+                              {/* Side depth face — base color + absolute dark overlay */}
                               <polygon
                                 points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`}
-                                fill={sideFill}
+                                fill={color.hex}
+                              />
+                              <polygon
+                                points={`${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx + fw/2 + dw},${botY + dw * 0.35} ${bx + fw/2},${botY}`}
+                                fill="rgba(0,0,0,0.35)"
                               />
                               {/* Front face */}
                               <rect x={bx - fw/2} y={topY} width={fw} height={bladeH} fill={faceFill} />
-                              {/* Lit top cap */}
+                              {/* Lit top cap — base color + absolute light overlay */}
                               <polygon
                                 points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`}
-                                fill={topFill}
+                                fill={color.hex}
+                              />
+                              <polygon
+                                points={`${bx - fw/2},${topY} ${bx + fw/2},${topY} ${bx + fw/2 + dw},${topY + dw * 0.35} ${bx - fw/2 + dw},${topY + dw * 0.35}`}
+                                fill="rgba(255,255,255,0.20)"
                               />
                             </g>
                           );
@@ -2687,22 +2697,22 @@ export default function FenceCanvas({
                             {/* Bottom rail */}
                             <polygon
                               points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Top rail */}
                             <polygon
                               points={`${px(0)},${py(0, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Left stile */}
                             <polygon
                               points={`${px(0)},${py(0, 1 + bladeProtrude)} ${px(stileT)},${py(stileT, 1 + bladeProtrude)} ${px(stileT)},${py(stileT, -bladeProtrude)} ${px(0)},${py(0, -bladeProtrude)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Right stile */}
                             <polygon
                               points={`${px(1 - stileT)},${py(1 - stileT, 1 + bladeProtrude)} ${px(1)},${py(1, 1 + bladeProtrude)} ${px(1)},${py(1, -bladeProtrude)} ${px(1 - stileT)},${py(1 - stileT, -bladeProtrude)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Vertical blades */}
                             {Array.from({ length: numBlades }).map((_, i) => renderBlade(i))}
@@ -2777,22 +2787,22 @@ export default function FenceCanvas({
                             {/* Bottom rail */}
                             <polygon
                               points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Top rail */}
                             <polygon
                               points={`${px(0)},${py(0, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Left stile (full height, covers rail ends) */}
                             <polygon
                               points={`${px(0)},${py(0, 1)} ${px(stileT)},${py(stileT, 1)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Right stile */}
                             <polygon
                               points={`${px(1 - stileT)},${py(1 - stileT, 1)} ${px(1)},${py(1, 1)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* 3 hinges — left stile, at 20 / 50 / 80% height */}
                             {[0.20, 0.50, 0.80].map((hf, hi) => (
@@ -2855,9 +2865,9 @@ export default function FenceCanvas({
                               <line key={`cbdrib-${leafL}-${ri}`}
                                 x1={px(tc)} y1={py(tc, 0)}
                                 x2={px(tc)} y2={py(tc, 1 + cbProtrude)}
-                                stroke={isSawtooth ? (ri % 2 === 0 ? ribLight : ribShadow) : ribShadow}
+                                stroke={isSawtooth ? (ri % 2 === 0 ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.45)") : "rgba(0,0,0,0.45)"}
                                 strokeWidth={isSawtooth ? sawSW : ribStrokeW}
-                                strokeOpacity={isSawtooth ? "0.72" : "0.48"}
+                                strokeOpacity="1"
                               />
                             );
                           });
@@ -2868,13 +2878,13 @@ export default function FenceCanvas({
                             <polygon points={`${px(ll.L)},${py(ll.L, 0)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.L)},${py(ll.L, 1 + cbProtrude)}`} fill={panelFill} />
                             {renderLeafRibs(ll.L, ll.R)}
                             {/* Bottom rail */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, railH)} ${px(ll.R)},${py(ll.R, railH)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, railH)} ${px(ll.R)},${py(ll.R, railH)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Top rail */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 - railH)} ${px(ll.L)},${py(ll.L, 1 - railH)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Outer (left) stile */}
-                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + cbProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1 + cbProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.L)},${py(ll.L, 1 + cbProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 1 + cbProtrude)} ${px(ll.L + stileT)},${py(ll.L + stileT, 0)} ${px(ll.L)},${py(ll.L, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Inner (meeting) stile */}
-                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R - stileT)},${py(ll.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(ll.R - stileT)},${py(ll.R - stileT, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 1 + cbProtrude)} ${px(ll.R)},${py(ll.R, 0)} ${px(ll.R - stileT)},${py(ll.R - stileT, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* 2 hinges on outer (left) stile */}
                             {[0.25, 0.75].map((hf, hi) => (
                               <rect key={`ll-hinge-${hi}`} x={px(ll.L) - 0.1} y={py(ll.L, hf) - 0.16} width={stileW + 0.22} height={0.32} rx="0.05" fill="#111111" />
@@ -2884,13 +2894,13 @@ export default function FenceCanvas({
                             <polygon points={`${px(rl.L)},${py(rl.L, 0)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.L)},${py(rl.L, 1 + cbProtrude)}`} fill={panelFill} />
                             {renderLeafRibs(rl.L, rl.R)}
                             {/* Bottom rail */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, railH)} ${px(rl.R)},${py(rl.R, railH)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, railH)} ${px(rl.R)},${py(rl.R, railH)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Top rail */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 - railH)} ${px(rl.L)},${py(rl.L, 1 - railH)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Inner (meeting) stile */}
-                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + cbProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1 + cbProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.L)},${py(rl.L, 1 + cbProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 1 + cbProtrude)} ${px(rl.L + stileT)},${py(rl.L + stileT, 0)} ${px(rl.L)},${py(rl.L, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Outer (right) stile */}
-                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R - stileT)},${py(rl.R - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(rl.R - stileT)},${py(rl.R - stileT, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 1 + cbProtrude)} ${px(rl.R)},${py(rl.R, 0)} ${px(rl.R - stileT)},${py(rl.R - stileT, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* 2 hinges on outer (right) stile */}
                             {[0.25, 0.75].map((hf, hi) => (
                               <rect key={`rl-hinge-${hi}`} x={px(rl.R) - stileW - 0.12} y={py(rl.R, hf) - 0.16} width={stileW + 0.22} height={0.32} rx="0.05" fill="#111111" />
@@ -2940,9 +2950,9 @@ export default function FenceCanvas({
                                 <line key={`cbrib-${ri}`}
                                   x1={px(tc)} y1={py(tc, 0)}
                                   x2={px(tc)} y2={py(tc, 1 + cbProtrude)}
-                                  stroke={isSawtooth ? (ri % 2 === 0 ? ribLight : ribShadow) : ribShadow}
+                                  stroke={isSawtooth ? (ri % 2 === 0 ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.45)") : "rgba(0,0,0,0.45)"}
                                   strokeWidth={isSawtooth ? sawSW : ribStrokeW}
-                                  strokeOpacity={isSawtooth ? "0.72" : "0.48"}
+                                  strokeOpacity="1"
                                 />
                               );
                             })}
@@ -2950,22 +2960,22 @@ export default function FenceCanvas({
                             {/* Bottom rail */}
                             <polygon
                               points={`${px(0)},${py(0, railH)} ${px(1)},${py(1, railH)} ${px(1)},${py(1, 0)} ${px(0)},${py(0, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Top rail — extends to full fence height */}
                             <polygon
                               points={`${px(0)},${py(0, 1 + cbProtrude)} ${px(1)},${py(1, 1 + cbProtrude)} ${px(1)},${py(1, 1 - railH)} ${px(0)},${py(0, 1 - railH)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Left stile — full fence height */}
                             <polygon
                               points={`${px(0)},${py(0, 1 + cbProtrude)} ${px(stileT)},${py(stileT, 1 + cbProtrude)} ${px(stileT)},${py(stileT, 0)} ${px(0)},${py(0, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* Right stile — full fence height */}
                             <polygon
                               points={`${px(1 - stileT)},${py(1 - stileT, 1 + cbProtrude)} ${px(1)},${py(1, 1 + cbProtrude)} ${px(1)},${py(1, 0)} ${px(1 - stileT)},${py(1 - stileT, 0)}`}
-                              fill={frameFill} stroke="#00000055" strokeWidth="0.04"
+                              fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12"
                             />
                             {/* 2 hinges — left stile at 25% and 75% height */}
                             {[0.25, 0.75].map((hf, hi) => (
@@ -3038,13 +3048,13 @@ export default function FenceCanvas({
                               );
                             })}
                             {/* Bottom rail */}
-                            <polygon points={`${px(leafL)},${py(leafL, railH)} ${px(leafR)},${py(leafR, railH)} ${px(leafR)},${py(leafR, 0)} ${px(leafL)},${py(leafL, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(leafL)},${py(leafL, railH)} ${px(leafR)},${py(leafR, railH)} ${px(leafR)},${py(leafR, 0)} ${px(leafL)},${py(leafL, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Top rail */}
-                            <polygon points={`${px(leafL)},${py(leafL, 1)} ${px(leafR)},${py(leafR, 1)} ${px(leafR)},${py(leafR, 1 - railH)} ${px(leafL)},${py(leafL, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(leafL)},${py(leafL, 1)} ${px(leafR)},${py(leafR, 1)} ${px(leafR)},${py(leafR, 1 - railH)} ${px(leafL)},${py(leafL, 1 - railH)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Left stile */}
-                            <polygon points={`${px(leafL)},${py(leafL, 1)} ${px(leafL + stileT)},${py(leafL + stileT, 1)} ${px(leafL + stileT)},${py(leafL + stileT, 0)} ${px(leafL)},${py(leafL, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(leafL)},${py(leafL, 1)} ${px(leafL + stileT)},${py(leafL + stileT, 1)} ${px(leafL + stileT)},${py(leafL + stileT, 0)} ${px(leafL)},${py(leafL, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Right stile */}
-                            <polygon points={`${px(leafR - stileT)},${py(leafR - stileT, 1)} ${px(leafR)},${py(leafR, 1)} ${px(leafR)},${py(leafR, 0)} ${px(leafR - stileT)},${py(leafR - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            <polygon points={`${px(leafR - stileT)},${py(leafR - stileT, 1)} ${px(leafR)},${py(leafR, 1)} ${px(leafR)},${py(leafR, 0)} ${px(leafR - stileT)},${py(leafR - stileT, 0)}`} fill={frameFill} stroke="rgba(0,0,0,0.6)" strokeWidth="0.12" />
                             {/* Hinges */}
                             {[0.25, 0.75].map((hf, hi) => {
                               const hingeT = hingeOnLeft ? leafL : leafR;
@@ -3759,13 +3769,21 @@ export default function FenceCanvas({
 
               {/* Toggle Gate inside this specific segment */}
               <div className="flex flex-col gap-1 mt-0.5 border-t border-[#d9d3c5] pt-1.5">
+                {(() => {
+                  const noGateForMaterial = material === 'post_and_rail';
+                  return (
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-semibold text-[#1a1c1e] leading-none">Gate Overlay</span>
+                  <span className={`text-[10px] font-semibold leading-none ${noGateForMaterial ? 'text-[#b0aca4] line-through' : 'text-[#1a1c1e]'}`}
+                    title={noGateForMaterial ? 'No gate design available for this material' : undefined}>
+                    Gate Overlay
+                  </span>
                   <input
                     type="checkbox"
                     id="segment_gate_check"
+                    disabled={noGateForMaterial}
                     checked={segments.find(s => s.id === selectedSegmentId)?.hasGate || false}
                     onChange={(e) => {
+                      if (noGateForMaterial) return;
                       const isChecked = e.target.checked;
                       setSegments(prev => prev.map(s => s.id === selectedSegmentId ? {
                         ...s,
@@ -3775,9 +3793,11 @@ export default function FenceCanvas({
                         gatePositionPercent: isChecked ? 38 : undefined
                       } : s));
                     }}
-                    className="w-3.5 h-3.5 cursor-pointer text-[#ff6a1f] accent-emerald-500"
+                    className={`w-3.5 h-3.5 accent-emerald-500 ${noGateForMaterial ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer text-[#ff6a1f]'}`}
                   />
                 </div>
+                  );
+                })()}
 
                 {segments.find(s => s.id === selectedSegmentId)?.hasGate && (
                   <div className="flex flex-col gap-1.5 mt-0.5 pt-1 pb-0.5 bg-[#f3efe6] px-1.5 rounded border border-[#d9d3c5]">
