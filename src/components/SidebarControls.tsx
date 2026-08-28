@@ -192,7 +192,7 @@ function SettingsPanel({ pricing, setPricing, companyId, activeMaterial }: Setti
       </div>
 
       {/* Collapsible material sections */}
-      <div className="flex flex-col gap-2 max-h-[520px] overflow-y-auto pr-1">
+      <div className="flex flex-col gap-2 pr-1">
         {MATERIALS_ORDER.map(mat => {
           const mp = pricing[mat] as unknown as Record<string, number>;
           const isOpen = openSections.has(mat);
