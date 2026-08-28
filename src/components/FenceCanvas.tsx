@@ -2996,7 +2996,90 @@ export default function FenceCanvas({
                         );
                       }
 
-                      // ── SLAT / OTHER MATERIAL GATES — vertical picket design ─────────────
+                      // ── SLAT FENCING GATE — horizontal slat design (matches fence panel) ──
+                      if (gateMat === 'slat_fencing') {
+                        const isChunky   = slatProfile === '90';
+                        const slatBodyH  = isChunky ? 1.30 : 0.68;
+                        const baseVh     = ghtStart; // gate height in SVG units
+                        const origTotal  = Math.max(isChunky ? Math.round(baseVh * 0.40) + 1 : Math.round(baseVh * 0.75) - 4, 4);
+                        const origPitch  = baseVh / origTotal;
+                        const origGap    = origPitch - slatBodyH;
+                        const slatGap    = origGap / 2;
+                        const pitch      = slatBodyH + slatGap;
+                        const slatTotal  = Math.max(Math.floor(baseVh / pitch), 4);
+                        const slatRatio  = slatBodyH / pitch;
+                        const slatPct    = slatRatio / slatTotal;
+
+                        const railH     = 0.07;  // fraction of gate height for top/bottom rail
+                        const stileT    = Math.max(0.04, Math.min(0.07, 2.0 / Math.max(gx2 - gx1, 1)));
+                        const frameFill = shadeHex(color.hex, 0.78);
+
+                        const renderLeaf = (leafL: number, leafR: number, hingeOnLeft: boolean) => (
+                          <g>
+                            {/* Horizontal slats — drawn behind frame */}
+                            {Array.from({ length: slatTotal }).map((_, i) => {
+                              const r  = i / slatTotal;
+                              const r2 = r + slatPct;
+                              // map leaf-local t-coords into gate-global t-coords for px/py
+                              const tL  = leafL; const tR  = leafR;
+                              // bottom-left, bottom-right, top-right, top-left of this slat
+                              const bL  = py(tL, r);  const bR  = py(tR, r);
+                              const tpL = py(tL, r2); const tpR = py(tR, r2);
+                              return (
+                                <polygon
+                                  key={`slat-${i}`}
+                                  points={`${px(tL)},${bL} ${px(tR)},${bR} ${px(tR)},${tpR} ${px(tL)},${tpL}`}
+                                  fill={color.hex}
+                                  stroke="#111"
+                                  strokeWidth="0.04"
+                                />
+                              );
+                            })}
+                            {/* Bottom rail */}
+                            <polygon points={`${px(leafL)},${py(leafL, railH)} ${px(leafR)},${py(leafR, railH)} ${px(leafR)},${py(leafR, 0)} ${px(leafL)},${py(leafL, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Top rail */}
+                            <polygon points={`${px(leafL)},${py(leafL, 1)} ${px(leafR)},${py(leafR, 1)} ${px(leafR)},${py(leafR, 1 - railH)} ${px(leafL)},${py(leafL, 1 - railH)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Left stile */}
+                            <polygon points={`${px(leafL)},${py(leafL, 1)} ${px(leafL + stileT)},${py(leafL + stileT, 1)} ${px(leafL + stileT)},${py(leafL + stileT, 0)} ${px(leafL)},${py(leafL, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Right stile */}
+                            <polygon points={`${px(leafR - stileT)},${py(leafR - stileT, 1)} ${px(leafR)},${py(leafR, 1)} ${px(leafR)},${py(leafR, 0)} ${px(leafR - stileT)},${py(leafR - stileT, 0)}`} fill={frameFill} stroke="#00000055" strokeWidth="0.04" />
+                            {/* Hinges */}
+                            {[0.25, 0.75].map((hf, hi) => {
+                              const hingeT = hingeOnLeft ? leafL : leafR;
+                              const hingeX = hingeOnLeft ? px(hingeT) - 0.1 : px(hingeT) - (Math.max(0.5, (gx2 - gx1) * 0.055) + 0.12);
+                              return (
+                                <rect key={`h-${hi}`} x={hingeX} y={py(hingeT, hf) - 0.16} width={Math.max(0.5, (gx2 - gx1) * 0.055) + 0.22} height={0.32} rx="0.05" fill="#111111" />
+                              );
+                            })}
+                          </g>
+                        );
+
+                        if (seg.gateType === 'double') {
+                          const gap = 0.005;
+                          return (
+                            <g>
+                              {renderLeaf(0, 0.5 - gap, true)}
+                              {renderLeaf(0.5 + gap, 1.0, false)}
+                              {/* Center lock-box */}
+                              <polygon points={`${px(0.485)},${py(0.485, 0.54)} ${px(0.515)},${py(0.515, 0.54)} ${px(0.515)},${py(0.515, 0.43)} ${px(0.485)},${py(0.485, 0.43)}`} fill="#1a1c1e" stroke="#000" strokeWidth="0.02" />
+                              <line x1={px(0.495)} y1={py(0.495, 0.485)} x2={px(0.47)} y2={py(0.47, 0.485)} stroke="#0d0e0f" strokeWidth="0.12" strokeLinecap="round" />
+                              <circle cx={px(0.495)} cy={py(0.495, 0.485)} r="0.08" fill="#333" />
+                            </g>
+                          );
+                        } else {
+                          return (
+                            <g>
+                              {renderLeaf(0, 1.0, true)}
+                              {/* Lock-box and handle */}
+                              <polygon points={`${px(0.91)},${py(0.91, 0.54)} ${px(0.938)},${py(0.938, 0.54)} ${px(0.938)},${py(0.938, 0.43)} ${px(0.91)},${py(0.91, 0.43)}`} fill="#1a1c1e" stroke="#000" strokeWidth="0.02" />
+                              <line x1={px(0.92)} y1={py(0.92, 0.485)} x2={px(0.89)} y2={py(0.89, 0.485)} stroke="#0d0e0f" strokeWidth="0.10" strokeLinecap="round" />
+                              <circle cx={px(0.92)} cy={py(0.92, 0.485)} r="0.06" fill="#333" />
+                            </g>
+                          );
+                        }
+                      }
+
+                      // ── OTHER MATERIAL GATES — vertical picket design ─────────────────────
                       if (seg.gateType === 'double') {
                         const picketTopH = vhStart / ghtStart; // pickets poke above top rail (~1.053)
                         // Left leaf inner zone: t 0.04 → 0.455
