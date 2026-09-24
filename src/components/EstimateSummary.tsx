@@ -92,10 +92,50 @@ export default function EstimateSummary({
     loadQuotes(companyId).then(setSentInquiries);
   }, [companyId]);
 
-  // Billing is bound directly to the locked map measurement (propertyFrontage), never to the
-  // on-canvas post/segment geometry. The canvas is a visual preview only — how a fence line is
-  // drawn (straight, diagonal, or following the roofline) must never change the quoted price.
-  const gatesList = segments.filter(s => s.hasGate).map(s => ({ type: s.gateType }));
+  // Gate counters — panel-authoritative, with auto-fill from canvas at 0/0 only.
+  // Once the contractor manually edits either counter, canvas changes no longer overwrite them.
+  const [singleGateCount, setSingleGateCount] = useState(0);
+  const [doubleGateCount, setDoubleGateCount] = useState(0);
+  const [gateCountManuallyEdited, setGateCountManuallyEdited] = useState(false);
+
+  // Derive canvas gate counts so we can compare and auto-sync
+  const canvasSingleGates = segments.filter(s => s.hasGate && s.gateType !== 'double').length;
+  const canvasDoubleGates = segments.filter(s => s.hasGate && s.gateType === 'double').length;
+
+  // Auto-fill when counters are untouched (both 0) and canvas has gates
+  useEffect(() => {
+    if (gateCountManuallyEdited) return;
+    setSingleGateCount(canvasSingleGates);
+    setDoubleGateCount(canvasDoubleGates);
+  }, [canvasSingleGates, canvasDoubleGates, gateCountManuallyEdited]);
+
+  const handleSingleGateChange = (val: number) => {
+    setSingleGateCount(Math.max(0, val));
+    setGateCountManuallyEdited(true);
+  };
+
+  const handleDoubleGateChange = (val: number) => {
+    setDoubleGateCount(Math.max(0, val));
+    setGateCountManuallyEdited(true);
+  };
+
+  const handleResetGatesToCanvas = () => {
+    setGateCountManuallyEdited(false);
+    setSingleGateCount(canvasSingleGates);
+    setDoubleGateCount(canvasDoubleGates);
+  };
+
+  // gatesList built from panel counters — not from canvas segments.
+  // This is the sole source of truth for gate pricing.
+  const gatesList: { type: 'single' | 'double' }[] = [
+    ...Array(singleGateCount).fill({ type: 'single' as const }),
+    ...Array(doubleGateCount).fill({ type: 'double' as const }),
+  ];
+
+  // Gate post cost: 2 posts per gate (regardless of single/double), folded into Structural Post Upgrades.
+  const mp = customPricing?.[material] as any;
+  const gatePostCostPerPost = mp?.gatePostCost ?? 85;
+  const gatePostsTotal = (singleGateCount + doubleGateCount) * 2 * gatePostCostPerPost;
 
   const estimate = estimateFencingCosts(
     material,
@@ -115,7 +155,7 @@ export default function EstimateSummary({
   const buildPdfLineItems = (): { label: string; amount: number }[] => {
     const items: { label: string; amount: number }[] = [
       { label: `Boundary Panels (${estimate.totalMeters}m)`, amount: estimate.materialCost },
-      { label: 'Structural Post Upgrades', amount: estimate.postsCost }
+      { label: 'Structural Post Upgrades', amount: estimate.postsCost + gatePostsTotal }
     ];
     if (estimate.gatesCost > 0) {
       items.push({ label: 'Premium Swing Gates', amount: estimate.gatesCost });
@@ -130,7 +170,8 @@ export default function EstimateSummary({
   };
 
   const customTotal = customLineItems.reduce((sum, item) => sum + item.amount, 0);
-  const grandTotal = estimate.totalPrice + customTotal;
+  // gatePostsTotal is folded into Structural Post Upgrades display but added here for the grand total
+  const grandTotal = estimate.totalPrice + gatePostsTotal + customTotal;
 
   // PDF generation for the estimate panel buttons.
   // Both Download and Share require a saved quote — if none exists yet, open
@@ -400,8 +441,54 @@ export default function EstimateSummary({
 
         <div className="flex justify-between text-[11px] text-[#5f6266]">
           <span>Gates integrated:</span>
-          <span className="font-mono text-[#3c4045] font-semibold">{gatesList.length} swing gates</span>
+          <span className="font-mono text-[#3c4045] font-semibold">
+            {gatesList.length === 0 ? 'None' : [
+              singleGateCount > 0 ? `${singleGateCount} single` : '',
+              doubleGateCount > 0 ? `${doubleGateCount} double` : ''
+            ].filter(Boolean).join(', ')}
+          </span>
         </div>
+      </div>
+
+      {/* Gate counters — authoritative source for gate pricing */}
+      <div className="bg-[#f3efe6] border border-[#d9d3c5] rounded-xl p-3 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold text-[#1a1c1e] uppercase tracking-wider">Gates</span>
+          {gateCountManuallyEdited && (
+            <button
+              onClick={handleResetGatesToCanvas}
+              className="text-[9px] text-[#5f6266] hover:text-[#ff6a1f] underline transition cursor-pointer"
+              title="Reset gate count to match canvas drawings"
+            >
+              Reset to canvas
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] text-[#5f6266] font-semibold uppercase tracking-wider">Single Gates</label>
+            <input
+              type="number"
+              min={0}
+              value={singleGateCount}
+              onChange={e => handleSingleGateChange(parseInt(e.target.value, 10) || 0)}
+              className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-white text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] text-[#5f6266] font-semibold uppercase tracking-wider">Double Gates</label>
+            <input
+              type="number"
+              min={0}
+              value={doubleGateCount}
+              onChange={e => handleDoubleGateChange(parseInt(e.target.value, 10) || 0)}
+              className="w-full text-xs font-bold rounded-lg border border-[#d9d3c5] bg-white text-[#1a1c1e] px-2.5 py-1.5 focus:border-[#ff6a1f]/50 outline-none"
+            />
+          </div>
+        </div>
+        <p className="text-[9px] text-[#8a8d91] leading-relaxed">
+          Gate placement on the canvas is visual only. Set gate count here for pricing.
+        </p>
       </div>
 
       {/* Core installation toggle */}
@@ -429,10 +516,10 @@ export default function EstimateSummary({
           <span className="font-mono text-[#1a1c1e]">${estimate.materialCost.toLocaleString()}</span>
         </div>
         
-        {/* Item 2: Upgrades */}
+        {/* Item 2: Upgrades (includes gate post costs) */}
         <div className="flex justify-between text-xs text-[#5f6266]">
           <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-[#5f6266]" /> Structural Post Upgrades</span>
-          <span className="font-mono text-[#1a1c1e]">${estimate.postsCost.toLocaleString()}</span>
+          <span className="font-mono text-[#1a1c1e]">${(estimate.postsCost + gatePostsTotal).toLocaleString()}</span>
         </div>
 
         {/* Item 3: Gates */}

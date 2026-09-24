@@ -3773,10 +3773,10 @@ export default function FenceCanvas({
                   const noGateForMaterial = material === 'post_and_rail';
                   return (
                 <div className="flex items-center justify-between">
-                  <span className={`text-[10px] font-semibold leading-none ${noGateForMaterial ? 'text-[#b0aca4] line-through' : 'text-[#1a1c1e]'}`}
-                    title={noGateForMaterial ? 'No gate design available for this material' : undefined}>
-                    Gate Overlay
-                  </span>
+                  <span
+                    className={`text-[10px] font-semibold leading-none ${noGateForMaterial ? 'text-[#b0aca4] line-through' : 'text-[#1a1c1e]'}`}
+                    title={noGateForMaterial ? 'No gate design available for this material' : 'Gate placement here is visual only for positioning. Gate count for pricing is set in the quote panel.'}
+                  >Gate Overlay</span>
                   <input
                     type="checkbox"
                     id="segment_gate_check"
