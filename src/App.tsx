@@ -638,6 +638,52 @@ export default function App() {
                 </div>
               </div>
 
+              <h3 className="text-sm font-extrabold text-[#ff6a1f] uppercase tracking-widest leading-none">Toolbar Controls</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-[#f3efe6] p-4.5 rounded-xl border border-[#d9d3c5]">
+                  <span className="text-xs font-bold text-[#1a1c1e] block mb-1">✋ Pan Tool</span>
+                  <p className="text-[11px] text-[#5f6266] leading-normal">
+                    Switches between draw/drag mode and camera pan mode. Use Pan to slide the background photo around without moving your fence.
+                  </p>
+                </div>
+
+                <div className="bg-[#f3efe6] p-4.5 rounded-xl border border-[#d9d3c5]">
+                  <span className="text-xs font-bold text-[#1a1c1e] block mb-1">🔲 Alignment Points</span>
+                  <p className="text-[11px] text-[#5f6266] leading-normal">
+                    Toggles a snap grid on the canvas to help align posts and panels along straight boundary lines.
+                  </p>
+                </div>
+
+                <div className="bg-[#f3efe6] p-4.5 rounded-xl border border-[#d9d3c5]">
+                  <span className="text-xs font-bold text-[#1a1c1e] block mb-1">🛰 Map Measure</span>
+                  <p className="text-[11px] text-[#5f6266] leading-normal">
+                    Opens a satellite photo tool to measure your property frontage in real metres — sets the fence scale automatically for accurate pricing.
+                  </p>
+                </div>
+
+                <div className="bg-[#f3efe6] p-4.5 rounded-xl border border-[#d9d3c5]">
+                  <span className="text-xs font-bold text-[#1a1c1e] block mb-1">➕ Add Post (insert mode)</span>
+                  <p className="text-[11px] text-[#5f6266] leading-normal">
+                    Activates insert mode — then tap any fence segment to place a new post in the middle of that panel, splitting it in two.
+                  </p>
+                </div>
+
+                <div className="bg-[#f3efe6] p-4.5 rounded-xl border border-[#d9d3c5]">
+                  <span className="text-xs font-bold text-[#1a1c1e] block mb-1">◀▶ Add Left / Add Right</span>
+                  <p className="text-[11px] text-[#5f6266] leading-normal">
+                    Extends the fence by adding a new post directly off the left or right end of the existing design, keeping it in a straight line.
+                  </p>
+                </div>
+
+                <div className="bg-[#f3efe6] p-4.5 rounded-xl border border-[#d9d3c5]">
+                  <span className="text-xs font-bold text-[#1a1c1e] block mb-1">🗑 Reset Design vs Clear Canvas</span>
+                  <p className="text-[11px] text-[#5f6266] leading-normal">
+                    <strong className="text-[#1a1c1e]">Reset Design</strong> removes all drawn fences but keeps your background photo. <strong className="text-[#1a1c1e]">Clear Canvas</strong> removes everything, including the photo.
+                  </p>
+                </div>
+              </div>
+
               <div className="border-t border-[#d9d3c5] pt-4 flex justify-end">
                 <button
                   onClick={() => setShowTutorial(false)}
