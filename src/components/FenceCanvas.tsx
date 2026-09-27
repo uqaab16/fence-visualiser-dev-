@@ -116,6 +116,8 @@ export default function FenceCanvas({
   const [isGlobalDragging, setIsGlobalDragging] = useState(false);
   const [showHelperGrid, setShowHelperGrid] = useState(true);
   const [showSatelliteModal, setShowSatelliteModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // States for Undo/Redo design layout rollback
   const [history, setHistory] = useState<{ posts: Post[]; segments: Segment[] }[]>([]);
@@ -1351,7 +1353,7 @@ export default function FenceCanvas({
           
           {backgroundUrl && (
             <button
-              onClick={handleResetDesign}
+              onClick={() => setShowResetConfirm(true)}
               title="Clear only drawn fences, posts, and nodes"
               className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#3c4045] text-xs px-2.5 py-1.5 rounded-lg transition border border-[#cfc8b8] cursor-pointer"
             >
@@ -1361,7 +1363,7 @@ export default function FenceCanvas({
           
           {backgroundUrl && (
             <button
-              onClick={handleClearCanvas}
+              onClick={() => setShowClearConfirm(true)}
               title="Clear entire canvas (remove background image and fence design)"
               className="flex items-center gap-1 bg-[#fff1e9] hover:bg-[#fff1e9] text-red-305 border border-red-900/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer"
             >
@@ -3959,6 +3961,58 @@ export default function FenceCanvas({
             >
               [X]
             </button>
+          </div>
+        )}
+
+        {/* Reset Design confirm dialog */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 bg-[#1a1c1e]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white border border-[#cfc8b8] w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+              <div className="px-6 pt-6 pb-2">
+                <h2 className="text-base font-bold text-[#1a1c1e] mb-2">Reset fence design?</h2>
+                <p className="text-sm text-[#5f6266] leading-relaxed">This will remove all drawn fence posts and panels. Your background photo will stay. <span className="font-semibold text-[#1a1c1e]">This cannot be undone.</span></p>
+              </div>
+              <div className="flex gap-2 px-6 py-4">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] text-[#1a1c1e] font-bold rounded-xl text-sm transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { setShowResetConfirm(false); handleResetDesign(); }}
+                  className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition cursor-pointer"
+                >
+                  Reset Design
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Clear Canvas confirm dialog */}
+        {showClearConfirm && (
+          <div className="fixed inset-0 bg-[#1a1c1e]/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white border border-[#cfc8b8] w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl">
+              <div className="px-6 pt-6 pb-2">
+                <h2 className="text-base font-bold text-[#1a1c1e] mb-2">Clear entire canvas?</h2>
+                <p className="text-sm text-[#5f6266] leading-relaxed">This will remove the background photo <span className="font-semibold text-[#1a1c1e]">and</span> all drawn fence posts and panels. <span className="font-semibold text-[#1a1c1e]">This cannot be undone.</span></p>
+              </div>
+              <div className="flex gap-2 px-6 py-4">
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="flex-1 px-4 py-2.5 bg-[#f3efe6] hover:bg-[#ece7db] border border-[#d9d3c5] text-[#1a1c1e] font-bold rounded-xl text-sm transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { setShowClearConfirm(false); handleClearCanvas(); }}
+                  className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition cursor-pointer"
+                >
+                  Clear Everything
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
