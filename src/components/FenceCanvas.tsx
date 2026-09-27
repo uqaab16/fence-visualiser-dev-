@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import SatelliteModal from './SatelliteModal';
 import { Post, Segment, FenceMaterial, FenceHeight, ColorOption } from '../types';
-import { calculateDistance, COLORS_PALETTE, MATERIAL_MAX_SPAN } from '../utils';
+import { calculateDistance, COLORS_PALETTE, MATERIAL_MAX_SPAN, isDesktopViewport } from '../utils';
 import { 
   Move, 
   Plus, 
@@ -175,8 +175,8 @@ export default function FenceCanvas({
 
   // Floating controls minimization states
   const [isShiftResizeMinimized, setIsShiftResizeMinimized] = useState<boolean>(() => window.innerWidth < 1024);
-  const [isPostCustomizerMinimized, setIsPostCustomizerMinimized] = useState<boolean>(false);
-  const [isSegmentCustomizerMinimized, setIsSegmentCustomizerMinimized] = useState<boolean>(false);
+  const [isPostCustomizerMinimized, setIsPostCustomizerMinimized] = useState<boolean>(() => window.innerWidth < 1024);
+  const [isSegmentCustomizerMinimized, setIsSegmentCustomizerMinimized] = useState<boolean>(() => window.innerWidth < 1024);
 
   // States for Gate interactive drag 'n resize operations
   const [activeGateDragId, setActiveGateDragId] = useState<string | null>(null);
@@ -340,13 +340,13 @@ export default function FenceCanvas({
     }
   }
 
-  // Reset minimizing states on selection changes
+  // Reset minimizing states on selection changes — desktop only; tablet keeps chip collapsed
   useEffect(() => {
-    setIsPostCustomizerMinimized(false);
+    if (selectedPostId && isDesktopViewport()) setIsPostCustomizerMinimized(false);
   }, [selectedPostId]);
 
   useEffect(() => {
-    setIsSegmentCustomizerMinimized(false);
+    if (selectedSegmentId && isDesktopViewport()) setIsSegmentCustomizerMinimized(false);
   }, [selectedSegmentId]);
 
   // Demo yard backdrop (public/demo yard.jpg uploaded via GitHub)
@@ -597,10 +597,9 @@ export default function FenceCanvas({
       return;
     }
 
-    // Select the segment and expand customizer panel
     setSelectedSegmentId(segId);
     setSelectedPostId(null);
-    setIsSegmentCustomizerMinimized(false);
+    if (isDesktopViewport()) setIsSegmentCustomizerMinimized(false);
 
     // Enter active global dragging of full fence representation
     setIsGlobalDragging(true);
@@ -619,7 +618,7 @@ export default function FenceCanvas({
     setActiveDragId(id);
     setSelectedPostId(id);
     setSelectedSegmentId(null);
-    setIsPostCustomizerMinimized(false);
+    if (isDesktopViewport()) setIsPostCustomizerMinimized(false);
   };
 
   // Handle clicking & dragging on gates
@@ -627,7 +626,7 @@ export default function FenceCanvas({
     e.stopPropagation();
     setSelectedSegmentId(segId);
     setSelectedPostId(null);
-    setIsSegmentCustomizerMinimized(false);
+    if (isDesktopViewport()) setIsSegmentCustomizerMinimized(false);
 
     const seg = segments.find(s => s.id === segId);
     if (!seg) return;
@@ -3682,24 +3681,24 @@ export default function FenceCanvas({
               <div className="flex flex-col gap-1 mt-0.5 border-t border-[#d9d3c5] pt-1">
                 <span className="text-[8px] text-[#5f6266] text-center uppercase tracking-wider font-bold">Nudge Node</span>
                 <div className="grid grid-cols-2 gap-1">
-                  <button onClick={() => nudgePost(0, -0.25)} className="px-1 py-0.5 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">▲ Up</button>
-                  <button onClick={() => nudgePost(0, 0.25)} className="px-1 py-0.5 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">▼ Down</button>
-                  <button onClick={() => nudgePost(-0.25, 0)} className="px-1 py-0.5 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">◀ L</button>
-                  <button onClick={() => nudgePost(0.25, 0)} className="px-1 py-0.5 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">▶ R</button>
+                  <button onClick={() => nudgePost(0, -0.25)} className="px-1 py-2 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">▲ Up</button>
+                  <button onClick={() => nudgePost(0, 0.25)} className="px-1 py-2 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">▼ Down</button>
+                  <button onClick={() => nudgePost(-0.25, 0)} className="px-1 py-2 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">◀ L</button>
+                  <button onClick={() => nudgePost(0.25, 0)} className="px-1 py-2 bg-[#ece7db] text-[#1a1c1e] rounded text-[9px] hover:bg-[#e2ddd0] cursor-pointer uppercase">▶ R</button>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-[#d9d3c5] pt-1.5">
                 <button
                   onClick={() => setSelectedPostId(null)}
-                  className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-[#cfc8b8]"
+                  className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded py-2 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-[#cfc8b8]"
                 >
                   Deselect
                 </button>
                 <button
                   onClick={() => deleteSelectedPost()}
                   disabled={posts.length <= 2}
-                  className="bg-[#fff1e9]/60 hover:bg-[#ffe3d3] border border-[#ffd4bd]/35 text-[#ff6a1f] disabled:opacity-40 disabled:cursor-not-allowed rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
+                  className="bg-[#fff1e9]/60 hover:bg-[#ffe3d3] border border-[#ffd4bd]/35 text-[#ff6a1f] disabled:opacity-40 disabled:cursor-not-allowed rounded py-2 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
                   title="Remove selected post"
                 >
                   <Trash2 className="w-3 h-3 shrink-0" />
@@ -3810,7 +3809,7 @@ export default function FenceCanvas({
                       const doubleAvailable = material === 'aluminium_blade' || material === 'colorbond_solid_panel' || material === 'slat_fencing';
                       const unavailableTitle = 'Not available for this material';
 
-                      const btnBase = 'py-0.5 rounded text-[8.5px] font-medium transition text-center';
+                      const btnBase = 'py-1.5 rounded text-[8.5px] font-medium transition text-center';
                       const btnActive = 'bg-[#ff6a1f]/40 text-[#ff6a1f] border border-[#ffd4bd]/30';
                       const btnIdle = 'text-[#5f6266] hover:text-[#1a1c1e] border border-transparent';
                       const btnDisabled = 'text-[#c0bbb2] border border-transparent cursor-not-allowed line-through';
@@ -3883,13 +3882,13 @@ export default function FenceCanvas({
               <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-[#d9d3c5] pt-1.5">
                 <button
                   onClick={() => setSelectedSegmentId(null)}
-                  className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-[#d9d3c5]"
+                  className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded py-2 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-[#d9d3c5]"
                 >
                   Deselect
                 </button>
                 <button
                   onClick={() => deleteSelectedSegment()}
-                  className="bg-[#fff1e9]/60 hover:bg-[#ffe3d3] border border-[#ffd4bd]/40 text-[#ff6a1f] rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
+                  className="bg-[#fff1e9]/60 hover:bg-[#ffe3d3] border border-[#ffd4bd]/40 text-[#ff6a1f] rounded py-2 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
                   title="Delete this fence panel"
                 >
                   <Trash2 className="w-3 h-3 shrink-0" />
@@ -3928,13 +3927,13 @@ export default function FenceCanvas({
             <div className="grid grid-cols-2 gap-1.5 mt-1.5 border-t border-[#d9d3c5] pt-1.5">
               <button
                 onClick={() => setSelectedSegmentId(null)}
-                className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded py-1 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-[#d9d3c5]"
+                className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] rounded py-2 text-center text-[10px] uppercase font-bold cursor-pointer transition border border-[#d9d3c5]"
               >
                 Deselect
               </button>
               <button
                 onClick={() => deleteSelectedSegment()}
-                className="bg-[#fff1e9]/60 hover:bg-[#ffe3d3] border border-[#ffd4bd]/40 text-[#ff6a1f] rounded py-1 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
+                className="bg-[#fff1e9]/60 hover:bg-[#ffe3d3] border border-[#ffd4bd]/40 text-[#ff6a1f] rounded py-2 px-1.5 text-center text-[10px] uppercase font-bold cursor-pointer transition flex items-center justify-center gap-1"
                 title="Remove selected gate"
               >
                 <Trash2 className="w-3 h-3 shrink-0" />
