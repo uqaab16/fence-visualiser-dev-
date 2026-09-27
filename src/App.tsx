@@ -276,7 +276,7 @@ export default function App() {
               <div className="flex flex-col gap-1 text-center">
                 <p className="text-sm text-[#3c4045] font-semibold">Check your inbox</p>
                 <p className="text-xs text-[#5f6266] leading-relaxed">
-                  We sent a 6-digit code (and a magic link) to{' '}
+                  We sent a 6-digit code to{' '}
                   <span className="text-[#1a1c1e] font-medium">{emailInput}</span>
                 </p>
               </div>
