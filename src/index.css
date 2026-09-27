@@ -52,7 +52,7 @@ body {
 }
 /* Compact variant for small canvas HUD / Move-Fence controls */
 .btn-tool-sm {
-  padding: 0.25rem 0.4rem;
+  padding: 0.5rem 0.625rem;
   font-size: 0.625rem;
   gap: 0.25rem;
 }
