@@ -99,7 +99,17 @@ export default function App() {
   // 'email' | 'code' — tracks which login screen is shown
   const [loginStep, setLoginStep] = useState<'email' | 'code'>('email');
   const [otpInput, setOtpInput] = useState<string>('');
-  const [resendCooldown, setResendCooldown] = useState<boolean>(false);
+  const [resendSecondsLeft, setResendSecondsLeft] = useState<number>(0);
+
+  const startResendCountdown = (seconds: number) => {
+    setResendSecondsLeft(seconds);
+    const interval = setInterval(() => {
+      setResendSecondsLeft(prev => {
+        if (prev <= 1) { clearInterval(interval); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +119,7 @@ export default function App() {
       setAuthError(error.message);
     } else {
       setLoginStep('code');
+      startResendCountdown(60); // disable Resend immediately; matches smtp_max_frequency
     }
   };
 
@@ -126,11 +137,14 @@ export default function App() {
   };
 
   const handleResendCode = async () => {
-    if (resendCooldown) return;
+    if (resendSecondsLeft > 0) return;
     setAuthError('');
-    setResendCooldown(true);
-    await signIn(emailInput.trim());
-    setTimeout(() => setResendCooldown(false), 30000);
+    const { error } = await signIn(emailInput.trim());
+    if (error) {
+      setAuthError(error.message);
+    } else {
+      startResendCountdown(60); // matches smtp_max_frequency: 60
+    }
   };
 
   const handleBackToEmail = () => {
@@ -332,10 +346,10 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleResendCode}
-                  disabled={resendCooldown}
-                  className="hover:text-[#3c4045] underline underline-offset-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={resendSecondsLeft > 0}
+                  className="hover:text-[#3c4045] underline underline-offset-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:no-underline"
                 >
-                  {resendCooldown ? 'Code sent' : 'Resend code'}
+                  {resendSecondsLeft > 0 ? `Resend in ${resendSecondsLeft}s` : 'Resend code'}
                 </button>
               </div>
             </form>
