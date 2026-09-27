@@ -6,7 +6,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import SatelliteModal from './SatelliteModal';
 import { Post, Segment, FenceMaterial, FenceHeight, ColorOption } from '../types';
-import { calculateDistance, COLORS_PALETTE, MATERIAL_MAX_SPAN } from '../utils';
+import { calculateDistance, COLORS_PALETTE, MATERIAL_MAX_SPAN, isDesktopViewport } from '../utils';
 import { 
   Move, 
   Plus, 
@@ -340,13 +340,13 @@ export default function FenceCanvas({
     }
   }
 
-  // Reset minimizing states on selection changes
+  // Reset minimizing states on selection changes — desktop only; tablet keeps chip collapsed
   useEffect(() => {
-    setIsPostCustomizerMinimized(false);
+    if (selectedPostId && isDesktopViewport()) setIsPostCustomizerMinimized(false);
   }, [selectedPostId]);
 
   useEffect(() => {
-    setIsSegmentCustomizerMinimized(false);
+    if (selectedSegmentId && isDesktopViewport()) setIsSegmentCustomizerMinimized(false);
   }, [selectedSegmentId]);
 
   // Demo yard backdrop (public/demo yard.jpg uploaded via GitHub)
@@ -597,10 +597,9 @@ export default function FenceCanvas({
       return;
     }
 
-    // Select the segment and expand customizer panel
     setSelectedSegmentId(segId);
     setSelectedPostId(null);
-    setIsSegmentCustomizerMinimized(false);
+    if (isDesktopViewport()) setIsSegmentCustomizerMinimized(false);
 
     // Enter active global dragging of full fence representation
     setIsGlobalDragging(true);
@@ -619,7 +618,7 @@ export default function FenceCanvas({
     setActiveDragId(id);
     setSelectedPostId(id);
     setSelectedSegmentId(null);
-    setIsPostCustomizerMinimized(false);
+    if (isDesktopViewport()) setIsPostCustomizerMinimized(false);
   };
 
   // Handle clicking & dragging on gates
@@ -627,7 +626,7 @@ export default function FenceCanvas({
     e.stopPropagation();
     setSelectedSegmentId(segId);
     setSelectedPostId(null);
-    setIsSegmentCustomizerMinimized(false);
+    if (isDesktopViewport()) setIsSegmentCustomizerMinimized(false);
 
     const seg = segments.find(s => s.id === segId);
     if (!seg) return;

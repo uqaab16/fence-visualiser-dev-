@@ -5,6 +5,8 @@
 
 import { ColorOption, FenceMaterial, FenceHeight, DynamicPricing } from './types';
 
+export const isDesktopViewport = () => window.innerWidth >= 1024;
+
 export const COLORS_PALETTE: ColorOption[] = [
   { name: 'Monument Grey', hex: '#3B3F42', isColorbond: true, desc: 'Sophisticated deep charcoal, the modern standard' },
   { name: 'Primrose', hex: '#EDE2C9', isColorbond: true, desc: 'Classic warm cream / yellow sand color' },
