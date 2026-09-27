@@ -174,7 +174,7 @@ export default function FenceCanvas({
   const [viewportPanStart, setViewportPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // Floating controls minimization states
-  const [isShiftResizeMinimized, setIsShiftResizeMinimized] = useState<boolean>(false);
+  const [isShiftResizeMinimized, setIsShiftResizeMinimized] = useState<boolean>(() => window.innerWidth < 1024);
   const [isPostCustomizerMinimized, setIsPostCustomizerMinimized] = useState<boolean>(false);
   const [isSegmentCustomizerMinimized, setIsSegmentCustomizerMinimized] = useState<boolean>(false);
 
