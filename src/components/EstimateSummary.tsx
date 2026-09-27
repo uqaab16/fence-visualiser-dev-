@@ -587,12 +587,12 @@ export default function EstimateSummary({
                 <span className="font-mono text-[#1a1c1e]">${item.amount.toLocaleString()}</span>
                 <button
                   onClick={() => { setEditingItemId(item.id); setDraftDescription(item.description); setDraftAmount(String(item.amount)); }}
-                  className="opacity-0 group-hover:opacity-100 text-[#5f6266] hover:text-[#ff6a1f] transition"
+                  className="opacity-50 group-hover:opacity-100 text-[#5f6266] hover:text-[#ff6a1f] transition"
                   title="Edit"
                 ><Pencil className="w-3 h-3" /></button>
                 <button
                   onClick={() => setCustomLineItems(prev => prev.filter(i => i.id !== item.id))}
-                  className="opacity-0 group-hover:opacity-100 text-[#5f6266] hover:text-red-500 transition"
+                  className="opacity-50 group-hover:opacity-100 text-[#5f6266] hover:text-red-500 transition"
                   title="Remove"
                 ><Trash2 className="w-3 h-3" /></button>
               </span>
