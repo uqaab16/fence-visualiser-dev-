@@ -31,6 +31,9 @@ import {
   LogOut
 } from 'lucide-react';
 
+// Must match the OTP length configured in Supabase Dashboard → Authentication → Settings → "OTP length"
+const SUPABASE_OTP_LENGTH = 6;
+
 // Create a pre-aligned default fence line coordinates mapped onto the lawn of our default house generated asset
 const DEFAULT_POSTS: Post[] = [
   { id: 'p1', x: 11, y: 76, type: 'standard' },
@@ -112,6 +115,10 @@ export default function App() {
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
+    if (otpInput.trim().length !== SUPABASE_OTP_LENGTH) {
+      setAuthError(`Please enter the full ${SUPABASE_OTP_LENGTH}-digit code from your email.`);
+      return;
+    }
     const { error } = await verifyOtp(emailInput.trim(), otpInput.trim());
     if (error) {
       setAuthError('Invalid or expired code. Please check your email or request a new code.');
@@ -283,18 +290,18 @@ export default function App() {
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-[#5f6266] uppercase tracking-widest leading-none">
-                  6-Digit Code
+                  {SUPABASE_OTP_LENGTH}-Digit Code
                 </label>
                 <input
                   type="text"
                   inputMode="numeric"
                   value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
+                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, SUPABASE_OTP_LENGTH))}
+                  placeholder={'0'.repeat(SUPABASE_OTP_LENGTH)}
                   className="w-full h-12 bg-white border border-[#d9d3c5] focus:border-[#ff6a1f]/50 focus:ring-1 focus:ring-[#ff6a1f]/40 rounded-lg px-4 text-xl tracking-[0.35em] text-[#1a1c1e] placeholder-[#c5c0b8] text-center transition outline-none font-mono"
                   autoFocus
                   required
-                  maxLength={6}
+                  maxLength={SUPABASE_OTP_LENGTH}
                 />
               </div>
 
@@ -307,7 +314,7 @@ export default function App() {
 
               <button
                 type="submit"
-                disabled={otpInput.length < 6}
+                disabled={otpInput.length < SUPABASE_OTP_LENGTH}
                 className="w-full h-11 hover:opacity-90 active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
               >
