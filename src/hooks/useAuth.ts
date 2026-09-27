@@ -24,10 +24,7 @@ export function useAuth() {
   }, []);
 
   const signIn = async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email });
     return { error };
   };
 
