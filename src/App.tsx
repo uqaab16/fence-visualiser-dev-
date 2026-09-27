@@ -90,20 +90,46 @@ const DEFAULT_SEGMENTS: Segment[] = [
 
 export default function App() {
   // Supabase auth
-  const { session, loading: authLoading, signIn, signOut } = useAuth();
+  const { session, loading: authLoading, signIn, verifyOtp, signOut } = useAuth();
   const [emailInput, setEmailInput] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
-  const [magicLinkSent, setMagicLinkSent] = useState<boolean>(false);
+  // 'email' | 'code' — tracks which login screen is shown
+  const [loginStep, setLoginStep] = useState<'email' | 'code'>('email');
+  const [otpInput, setOtpInput] = useState<string>('');
+  const [resendCooldown, setResendCooldown] = useState<boolean>(false);
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
     const { error } = await signIn(emailInput.trim());
     if (error) {
       setAuthError(error.message);
     } else {
-      setMagicLinkSent(true);
+      setLoginStep('code');
     }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    const { error } = await verifyOtp(emailInput.trim(), otpInput.trim());
+    if (error) {
+      setAuthError('Invalid or expired code. Please check your email or request a new code.');
+    }
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown) return;
+    setAuthError('');
+    setResendCooldown(true);
+    await signIn(emailInput.trim());
+    setTimeout(() => setResendCooldown(false), 30000);
+  };
+
+  const handleBackToEmail = () => {
+    setLoginStep('email');
+    setOtpInput('');
+    setAuthError('');
   };
 
   // Navigation State
@@ -245,22 +271,69 @@ export default function App() {
             </div>
           </div>
 
-          {magicLinkSent ? (
-            <div className="p-8 flex flex-col items-center gap-4 text-center">
-              <Mail className="w-10 h-10 text-[#5f6266]" />
-              <p className="text-sm text-[#3c4045] font-semibold">Check your inbox</p>
-              <p className="text-xs text-[#5f6266] leading-relaxed">
-                We sent a magic link to <span className="text-[#1a1c1e] font-medium">{emailInput}</span>. Click the link in your email to sign in.
-              </p>
+          {loginStep === 'code' ? (
+            <form onSubmit={handleVerifyOtp} className="p-8 flex flex-col gap-5">
+              <div className="flex flex-col gap-1 text-center">
+                <p className="text-sm text-[#3c4045] font-semibold">Check your inbox</p>
+                <p className="text-xs text-[#5f6266] leading-relaxed">
+                  We sent a 6-digit code (and a magic link) to{' '}
+                  <span className="text-[#1a1c1e] font-medium">{emailInput}</span>
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-[#5f6266] uppercase tracking-widest leading-none">
+                  6-Digit Code
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full h-12 bg-white border border-[#d9d3c5] focus:border-[#ff6a1f]/50 focus:ring-1 focus:ring-[#ff6a1f]/40 rounded-lg px-4 text-xl tracking-[0.35em] text-[#1a1c1e] placeholder-[#c5c0b8] text-center transition outline-none font-mono"
+                  autoFocus
+                  required
+                  maxLength={6}
+                />
+              </div>
+
+              {authError && (
+                <div className="bg-[#fff1e9]/20 border border-[#ffd4bd]/40 rounded-lg p-3 flex items-start gap-2 text-[#ff6a1f]">
+                  <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span className="text-[11px] leading-normal font-medium">{authError}</span>
+                </div>
+              )}
+
               <button
-                onClick={() => { setMagicLinkSent(false); setEmailInput(''); }}
-                className="text-[11px] text-[#5f6266] hover:text-[#3c4045] underline underline-offset-2 cursor-pointer mt-2"
+                type="submit"
+                disabled={otpInput.length < 6}
+                className="w-full h-11 hover:opacity-90 active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
               >
-                Use a different email
+                <span>Verify Code</span>
               </button>
-            </div>
+
+              <div className="flex items-center justify-between text-[11px] text-[#5f6266]">
+                <button
+                  type="button"
+                  onClick={handleBackToEmail}
+                  className="hover:text-[#3c4045] underline underline-offset-2 cursor-pointer"
+                >
+                  ← Different email
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  disabled={resendCooldown}
+                  className="hover:text-[#3c4045] underline underline-offset-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {resendCooldown ? 'Code sent' : 'Resend code'}
+                </button>
+              </div>
+            </form>
           ) : (
-            <form onSubmit={handleMagicLink} className="p-8 flex flex-col gap-5">
+            <form onSubmit={handleSendCode} className="p-8 flex flex-col gap-5">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-[#5f6266] uppercase tracking-widest leading-none">
                   Email Address
@@ -291,7 +364,7 @@ export default function App() {
                 className="w-full h-11 hover:opacity-90 active:scale-[0.98] text-white text-xs font-bold tracking-widest uppercase rounded-lg transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer mt-2"
                 style={{ backgroundColor: CLIENT_CONFIG.primaryColor }}
               >
-                <span>Send Magic Link</span>
+                <span>Send Login Code</span>
               </button>
             </form>
           )}
