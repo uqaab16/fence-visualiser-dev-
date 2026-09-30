@@ -8,10 +8,11 @@ Last updated: 2026-09-30
 ## How to use
 
 - Status values: `not started` / `in progress` / `done`.
-- Phases (defined here, independent of the numbering in the owner's master business plan):
+- Phases used in THIS file:
   - **Phase 1: safe to onboard real customers** (security holes, data safety, legal floor, environments)
   - **Phase 2: safe to charge** (billing, data rights, integrity, paid-plan prerequisites)
   - **Phase 3: built to grow** (teams, ops tooling, analytics, cleanup)
+- **WARNING, different numbering from the master business plan.** The owner's master plan (`fence-visualiser-master-plan` HTML) has its own Phases 0-3 (Phase 0 Foundations, Phase 1 SaaS MVP, Phase 2 Stand Out, Phase 3 Expand). The Phase 1/2/3 above are a separate scheme and do NOT map one-to-one to those. Always write "SR Phase N" for this file and "master-plan Phase N" for the plan, so the two are never confused.
 - Cost type: `Free` = build time only, `Paid` = recurring or one-off money, `Ambiguous` = depends on scale or choice (see notes).
 - Update the Status column and add a line to the Log whenever an item changes state.
 
@@ -22,15 +23,16 @@ Last updated: 2026-09-30
 3. Do not declare an item done until the owner has tested it.
 4. No customer PII (names, emails, phones, addresses entered in proposal forms) in analytics, logs, or staging data. Staging gets schema only, never production rows.
 5. Never paste or commit secrets. Tokens and passwords are never written to files in this repo.
+6. Every call to the PRODUCTION database from the dev tools starts with `set transaction read only;`, and a before/after fingerprint (row counts, migration list, schema hashes) is compared. Known limit, verified on staging 2026-09-30: this blocks accidental writes (CREATE/INSERT fail with error 25006) but can be switched off deliberately (`set transaction read write`), and the connection is not allowed to assume Supabase's read-only role. A hard guarantee needs the MCP connector configured with `read_only=true&project_ref=<prod ref>` (Supabase docs), a setting only the owner can change. Supabase also advises against connecting MCP to production at all.
 
 ## Phase 1: safe to onboard real customers
 
 | ID | Item | Status | Cost | Notes |
 |---|---|---|---|---|
-| SR-01 | Staging environment: second free Supabase project (Sydney), not paid Branching | in progress | Free | Plan proposed 2026-09-30, awaiting owner approval. Nothing applied. Note: once the org moves to Pro, an extra project may add compute cost (verify). |
-| SR-02 | Export the live production schema (tables, constraints, indexes, RLS, functions, grants, storage bucket and policies) into `supabase/migrations` as a baseline; apply to staging; prove parity | in progress | Free | Awaiting approval. Live DB tracks only 2 migrations, the repo has 3 unrelated files. Core tables were created by hand in the dashboard. |
-| SR-03 | Point Vercel Preview env vars (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) at staging; keep Production on the live project | in progress | Free | Awaiting approval. Today both vars target Preview and Production, so previews hit the live database. |
-| SR-04 | Stop users changing their own `profiles.company_id` / `role` (company-switching hole) | not started | Free | P0 security. `profiles_update_own` has no WITH CHECK and UPDATE is granted on all columns. |
+| SR-01 | Staging environment: second free Supabase project (Sydney), not paid Branching | in progress | Free | Created 2026-09-30: `fencely-staging`, ref `dehladkrsyozruyrpjgm`, Sydney, in the Fencely org (plan still `free` after creation). Per Supabase docs (billing-on-supabase, billing-faq): Free plan = 2 free projects; a paid org includes a $10 compute credit covering ONE project and each additional project costs about $10/month (Micro $0.01344/hr); free and paid projects cannot be mixed in one org. **Before upgrading the Fencely org to Pro (SR-07), transfer staging to a separate Free org (dashboard project transfer) or accept about +US$10/month.** Staging Postgres is 17.11, production 17.6 (platform patch difference). Not `done` until the owner has reviewed. |
+| SR-02 | Export the live production schema (tables, constraints, indexes, RLS, functions, grants, storage bucket and policies) into `supabase/migrations` as a baseline; apply to staging; prove parity | in progress | Free | Done on staging 2026-09-30: `supabase/migrations/20260930200321_baseline.sql` plus `20260930200657_baseline_function_acl.sql` (a hand-made REVOKE on production that no migration recorded, found by the diff). Parity diff: all 8 object classes identical (columns, constraints, indexes, RLS flags, 12 policies, function, grants, bucket). Old 3 files archived in `supabase/migrations_legacy/`. Production unchanged (before/after fingerprint identical). **Open:** production's migration history (2 versions) does not match the baseline, so `supabase migration repair` (a metadata write to production) needs separate owner approval. Staging Auth settings (SMTP, email template, OTP length 6, rate limits) cannot be copied by the dev tools and must be set by the owner in the staging dashboard. |
+| SR-03 | Point Vercel Preview env vars (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) at staging; keep Production on the live project | in progress | Free | Paused for owner approval: exact changes to be shown before anything is applied. Today both vars target Preview and Production, so previews hit the live database. |
+| SR-04 | Stop users changing their own `profiles.company_id` / `role` (company-switching hole) | not started | Free | P0 security. `profiles_update_own` has no WITH CHECK and UPDATE is granted on all columns. Reproduced on staging 2026-09-30: user A updated their own profile to company B and could then read B's quote. First migration to test on staging before production. |
 | SR-05 | Drop the open `companies_insert_own` policy; revoke anon EXECUTE on `create_company_and_profile` | not started | Free | Unlimited company creation could fill the 500 MB free DB. Advisor flags the anon-executable function. |
 | SR-06 | PostHog session replay: mask all text and delete existing recordings | not started | Free | Live in production. Only `input, textarea` are masked, so quote log and detail panel (name, phone, address) are recorded. Violates the no-PII rule. |
 | SR-07 | Supabase Pro for daily backups and no idle pause; confirm a backup exists | not started | Paid | About US$25/month (verify at checkout). Interim option: DIY nightly dump (ambiguous: free but self-maintained). |
@@ -84,3 +86,4 @@ Last updated: 2026-09-30
 ## Log
 
 - 2026-09-30: Tracker created. SR-01 to SR-03 (staging) plan proposed to owner, awaiting approval. No production or Vercel changes made.
+- 2026-09-30: Owner approved plan. Staging project created. Read-only guard tested on staging. Production inventoried read-only. Baseline migration written and applied to staging, parity diff clean after one fix, tenant isolation verified (user A sees only own company, anonymous sees nothing), SR-04 and SR-05 holes reproduced on staging. Production before/after fingerprint identical. Vercel change (SR-03) NOT applied, awaiting owner approval.
