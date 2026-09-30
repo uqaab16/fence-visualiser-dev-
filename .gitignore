@@ -3,3 +3,6 @@ dist/
 .env
 .env.local
 *.log
+
+# Auth config backups written by supabase/auth/apply-auth-config.py
+supabase/auth/backups/
