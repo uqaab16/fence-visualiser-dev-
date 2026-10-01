@@ -9,6 +9,7 @@ import { estimateFencingCosts, FENCE_PRICES } from '../utils';
 import { CLIENT_CONFIG } from '../clientConfig';
 import type { QuotePdfData } from '../pdfQuote';
 import { loadQuotes, saveQuote, deleteAllQuotes } from '../lib/quotes';
+import Pii from './Pii';
 import {
   Building2,
   MapPin,
@@ -729,7 +730,7 @@ export default function EstimateSummary({
                   className="text-[10px] border-b pb-2 flex flex-col gap-1 px-2 py-2 rounded transition-all text-[#5f6266] border-[#d9d3c5] hover:bg-[#ece7db] hover:text-[#1a1c1e] cursor-pointer"
                 >
                   <div className="flex justify-between font-bold leading-tight text-[#1a1c1e] mb-0.5">
-                    <span className="underline decoration-dotted text-[#ff6a1f]">{inq.fullName}</span>
+                    <Pii className="underline decoration-dotted text-[#ff6a1f]">{inq.fullName}</Pii>
                     <span className="text-[#ff6a1f] font-mono">${inq.totalCost.toLocaleString()}</span>
                   </div>
                   <div className="text-[9px] text-[#5f6266] flex items-center justify-between mt-0.5 font-sans">
@@ -737,7 +738,7 @@ export default function EstimateSummary({
                     <span className="text-[#5f6266] font-mono">{new Date(inq.createdAt).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                   <p className="text-[9.5px] leading-relaxed mt-1 italic font-light p-1.5 rounded border text-[#3c4045] bg-white border-[#d9d3c5]/80 line-clamp-1">
-                    Address: {inq.address}
+                    Address: <Pii>{inq.address}</Pii>
                   </p>
                 </div>
               ))
@@ -789,29 +790,29 @@ export default function EstimateSummary({
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5]">
                     <span className="text-[10px] text-[#5f6266] font-medium block">Full Name</span>
-                    <span className="text-[#1a1c1e] font-semibold">{selectedPastInquiry.fullName}</span>
+                    <Pii className="text-[#1a1c1e] font-semibold">{selectedPastInquiry.fullName}</Pii>
                   </div>
                   <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5]">
                     <span className="text-[10px] text-[#5f6266] font-medium block">Phone</span>
-                    <span className="text-[#1a1c1e] font-mono">{selectedPastInquiry.phone}</span>
+                    <Pii className="text-[#1a1c1e] font-mono">{selectedPastInquiry.phone}</Pii>
                   </div>
                 </div>
 
                 <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5] text-xs">
                   <span className="text-[10px] text-[#5f6266] font-medium block">Email Address</span>
-                  <span className="text-[#1a1c1e] font-mono">{selectedPastInquiry.email}</span>
+                  <Pii className="text-[#1a1c1e] font-mono">{selectedPastInquiry.email}</Pii>
                 </div>
 
                 <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5] text-xs">
                   <span className="text-[10px] text-[#5f6266] font-medium block">{CLIENT_CONFIG.regionState + " Site Address"}</span>
-                  <span className="text-[#1a1c1e]">{selectedPastInquiry.address}</span>
+                  <Pii className="text-[#1a1c1e]">{selectedPastInquiry.address}</Pii>
                 </div>
 
                 {selectedPastInquiry.message && (
                   <div className="bg-[#f3efe6] p-3 rounded-lg border border-[#d9d3c5] text-xs">
                     <span className="text-[10px] text-[#5f6266] font-medium block">Site Remarks / Notes</span>
                     <p className="text-[#3c4045] italic mt-1 font-light leading-relaxed">
-                      "{selectedPastInquiry.message}"
+                      "<Pii>{selectedPastInquiry.message}</Pii>"
                     </p>
                   </div>
                 )}

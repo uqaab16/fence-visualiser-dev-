@@ -9,6 +9,7 @@ import { COLORS_PALETTE, estimateFencingCosts } from './utils';
 import SidebarControls from './components/SidebarControls';
 import FenceCanvas from './components/FenceCanvas';
 import EstimateSummary from './components/EstimateSummary';
+import Pii from './components/Pii';
 import { CLIENT_CONFIG } from './clientConfig';
 import { useAuth } from './hooks/useAuth';
 import { loadPricing, savePricing } from './lib/pricing';
@@ -298,7 +299,7 @@ export default function App() {
                 <p className="text-sm text-[#3c4045] font-semibold">Check your inbox</p>
                 <p className="text-xs text-[#5f6266] leading-relaxed">
                   We sent a 6-digit code to{' '}
-                  <span className="text-[#1a1c1e] font-medium">{emailInput}</span>
+                  <Pii className="text-[#1a1c1e] font-medium">{emailInput}</Pii>
                 </p>
               </div>
 
@@ -322,7 +323,7 @@ export default function App() {
               {authError && (
                 <div className="bg-[#fff1e9]/20 border border-[#ffd4bd]/40 rounded-lg p-3 flex items-start gap-2 text-[#ff6a1f]">
                   <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span className="text-[11px] leading-normal font-medium">{authError}</span>
+                  <Pii className="text-[11px] leading-normal font-medium">{authError}</Pii>
                 </div>
               )}
 
@@ -376,7 +377,7 @@ export default function App() {
               {authError && (
                 <div className="bg-[#fff1e9]/20 border border-[#ffd4bd]/40 rounded-lg p-3 flex items-start gap-2 text-[#ff6a1f]">
                   <XCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span className="text-[11px] leading-normal font-medium">{authError}</span>
+                  <Pii className="text-[11px] leading-normal font-medium">{authError}</Pii>
                 </div>
               )}
 

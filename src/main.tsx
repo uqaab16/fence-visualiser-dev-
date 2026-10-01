@@ -16,6 +16,7 @@ if (posthogKey) {
     // Autocapture covers clicks, page views, and form interactions automatically
     autocapture: true,
   });
+  posthog.register({ app_env: __APP_ENV__ });
 }
 
 createRoot(document.getElementById('root')!).render(

@@ -1400,6 +1400,7 @@ export default function FenceCanvas({
             }}
           >
             {backgroundUrl ? (
+              // ph-no-capture: the customer's property photo must not appear in PostHog replays. Map tiles: see SatelliteModal (SR-10).
               <img
                 src={backgroundUrl}
                 alt="Client Property Yard"
@@ -1410,7 +1411,7 @@ export default function FenceCanvas({
                     setImageAspectRatio(target.naturalWidth / target.naturalHeight);
                   }
                 }}
-                className="w-full h-full object-contain transition-opacity duration-300 pointer-events-none"
+                className="ph-no-capture w-full h-full object-contain transition-opacity duration-300 pointer-events-none"
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-xl m-4 select-none transition-colors duration-200 bg-white/40 border-[#cfc8b8] text-[#1a1c1e] shadow-2xl">
