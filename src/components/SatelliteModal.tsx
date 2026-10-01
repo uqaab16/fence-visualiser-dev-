@@ -133,6 +133,9 @@ export default function SatelliteModal({ isOpen, onClose, onSelectDistance }: Sa
           {/* Main Visualizer Area */}
           <div className="flex-1 bg-white relative flex flex-col min-h-0">
             {hasValidKey ? (
+              // TODO SR-10 (before the Maps key goes live): add `ph-no-capture` to the map container (tile coordinates identify the
+              // customer's property) and to the address suggestion buttons (~line 541): PostHog click capture records button text,
+              // so the customer's address would be sent as an event. `ph-mask` alone does not stop click capture.
               <APIProvider apiKey={API_KEY} version="weekly">
                 <GoogleMapContainer 
                   pins={pins}

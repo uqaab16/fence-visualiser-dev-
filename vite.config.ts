@@ -6,6 +6,10 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    // Tags analytics events as production / preview / development so preview sessions can be filtered out in PostHog.
+    define: {
+      __APP_ENV__: JSON.stringify(process.env.VERCEL_ENV || process.env.NODE_ENV || 'development'),
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
