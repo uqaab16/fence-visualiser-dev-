@@ -44,6 +44,8 @@ interface EstimateSummaryProps {
   customPricing?: DynamicPricing;
   companyId: string | null;
   userId: string | null;
+  // SR-08: called after a quote row is saved, so the draft design can be attached to it.
+  onQuoteSaved?: (quoteId: string) => Promise<void> | void;
 }
 
 export default function EstimateSummary({
@@ -57,7 +59,8 @@ export default function EstimateSummary({
   setIsRightPanelOpen,
   customPricing,
   companyId,
-  userId
+  userId,
+  onQuoteSaved
 }: EstimateSummaryProps) {
   // Option: Include installation
   const [includeInstall, setIncludeInstall] = useState(true);
@@ -377,6 +380,7 @@ export default function EstimateSummary({
       if (result) {
         newInquiry.id = result.id;
         newInquiry.quoteNumber = result.quoteNumber;
+        try { await onQuoteSaved?.(result.id); } catch (err) { console.error('Could not attach the design to the quote', err); }
       } else {
         // Supabase save failed — generate a local fallback so the success screen is never blank
         newInquiry.id = `inquiry_${Date.now()}`;

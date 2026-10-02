@@ -14,6 +14,8 @@ import { CLIENT_CONFIG } from './clientConfig';
 import { useAuth } from './hooks/useAuth';
 import { loadPricing, savePricing } from './lib/pricing';
 import { ensureUserOnboarded } from './lib/onboarding';
+import { DesignStateV1, LoadedDraft, hasContent, loadDraft, discardDraft, finalizeDraft } from './lib/designs';
+import { useDraftAutosave } from './hooks/useDraftAutosave';
 import {
   ShieldCheck,
   HelpCircle,
@@ -216,6 +218,70 @@ export default function App() {
   // Background environment image state - Blank Slate
   const [backgroundUrl, setBackgroundUrl] = useState<string>("");
   const [customImageUploaded, setCustomImageUploaded] = useState<boolean>(false);
+
+  // ---- SR-08: draft autosave + restore ----
+  const DEMO_YARD = '/demo yard.jpg'; // same file FenceCanvas loads as the demo picture
+  const [globalOffset, setGlobalOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [restoredOffset, setRestoredOffset] = useState<{ x: number; y: number } | null>(null);
+  const [pendingDraft, setPendingDraft] = useState<LoadedDraft | null>(null);
+  const [draftResolved, setDraftResolved] = useState<boolean>(false);
+  const userId = session?.user?.id ?? null;
+
+  const designState: DesignStateV1 = {
+    material, height, color, postColor, railCount, includeChainwire, slatProfile, solidPanelProfile,
+    fenceScale, propertyFrontage, posts, segments, globalOffset,
+    background: backgroundUrl ? (customImageUploaded ? 'upload' : 'demo') : 'none',
+  };
+  const draft = useDraftAutosave({
+    companyId, userId, enabled: draftResolved && !!companyId && !!userId,
+    state: designState, photoSrc: backgroundUrl,
+  });
+
+  // After sign-in, look for a saved draft and ASK before replacing anything on the canvas.
+  useEffect(() => {
+    setPendingDraft(null);
+    setDraftResolved(false);
+    if (!companyId || !userId) return;
+    let cancelled = false;
+    loadDraft(userId)
+      .then((d) => {
+        if (cancelled) return;
+        if (d && hasContent(d.state)) setPendingDraft(d); else setDraftResolved(true);
+      })
+      .catch((err) => { console.error('Could not check for a saved draft', err); if (!cancelled) setDraftResolved(true); });
+    return () => { cancelled = true; };
+  }, [companyId, userId]);
+
+  const restoreDraft = () => {
+    if (!pendingDraft) return;
+    const s = pendingDraft.state;
+    setMaterial(s.material); setHeight(s.height); setColor(s.color); setPostColor(s.postColor);
+    setRailCount(s.railCount); setIncludeChainwire(s.includeChainwire); setSlatProfile(s.slatProfile);
+    setSolidPanelProfile(s.solidPanelProfile); setFenceScale(s.fenceScale); setPropertyFrontage(s.propertyFrontage);
+    setPosts(s.posts); setSegments(s.segments);
+    setSelectedPostId(null); setSelectedSegmentId(null);
+    setRestoredOffset({ ...s.globalOffset });
+    const src = s.background === 'upload' ? (pendingDraft.photoUrl ?? '') : s.background === 'demo' ? DEMO_YARD : '';
+    setBackgroundUrl(src);
+    setCustomImageUploaded(s.background === 'upload');
+    draft.adopt(pendingDraft.designId, s.background === 'upload' ? src : '', s);
+    setPendingDraft(null);
+    setDraftResolved(true);
+  };
+
+  const discardSavedDraft = () => {
+    setPendingDraft(null);
+    setDraftResolved(true);
+    if (userId) discardDraft(userId).catch((err) => console.error('Could not discard the draft', err));
+  };
+
+  // A quote was saved: attach the (just flushed) draft design to it; the next change starts a new draft.
+  const attachDesignToQuote = async (quoteId: string) => {
+    if (!userId) return;
+    await draft.flush();
+    await finalizeDraft(userId, quoteId);
+    draft.reset();
+  };
 
   // Focus inspection state
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
@@ -626,6 +692,22 @@ export default function App() {
             </button>
           )}
 
+          {pendingDraft && (
+            <div role="dialog" aria-label="Restore your unsaved design" className="fixed top-3 left-1/2 -translate-x-1/2 z-[60] w-[min(92vw,26rem)] bg-[#1a1c1e] text-white rounded-xl shadow-2xl p-4 border border-[#ff6a1f]/40">
+              <p className="text-sm font-bold">Restore your unsaved design?</p>
+              <p className="text-xs text-white/70 mt-1">We found a design you were working on{pendingDraft.photoUrl ? ', including its photo' : ''}.</p>
+              <div className="flex gap-2 mt-3">
+                <button type="button" onClick={restoreDraft} className="flex-1 bg-[#ff6a1f] hover:bg-[#e85d17] text-white text-sm font-bold rounded-lg py-2 cursor-pointer">Restore</button>
+                <button type="button" onClick={discardSavedDraft} className="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-lg py-2 cursor-pointer">Start fresh</button>
+              </div>
+            </div>
+          )}
+          {draftResolved && draft.status !== 'idle' && (
+            <div aria-live="polite" className={`fixed bottom-2 left-2 z-[55] text-[10px] font-bold px-2 py-1 rounded-full pointer-events-none ${draft.status === 'error' ? 'bg-red-600 text-white' : 'bg-black/50 text-white/80'}`}>
+              {draft.status === 'saving' ? 'Saving draft…' : draft.status === 'saved' ? 'Draft saved' : 'Draft not saved'}
+            </div>
+          )}
+
           <FenceCanvas
             material={material}
             railCount={railCount}
@@ -639,6 +721,8 @@ export default function App() {
             setBackgroundUrl={setBackgroundUrl}
             customImageUploaded={customImageUploaded}
             setCustomImageUploaded={setCustomImageUploaded}
+            restoredGlobalOffset={restoredOffset}
+            onGlobalOffsetChange={setGlobalOffset}
             fenceScale={fenceScale}
             setFenceScale={setFenceScale}
             postColor={postColor}
@@ -675,7 +759,8 @@ export default function App() {
               setIsRightPanelOpen={setIsRightPanelOpen}
               customPricing={pricing}
               companyId={companyId}
-              userId={session?.user?.id ?? null}
+              userId={userId}
+              onQuoteSaved={attachDesignToQuote}
             />
           </div>
         )}

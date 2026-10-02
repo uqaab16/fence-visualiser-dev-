@@ -44,6 +44,9 @@ interface FenceCanvasProps {
   setBackgroundUrl: (url: string) => void;
   customImageUploaded: boolean;
   setCustomImageUploaded: (val: boolean) => void;
+  // SR-08: the fence slide offset is canvas-local state; these let the app save and restore it with the draft.
+  restoredGlobalOffset?: { x: number; y: number } | null;
+  onGlobalOffsetChange?: (offset: { x: number; y: number }) => void;
   fenceScale: number; // visual scalar (0.5 to 2.0)
   setFenceScale: (val: number) => void;
   postColor: ColorOption;
@@ -89,6 +92,8 @@ export default function FenceCanvas({
   setBackgroundUrl,
   customImageUploaded,
   setCustomImageUploaded,
+  restoredGlobalOffset,
+  onGlobalOffsetChange,
   fenceScale,
   setFenceScale,
   postColor,
@@ -112,6 +117,8 @@ export default function FenceCanvas({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [globalOffset, setGlobalOffset] = useState({ x: 0, y: 0 }); // slide fence sideways/up/down
+  useEffect(() => { onGlobalOffsetChange?.(globalOffset); }, [globalOffset]);
+  useEffect(() => { if (restoredGlobalOffset) setGlobalOffset(restoredGlobalOffset); }, [restoredGlobalOffset]);
   const [dragOffsetStart, setDragOffsetStart] = useState({ x: 0, y: 0 });
   const [isGlobalDragging, setIsGlobalDragging] = useState(false);
   const [showHelperGrid, setShowHelperGrid] = useState(true);
