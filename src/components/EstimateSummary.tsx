@@ -8,7 +8,8 @@ import { FenceMaterial, FenceHeight, ColorOption, Post, Segment, QuoteInquiry, D
 import { estimateFencingCosts, FENCE_PRICES } from '../utils';
 import { CLIENT_CONFIG } from '../clientConfig';
 import type { QuotePdfData } from '../pdfQuote';
-import { loadQuotes, saveQuote, deleteAllQuotes } from '../lib/quotes';
+import { loadQuotes, saveQuote, deleteQuotes } from '../lib/quotes';
+import ConfirmDeleteModal from './ConfirmDeleteModal';
 import Pii from './Pii';
 import {
   Building2,
@@ -80,6 +81,10 @@ export default function EstimateSummary({
   const [sentInquiries, setSentInquiries] = useState<QuoteInquiry[]>([]);
   const [showCRMInbox, setShowCRMInbox] = useState(false);
   const [selectedPastInquiry, setSelectedPastInquiry] = useState<QuoteInquiry | null>(null);
+  // SR-44: delete confirmation + result state. Items leave the list only after the database confirms the delete.
+  const [pendingDelete, setPendingDelete] = useState<{ ids: string[]; fullName?: string; quoteNumber?: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Stable quote number captured at save time, used on the success screen.
   const [savedQuoteNumber, setSavedQuoteNumber] = useState('');
@@ -397,12 +402,37 @@ export default function EstimateSummary({
     setIsSubmitted(true);
   };
 
-  const clearCRMInboxes = async () => {
-    if (window.confirm('Are you sure you want to clear historic inquiries?')) {
-      if (companyId) await deleteAllQuotes(companyId);
-      setSentInquiries([]);
-    }
+  const requestClearAll = () => {
+    if (sentInquiries.length === 0 || isDeleting) return;
+    setDeleteError(null);
+    setPendingDelete({ ids: sentInquiries.map((q) => q.id) });
   };
+
+  const requestDeleteOne = (inq: QuoteInquiry) => {
+    if (isDeleting) return;
+    setDeleteError(null);
+    setPendingDelete({ ids: [inq.id], fullName: inq.fullName, quoteNumber: inq.quoteNumber });
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete || isDeleting) return;
+    const { ids, fullName } = pendingDelete;
+    setIsDeleting(true);
+    const result = await deleteQuotes(companyId, ids);
+    setSentInquiries((prev) => prev.filter((q) => !result.deletedIds.includes(q.id)));
+    if (result.failedIds.length === 0) {
+      if (fullName !== undefined) setSelectedPastInquiry(null); // single delete was opened from the detail view
+      setPendingDelete(null);
+      setDeleteError(null);
+    } else {
+      const done = result.deletedIds.length;
+      setPendingDelete({ ...pendingDelete, ids: result.failedIds });
+      setDeleteError(`${done > 0 ? `Deleted ${done} of ${ids.length}. ` : ''}${result.failedIds.length} could not be deleted and ${result.failedIds.length === 1 ? 'is' : 'are'} still in your log. ${result.error ?? ''}`.trim());
+    }
+    setIsDeleting(false);
+  };
+
+  const cancelDelete = () => { if (!isDeleting) { setPendingDelete(null); } };
 
   return (
     <div className="flex flex-col w-80 sm:w-92 shrink-0 p-5.5 h-full overflow-y-auto gap-4 relative z-20 bg-[#f3efe6] text-[#1a1c1e] border-l border-[#d9d3c5]">
@@ -718,10 +748,17 @@ export default function EstimateSummary({
           <div className="flex flex-col gap-2 p-3 rounded-xl border max-h-52 overflow-y-auto bg-[#f3efe6] border-[#d9d3c5] relative z-30 pointer-events-auto">
             <div className="flex justify-between items-center text-[10px] border-b pb-1.5 mb-1.5 border-[#d9d3c5]">
               <span className="font-semibold uppercase text-[#5f6266]">Interactive Ledger</span>
-              <button onClick={clearCRMInboxes} className="text-red-500 hover:text-red-400 text-[10px] font-sans font-medium cursor-pointer">
+              <button onClick={requestClearAll} disabled={isDeleting || sentInquiries.length === 0} className="text-red-500 hover:text-red-400 text-[10px] font-sans font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                 Clear All
               </button>
             </div>
+
+            {deleteError && !pendingDelete && (
+              <div role="alert" className="text-[10px] font-semibold text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1.5 leading-relaxed flex items-start justify-between gap-2">
+                <span>{deleteError}</span>
+                <button onClick={() => setDeleteError(null)} className="shrink-0 underline cursor-pointer" aria-label="Dismiss message">Dismiss</button>
+              </div>
+            )}
 
             {sentInquiries.length === 0 ? (
               <span className="text-[10px] text-[#5f6266] text-center py-4 italic">No submitted designs yet. Submit custom requests to log them here.</span>
@@ -750,6 +787,25 @@ export default function EstimateSummary({
           </div>
         )}
       </div>
+
+      {/* SR-44: confirm deleting one proposal or the whole log */}
+      {pendingDelete && (() => {
+        const n = pendingDelete.ids.length;
+        const single = pendingDelete.fullName !== undefined;
+        return (
+          <ConfirmDeleteModal
+            title={single ? 'Delete this proposal?' : n === 1 ? 'Delete the remaining proposal?' : `Delete all ${n} proposals?`}
+            confirmLabel={single ? 'Delete Proposal' : n === 1 ? 'Delete Proposal' : `Delete ${n} Proposals`}
+            busy={isDeleting}
+            error={deleteError}
+            onConfirm={confirmDelete}
+            onCancel={cancelDelete}
+          >
+            {single ? (<>The proposal for <Pii className="font-semibold text-[#1a1c1e]">{pendingDelete.fullName}</Pii>{pendingDelete.quoteNumber ? ` (${pendingDelete.quoteNumber})` : ''} will be permanently deleted, together with its saved design and photo. </>) : (<>{n === 1 ? 'This proposal' : `All ${n} proposals`} will be permanently deleted, together with the saved designs and photos attached to {n === 1 ? 'it' : 'them'}. </>)}
+            <span className="font-semibold text-[#1a1c1e]">This cannot be undone.</span>
+          </ConfirmDeleteModal>
+        );
+      })()}
 
       {/* MODAL WINDOW: PAST PROPOSAL DETAIL VIEWERS */}
       {selectedPastInquiry && (
@@ -858,7 +914,13 @@ export default function EstimateSummary({
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-[#d9d3c5] bg-white flex justify-end">
+            <div className="px-6 py-4 border-t border-[#d9d3c5] bg-white flex justify-between items-center">
+              <button
+                onClick={() => requestDeleteOne(selectedPastInquiry)}
+                className="text-red-600 hover:text-red-700 border border-red-200 hover:bg-red-50 font-bold py-2.5 px-4 rounded-lg text-xs uppercase cursor-pointer"
+              >
+                Delete Proposal
+              </button>
               <button 
                 onClick={() => setSelectedPastInquiry(null)}
                 className="bg-[#ece7db] hover:bg-[#e2ddd0] text-[#1a1c1e] font-bold py-2.5 px-5 rounded-lg text-xs uppercase cursor-pointer"
